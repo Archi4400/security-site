@@ -1,0 +1,154 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { reveal, t, text } from '../engine';
+import { PRESS_EMAIL } from '../brand';
+import { en } from '../i18n/locales/en';
+
+const facts = en.press.facts;
+---
+
+<Layout metaKey="meta.press" path="/press">
+  <PageHead titleKey="press.head.title" ledeKey="press.head.lede" kickerKey="nav.about" />
+
+  <section class="band ps">
+    <div class="shell ps__grid">
+      <div class="ps__main">
+        <article class="ps__block" {...reveal()}>
+          <h2 {...text('press.about.title')}>{t('press.about.title')}</h2>
+          <p {...text('press.about.text')}>{t('press.about.text')}</p>
+        </article>
+        <article class="ps__block" {...reveal()}>
+          <h2 {...text('press.factsTitle')}>{t('press.factsTitle')}</h2>
+          <ul class="ps__facts" role="list">
+            {facts.map((_, i) => <li {...text(`press.facts.${i}`)}>{t(`press.facts.${i}`)}</li>)}
+          </ul>
+        </article>
+      </div>
+      <aside class="ps__side">
+        <div class="ps__card card" {...reveal()}>
+          <h2 {...text('press.logoTitle')}>{t('press.logoTitle')}</h2>
+          <p {...text('press.logoText')}>{t('press.logoText')}</p>
+          <div class="ps__logos">
+            <a href="/logo/logo.svg" download class="ps__logo ps__logo--dark">
+              <img src="/logo/logo.svg" alt="" width="496" height="167" />
+              <span {...text('press.logoDark')}>{t('press.logoDark')}</span>
+            </a>
+            <a href="/logo/logo_dark.svg" download class="ps__logo ps__logo--light">
+              <img src="/logo/logo_dark.svg" alt="" width="496" height="167" />
+              <span {...text('press.logoLight')}>{t('press.logoLight')}</span>
+            </a>
+          </div>
+        </div>
+        <div class="ps__card card" {...reveal()}>
+          <h2 {...text('press.contactTitle')}>{t('press.contactTitle')}</h2>
+          <p {...text('press.contactText')}>{t('press.contactText')}</p>
+          <a href={`mailto:${PRESS_EMAIL}`} class="link ps__mail"><span>{PRESS_EMAIL}</span><Icon name="arrow" /></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .ps__grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .ps__main {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .ps__block {
+    display: grid;
+    gap: 1rem;
+    max-width: 44rem;
+  }
+
+  .ps__block h2,
+  .ps__card h2 {
+    font-size: var(--step-2);
+  }
+
+  .ps__block p {
+    color: var(--ink-2);
+    font-size: var(--step-1);
+  }
+
+  .ps__facts {
+    display: grid;
+    margin: 0;
+  }
+
+  .ps__facts li {
+    padding-block: 0.85rem;
+    border-top: 1px solid var(--edge);
+    color: var(--ink-2);
+  }
+
+  .ps__side {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .ps__card {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.5rem;
+  }
+
+  .ps__card p {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .ps__logos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .ps__logo {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge-strong);
+    font-size: 0.84rem;
+    transition: border-color 0.2s var(--ease);
+  }
+
+  .ps__logo:hover {
+    border-color: var(--accent-ink);
+  }
+
+  .ps__logo img {
+    height: 1.5rem;
+    width: auto;
+  }
+
+  .ps__logo--dark {
+    background: #06070a;
+    color: #f4f5f7;
+  }
+
+  .ps__logo--light {
+    background: #ffffff;
+    color: #0b0d12;
+  }
+
+  .ps__mail {
+    overflow-wrap: anywhere;
+    min-height: 44px;
+  }
+
+  @media (min-width: 64rem) {
+    .ps__grid {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,126 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { reveal, t, text } from '../engine';
+import { en } from '../i18n/locales/en';
+
+const how = en.careers.how.items;
+const roles = en.careers.roles;
+---
+
+<Layout metaKey="meta.careers" path="/careers">
+  <PageHead titleKey="careers.head.title" ledeKey="careers.head.lede" kickerKey="nav.about" />
+
+  <section class="band cr">
+    <div class="shell cr__grid">
+      <div class="cr__how" {...reveal()}>
+        <h2 {...text('careers.how.title')}>{t('careers.how.title')}</h2>
+        <ul role="list">
+          {how.map((_, i) => (
+            <li><Icon name="check" class="cr__mark" /><span {...text(`careers.how.items.${i}`)}>{t(`careers.how.items.${i}`)}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div class="cr__roles">
+        <h2 {...reveal()} {...text('careers.rolesTitle')}>{t('careers.rolesTitle')}</h2>
+        <ul class="cr__list" role="list">
+          {roles.map((_, i) => (
+            <li class="cr__role card" {...reveal()} style={`--d: ${i * 0.07}s`}>
+              <div class="cr__role-top">
+                <h3 {...text(`careers.roles.${i}.title`)}>{t(`careers.roles.${i}.title`)}</h3>
+                <span class="chip" {...text(`careers.roles.${i}.where`)}>{t(`careers.roles.${i}.where`)}</span>
+              </div>
+              <p {...text(`careers.roles.${i}.text`)}>{t(`careers.roles.${i}.text`)}</p>
+              <a href="/contact" class="link"><span {...text('careers.apply')}>{t('careers.apply')}</span><Icon name="arrow" /></a>
+            </li>
+          ))}
+        </ul>
+        <p class="cr__none" {...reveal()} {...text('careers.none')}>{t('careers.none')}</p>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .cr__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .cr__how,
+  .cr__roles {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .cr__how h2,
+  .cr__roles h2 {
+    font-size: var(--step-3);
+  }
+
+  .cr__how ul {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .cr__how li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: baseline;
+    color: var(--ink-2);
+  }
+
+  .cr__mark {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+    translate: 0 0.2rem;
+    color: var(--accent-ink);
+  }
+
+  .cr__list {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .cr__role {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.5rem;
+  }
+
+  .cr__role-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .cr__role h3 {
+    font-size: var(--step-2);
+  }
+
+  .cr__role p {
+    color: var(--ink-2);
+  }
+
+  .cr__none {
+    color: var(--mute);
+  }
+
+  @media (min-width: 64rem) {
+    .cr__grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .cr__how {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+  }
+</style>

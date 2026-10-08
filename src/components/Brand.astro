@@ -1,0 +1,38 @@
+---
+import { BRAND } from '../brand';
+
+interface Props {
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { class: cls, ...rest } = Astro.props;
+---
+
+<a href="/" class:list={['brand', cls]} aria-label={BRAND} {...rest}>
+  <img class="brand__img brand__img--dark" src="/logo/logo.svg" alt="" width="496" height="167" />
+  <img class="brand__img brand__img--light" src="/logo/logo_dark.svg" alt="" width="496" height="167" />
+</a>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-height: 44px;
+  }
+
+  .brand__img {
+    height: 1.55rem;
+    width: auto;
+  }
+
+  .brand__img--light,
+  :global(:root[data-theme='light']) .brand__img--dark {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .brand__img--light {
+    display: block;
+  }
+</style>

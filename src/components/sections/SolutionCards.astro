@@ -1,0 +1,115 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import { solutions } from '../../lib/solutions';
+
+interface Props {
+  /** 2 where the cards follow the page's h1 directly. */
+  level?: 2 | 3;
+  /** Leaves this one out, for the "other solutions" row. */
+  except?: string;
+  withPortal?: boolean;
+}
+
+const { except, withPortal = false, level = 3 } = Astro.props;
+const H = level === 2 ? 'h2' : 'h3';
+const list = solutions.filter((s) => s.key !== except);
+---
+
+<ul class="sol" role="list">
+  {list.map((s, i) => (
+    <li class="sol__cell" {...reveal()} style={`--d: ${(i % 3) * 0.07}s`}>
+      <a href={`/solutions/${s.slug}`} class="sol__card card">
+        <Icon name={s.icon} class="sol__icon" />
+        <H class="sol__title" {...text(`solutions.${s.key}.title`)}>{t(`solutions.${s.key}.title`)}</H>
+        <p class="sol__text" {...text(`solutions.${s.key}.lede`)}>{t(`solutions.${s.key}.lede`)}</p>
+        <Icon name="arrow" class="sol__go" />
+      </a>
+    </li>
+  ))}
+  {withPortal && (
+    <li class="sol__cell" {...reveal()}>
+      <a href="/portal" class="sol__card sol__card--portal card">
+        <Icon name="panel" class="sol__icon" />
+        <H class="sol__title" {...text('menu.portal.title')}>{t('menu.portal.title')}</H>
+        <p class="sol__text" {...text('portal.head.lede')}>{t('portal.head.lede')}</p>
+        <Icon name="arrow" class="sol__go" />
+      </a>
+    </li>
+  )}
+</ul>
+
+<style>
+  .sol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .sol__cell {
+    display: grid;
+    min-width: 0;
+  }
+
+  @media (min-width: 72rem) {
+    .sol:has(> :nth-child(4):last-child) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .sol__card {
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0.8rem;
+    padding: 1.6rem;
+  }
+
+  .sol__card::after {
+    content: '';
+    position: absolute;
+    inset: auto -20% -60% -20%;
+    height: 80%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(var(--aurora-3) / 0.35), transparent);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .sol__card:hover::after {
+    opacity: 1;
+  }
+
+  .sol__card--portal {
+    background:
+      radial-gradient(100% 120% at 100% 100%, rgb(var(--aurora-2) / 0.18), transparent 60%),
+      var(--sheet);
+  }
+
+  .sol__icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--accent-ink);
+  }
+
+  .sol__title {
+    font-size: var(--step-2);
+  }
+
+  .sol__text {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .sol__go {
+    width: 1.2rem;
+    height: 1.2rem;
+    transition: translate 0.25s var(--ease);
+  }
+
+  .sol__card:hover .sol__go {
+    translate: 4px 0;
+  }
+</style>

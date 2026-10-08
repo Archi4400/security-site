@@ -1,0 +1,192 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import { ruleGroups } from '../../lib/rules';
+
+let order = 0;
+const groups = ruleGroups.map((g) => ({ ...g, start: (order += g.ids.length) - g.ids.length }));
+---
+
+<section class="band rules">
+  <div class="shell rules__wrap">
+    <div class="rules__top">
+      <div class="head" {...reveal()}>
+        <h2 {...text('home.catches.title')}>{t('home.catches.title')}</h2>
+        <p {...text('home.catches.lede')}>{t('home.catches.lede')}</p>
+      </div>
+      <a href="/solutions" class="link" {...reveal()}><span {...text('nav.solutionsAll')}>{t('nav.solutionsAll')}</span><Icon name="arrow" /></a>
+    </div>
+
+    <div class="board panel" data-lean {...reveal()}>
+      <ul class="board__rows" role="list">
+        {groups.map((g, i) => (
+          <li class="board__row" data-spot>
+            <a href={g.href} class="board__group">
+              <span class="board__name" {...text(`home.catches.groups.${i}.title`)}>{t(`home.catches.groups.${i}.title`)}</span>
+              <span class="board__count mono">{g.ids.length}</span>
+            </a>
+            <ul class="board__ids" role="list">
+              {g.ids.map((id, j) => (
+                <li class="board__id" style={`--n: ${g.start + j}`}>
+                  <span class="board__pulse" aria-hidden="true"></span>
+                  <code>{id}</code>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+      <p class="board__note" {...text('home.catches.rotation')}>{t('home.catches.rotation')}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rules__wrap {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
+
+  .rules__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .board {
+    display: grid;
+    gap: 0.5rem;
+    padding: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+    min-width: 0;
+  }
+
+  .board__rows {
+    display: grid;
+    margin: 0;
+  }
+
+  .board__row {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--radius-s);
+    border-bottom: 1px solid var(--edge);
+    transition: background-color 0.3s var(--ease);
+  }
+
+  .board__row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(22rem circle at var(--mx, -20rem) var(--my, 50%), rgb(var(--aurora-3) / 0.16), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+  }
+
+  .board__row:hover::before {
+    opacity: 1;
+  }
+
+  .board__group {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-height: 44px;
+    align-self: start;
+  }
+
+  .board__name {
+    font-size: var(--step-1);
+    font-weight: 500;
+  }
+
+  .board__count {
+    color: var(--accent-ink);
+    font-size: 0.95rem;
+  }
+
+  .board__group:hover .board__name {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  .board__ids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .board__id {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    font-size: 0.8rem;
+    color: var(--ink-2);
+    transition:
+      border-color 0.25s var(--ease),
+      color 0.25s var(--ease);
+  }
+
+  .board__row:hover .board__id {
+    border-color: var(--edge-strong);
+    color: var(--ink);
+  }
+
+  .board__id code {
+    font-size: inherit;
+  }
+
+  .board__pulse {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--ok);
+    animation: rule-pulse 3.4s ease-in-out infinite;
+    animation-delay: calc(var(--n) * 0.1s);
+  }
+
+  @keyframes rule-pulse {
+    0%,
+    70%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 0%, transparent);
+    }
+
+    35% {
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 30%, transparent);
+    }
+  }
+
+  .board__note {
+    padding: 1rem;
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+
+  @media (min-width: 64rem) {
+    .board__row {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      align-items: start;
+      gap: 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .board__pulse {
+      animation: none;
+    }
+  }
+</style>

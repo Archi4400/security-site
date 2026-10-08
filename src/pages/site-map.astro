@@ -1,0 +1,85 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import { t, text } from '../engine';
+import { aboutLinks, solutionLinks, type NavLink } from '../components/header/navRoutes';
+import { posts } from '../lib/posts';
+
+const groups: { key: string; links: NavLink[] }[] = [
+  {
+    key: 'siteMap.main',
+    links: [
+      { href: '/', key: 'siteMap.home' },
+      { href: '/pricing', key: 'nav.pricing' },
+      { href: '/contact', key: 'nav.contact' },
+    ],
+  },
+  { key: 'nav.solutions', links: [{ href: '/solutions', key: 'nav.solutionsAll' }, ...solutionLinks] },
+  { key: 'nav.about', links: aboutLinks },
+  {
+    key: 'nav.blog',
+    links: [{ href: '/blog', key: 'nav.blog' }, ...posts.map((p) => ({ href: `/blog/${p.slug}`, key: `blog.posts.${p.key}.title` }))],
+  },
+  {
+    key: 'siteMap.legalGroup',
+    links: [
+      { href: '/privacy-policy', key: 'footer.privacy' },
+      { href: '/terms-conditions', key: 'footer.terms' },
+      { href: '/cookie-policy', key: 'footer.cookies' },
+    ],
+  },
+];
+---
+
+<Layout metaKey="meta.siteMap" path="/site-map">
+  <PageHead titleKey="siteMap.head.title" ledeKey="siteMap.head.lede" />
+  <section class="band">
+    <div class="shell sm">
+      {groups.map((g) => (
+        <div class="sm__group">
+          <h2 class="sm__title" {...text(g.key)}>{t(g.key)}</h2>
+          <ul class="sm__list" role="list">
+            {g.links.map((l) => <li><a href={l.href} {...text(l.key)}>{t(l.key)}</a></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .sm {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  .sm__group {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+  }
+
+  .sm__title {
+    font-size: var(--step-1);
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .sm__list {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0;
+  }
+
+  .sm__list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-2);
+  }
+
+  .sm__list a:hover {
+    color: var(--ink);
+  }
+</style>

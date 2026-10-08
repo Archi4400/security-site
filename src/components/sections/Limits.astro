@@ -1,0 +1,75 @@
+---
+import { reveal, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+
+const items = en.home.limits.items;
+---
+
+<section class="band limits">
+  <div class="shell limits__grid">
+    <div class="head limits__head" {...reveal()}>
+      <h2 {...text('home.limits.title')}>{t('home.limits.title')}</h2>
+      <p {...text('home.limits.lede')}>{t('home.limits.lede')}</p>
+    </div>
+    <ul class="limits__list" role="list">
+      {items.map((_, i) => (
+        <li class="limits__item" {...reveal()}>
+          <h3 class="limits__title" {...text(`home.limits.items.${i}.title`)}>{t(`home.limits.items.${i}.title`)}</h3>
+          <p class="limits__text" {...text(`home.limits.items.${i}.text`)}>{t(`home.limits.items.${i}.text`)}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .limits {
+    background: var(--ground-2);
+    border-block: 1px solid var(--edge);
+  }
+
+  .limits__grid {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .limits__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .limits__item {
+    display: grid;
+    gap: 0.4rem 2rem;
+    padding-block: 1.4rem;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .limits__item:first-child {
+    border-top: 1px solid var(--edge);
+  }
+
+  .limits__title {
+    font-size: var(--step-1);
+  }
+
+  .limits__text {
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 64rem) {
+    .limits__grid {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      align-items: start;
+    }
+
+    .limits__head {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+
+    .limits__item {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+</style>

@@ -1,0 +1,370 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+
+const collectors = ['tap', 'waf', 'connector'];
+const ours = ['core', 'brain', 'baseline', 'notifier', 'portalNode'];
+const kept = [0, 1, 2, 3];
+const sent = [0, 1, 2];
+---
+
+<section class="band how" id="how">
+  <div class="shell how__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.how.title')}>{t('home.how.title')}</h2>
+      <p {...text('home.how.lede')}>{t('home.how.lede')}</p>
+    </div>
+
+    <div class="how__map" {...reveal()}>
+      <div class="how__side how__side--yours panel" data-lean>
+        <h3 class="how__label mono" {...text('home.how.yours')}>{t('home.how.yours')}</h3>
+        <ul class="how__nodes" role="list">
+          {collectors.map((c) => (
+            <li class="how__node">
+              <span class="how__name mono" {...text(`home.how.${c}.name`)}>{t(`home.how.${c}.name`)}</span>
+              <span class="how__text" {...text(`home.how.${c}.text`)}>{t(`home.how.${c}.text`)}</span>
+              <span class="how__key" {...text(`home.how.${c}.key`)}>{t(`home.how.${c}.key`)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="how__line" aria-hidden="true">
+        <span class="how__packet" style="--k: 0"></span>
+        <span class="how__packet" style="--k: 1"></span>
+        <span class="how__packet" style="--k: 2"></span>
+      </div>
+      <p class="how__line-label mono" {...text('home.how.line')}>{t('home.how.line')}</p>
+
+      <div class="how__side how__side--ours panel" data-lean>
+        <h3 class="how__label mono" {...text('home.how.ours')}>{t('home.how.ours')}</h3>
+        <ul class="how__chips" role="list">
+          {ours.map((o) => (
+            <li class="how__chip">
+              <span class="mono" {...text(`home.how.${o}.name`)}>{t(`home.how.${o}.name`)}</span>
+              <span {...text(`home.how.${o}.text`)}>{t(`home.how.${o}.text`)}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="how__alert">
+          <span class="dot sev--high" aria-hidden="true"></span>
+          <span class="how__alert-text" {...text('panel.i1')}>{t('panel.i1')}</span>
+          <span class="chip">Telegram</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="how__lists" {...reveal()}>
+      <div class="how__list">
+        <h3 class="how__list-title" {...text('home.how.kept')}>{t('home.how.kept')}</h3>
+        <ul role="list">
+          {kept.map((i) => (
+            <li><Icon name="minus" class="how__mark how__mark--kept" /><span {...text(`home.how.keptItems.${i}`)}>{t(`home.how.keptItems.${i}`)}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div class="how__list">
+        <h3 class="how__list-title" {...text('home.how.sent')}>{t('home.how.sent')}</h3>
+        <ul role="list">
+          {sent.map((i) => (
+            <li><Icon name="arrow" class="how__mark how__mark--sent" /><span {...text(`home.how.sentItems.${i}`)}>{t(`home.how.sentItems.${i}`)}</span></li>
+          ))}
+        </ul>
+      </div>
+      <p class="how__install" {...text('home.how.install')}>{t('home.how.install')}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .how {
+    position: relative;
+    background: var(--ground-2);
+    border-block: 1px solid var(--edge);
+  }
+
+  .how__wrap {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 3vw, 4rem);
+  }
+
+  .how__map {
+    display: grid;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .how__side {
+    display: grid;
+    align-content: start;
+    gap: 1.1rem;
+    padding: clamp(1.1rem, 0.8rem + 1vw, 1.6rem);
+    min-width: 0;
+  }
+
+  .how__label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--mute);
+    letter-spacing: 0;
+  }
+
+  .how__nodes {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .how__node {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    transition: border-color 0.25s var(--ease);
+  }
+
+  .how__node:hover {
+    border-color: rgb(var(--aurora-1) / 0.6);
+  }
+
+  .how__name {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .how__text {
+    color: var(--ink-2);
+    font-size: 0.93rem;
+  }
+
+  .how__key {
+    font-size: 0.86rem;
+    color: var(--mute);
+    padding-left: 0.75rem;
+    border-left: 2px solid rgb(var(--aurora-3));
+  }
+
+  .how__chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .how__chip {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    font-size: 0.86rem;
+    color: var(--mute);
+    transition: border-color 0.25s var(--ease);
+  }
+
+  .how__chip:hover {
+    border-color: rgb(var(--aurora-3) / 0.7);
+  }
+
+  .how__chip .mono {
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .how__alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+    margin-top: auto;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-s);
+    border: 1px solid rgb(var(--aurora-1) / 0.5);
+    background: color-mix(in oklab, rgb(var(--aurora-1)) 8%, var(--sheet));
+    font-size: 0.92rem;
+  }
+
+  .how__alert-text {
+    flex: 1 1 12rem;
+  }
+
+  .how__side--ours {
+    align-content: stretch;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .how__line {
+    position: relative;
+    height: 4.5rem;
+    margin-inline: auto;
+    width: 2px;
+    background: repeating-linear-gradient(180deg, var(--accent-ink) 0 6px, transparent 6px 12px);
+  }
+
+  .how__packet {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-left: -0.275rem;
+    border-radius: 50%;
+    background: rgb(var(--aurora-1));
+    box-shadow: 0 0 14px rgb(var(--aurora-1) / 0.8);
+    animation: packet-down 2.4s linear infinite;
+    animation-delay: calc(var(--k) * 0.8s);
+  }
+
+  .how__line-label {
+    justify-self: center;
+    order: 0;
+    margin: -0.5rem 0 1rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--ground-2);
+    font-size: 0.78rem;
+    color: var(--accent-ink);
+  }
+
+  @keyframes packet-down {
+    0% {
+      top: 0;
+      opacity: 0;
+    }
+
+    15%,
+    85% {
+      opacity: 1;
+    }
+
+    100% {
+      top: calc(100% - 0.55rem);
+      opacity: 0;
+    }
+  }
+
+  @keyframes packet-across {
+    0% {
+      left: 0;
+      opacity: 0;
+    }
+
+    15%,
+    85% {
+      opacity: 1;
+    }
+
+    100% {
+      left: calc(100% - 0.55rem);
+      opacity: 0;
+    }
+  }
+
+  .how__lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1.5rem 2rem;
+  }
+
+  .how__list {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+  }
+
+  .how__list-title {
+    font-size: var(--step-1);
+  }
+
+  .how__list ul {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .how__list li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    color: var(--ink-2);
+  }
+
+  .how__mark {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    translate: 0 0.15rem;
+  }
+
+  .how__mark--kept {
+    color: var(--mute);
+  }
+
+  .how__mark--sent {
+    color: var(--accent-ink);
+  }
+
+  .how__install {
+    grid-column: 1 / -1;
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius-s);
+    border: 1px dashed var(--edge-strong);
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 64rem) {
+    .how__map {
+      grid-template-columns: minmax(0, 1.25fr) 7rem minmax(0, 1fr);
+      grid-template-rows: auto;
+    }
+
+    .how__side--yours {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .how__line {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      width: 100%;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, var(--accent-ink) 0 6px, transparent 6px 12px);
+    }
+
+    .how__packet {
+      top: 50%;
+      left: 0;
+      margin: -0.275rem 0 0;
+      animation-name: packet-across;
+    }
+
+    .how__line-label {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      margin: 0;
+      translate: 0 3.25rem;
+      max-width: 7rem;
+      text-align: center;
+      border-radius: var(--radius-s);
+    }
+
+    .how__side--ours {
+      grid-column: 3;
+      grid-row: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .how__packet {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

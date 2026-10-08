@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import CloseCall from '../components/sections/CloseCall.astro';
+import Icon from '../components/Icon.astro';
+import { reveal, t, text } from '../engine';
+import { en } from '../i18n/locales/en';
+
+const plans = en.pricing.plans;
+const included = en.pricing.included;
+const featured = 1;
+---
+
+<Layout metaKey="meta.pricing" path="/pricing">
+  <PageHead titleKey="pricing.head.title" ledeKey="pricing.head.lede" />
+
+  <section class="band pr">
+    <div class="shell pr__wrap">
+      <ul class="pr__plans" role="list">
+        {plans.map((plan, i) => (
+          <li class:list={['pr__plan', i === featured && 'pr__plan--featured panel']} data-lean={i === featured ? '' : undefined} {...reveal()} style={`--d: ${i * 0.08}s`}>
+            {i === featured && <p class="pr__badge" {...text('pricing.featured')}>{t('pricing.featured')}</p>}
+            <h2 class="pr__name" {...text(`pricing.plans.${i}.name`)}>{t(`pricing.plans.${i}.name`)}</h2>
+            <p class="pr__for" {...text(`pricing.plans.${i}.for`)}>{t(`pricing.plans.${i}.for`)}</p>
+            <p class="pr__price" {...text('pricing.onRequest')}>{t('pricing.onRequest')}</p>
+            <ul class="pr__points" role="list">
+              {plan.points.map((_, j) => (
+                <li><Icon name="check" class="pr__check" /><span {...text(`pricing.plans.${i}.points.${j}`)}>{t(`pricing.plans.${i}.points.${j}`)}</span></li>
+              ))}
+            </ul>
+            <a href="/contact" class:list={['btn', i === featured ? 'btn--solid' : 'btn--line']}>
+              <span {...text('common.quote')}>{t('common.quote')}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="pr__incl" {...reveal()}>
+        <h2 class="pr__incl-title" {...text('pricing.includedTitle')}>{t('pricing.includedTitle')}</h2>
+        <ul class="pr__incl-list" role="list">
+          {included.map((_, i) => (
+            <li><Icon name="check" class="pr__check" /><span {...text(`pricing.included.${i}`)}>{t(`pricing.included.${i}`)}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <CloseCall />
+</Layout>
+
+<style>
+  .pr__wrap {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 5rem);
+  }
+
+  .pr__plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    align-items: stretch;
+  }
+
+  .pr__plan {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 1rem;
+    padding: clamp(1.4rem, 1rem + 1vw, 2rem);
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    min-width: 0;
+  }
+
+  .pr__plan--featured {
+    grid-template-rows: auto auto auto auto 1fr auto;
+    border-color: color-mix(in oklab, var(--accent) 55%, var(--edge-strong));
+  }
+
+  .pr__badge {
+    justify-self: start;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .pr__name {
+    font-size: var(--step-3);
+  }
+
+  .pr__for {
+    color: var(--ink-2);
+  }
+
+  .pr__price {
+    font-weight: 500;
+    padding-block: 0.75rem;
+    border-block: 1px solid var(--edge);
+  }
+
+  .pr__points,
+  .pr__incl-list {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .pr__points li,
+  .pr__incl-list li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .pr__check {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    translate: 0 0.15rem;
+    color: var(--accent-ink);
+  }
+
+  .pr__incl {
+    display: grid;
+    gap: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .pr__incl-title {
+    font-size: var(--step-3);
+  }
+
+  .pr__incl-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 0.9rem 2rem;
+  }
+</style>

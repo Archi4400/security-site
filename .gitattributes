@@ -1,0 +1,19 @@
+# Every text file is stored and checked out as LF, regardless of whoever
+# writes it (an editor, a script, an agent's edit tool) or what their local
+# core.autocrlf is set to. This overrides personal git config for anyone
+# who clones the repo, so the convention holds without depending on any
+# one machine's settings.
+* text=auto eol=lf
+
+# Raster/compressed assets: never run through text normalization, or the
+# bytes inside the file get corrupted rather than just its line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.gif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

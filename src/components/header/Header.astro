@@ -1,0 +1,147 @@
+---
+import { menuDialog, pinned, t, text } from '../../engine';
+import { LOGIN, REGISTER } from '../../brand';
+import Brand from '../Brand.astro';
+import Icon from '../Icon.astro';
+import DesktopNav from './DesktopNav.astro';
+import LangSwitcher from './LangSwitcher.astro';
+import MobileMenu from './MobileMenu.astro';
+import ThemeSwitch from './ThemeSwitch.astro';
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+const nav = menuDialog('nav', { closeAt: '(min-width: 72rem)' });
+---
+
+<header {...pinned()} class="bar">
+  <div class="shell bar__row">
+    <Brand />
+    <DesktopNav path={path} />
+    <div class="bar__end">
+      <div class="bar__prefs">
+        <LangSwitcher id="lang" />
+        <ThemeSwitch id="theme" />
+      </div>
+      <a href={LOGIN} class="bar__login"><Icon name="user" /><span {...text('nav.login')}>{t('nav.login')}</span></a>
+      <a href={REGISTER} class="btn btn--line bar__cta"><span {...text('nav.cta')}>{t('nav.cta')}</span></a>
+      <button {...nav.opener()} class="burger"><Icon name="menu" /></button>
+    </div>
+  </div>
+</header>
+
+<MobileMenu nav={nav} path={path} />
+
+<style>
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in oklab, var(--ground) 82%, transparent);
+    backdrop-filter: blur(16px) saturate(1.2);
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .bar__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: var(--header-h);
+  }
+
+  .bar__row > :global(.nav) {
+    display: none;
+  }
+
+  .bar__end {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+  }
+
+  .bar__prefs,
+  .bar__login {
+    display: none;
+  }
+
+  .bar__prefs {
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .bar__login {
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    transition: color 0.2s var(--ease);
+  }
+
+  .bar__login:hover {
+    color: var(--ink);
+  }
+
+  .bar__login :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .bar__cta {
+    min-height: 2.75rem;
+    padding: 0.6rem 1.15rem;
+    border-color: color-mix(in oklab, var(--accent) 60%, var(--edge-strong));
+    white-space: nowrap;
+  }
+
+  .bar__cta:hover {
+    border-color: var(--accent-ink);
+  }
+
+  .burger {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--edge-strong);
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .burger :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  @media (max-width: 22.4rem) {
+    .bar__cta {
+      padding-inline: 0.85rem;
+      font-size: 0.92rem;
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .bar__row {
+      gap: 1.25rem;
+    }
+
+    .bar__row > :global(.nav) {
+      display: block;
+    }
+
+    .bar__prefs,
+    .bar__login {
+      display: flex;
+    }
+
+    .burger {
+      display: none;
+    }
+  }
+</style>

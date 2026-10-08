@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHead from '../../components/sections/PageHead.astro';
+import PostCards from '../../components/sections/PostCards.astro';
+---
+
+<Layout metaKey="meta.blog" path="/blog">
+  <PageHead titleKey="blog.head.title" ledeKey="blog.head.lede" />
+  <section class="band">
+    <div class="shell">
+      <PostCards level={2} />
+    </div>
+  </section>
+</Layout>

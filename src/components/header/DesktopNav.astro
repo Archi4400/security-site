@@ -1,0 +1,180 @@
+---
+import { label, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import { isCurrent, isGroup, navRoutes } from './navRoutes';
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+---
+
+<nav class="nav" {...label('nav.label')}>
+  <ul class="nav__list" role="list">
+    {navRoutes.map((entry) => (
+      <li class:list={['nav__item', isGroup(entry) && 'nav__item--group']}>
+        <a
+          href={entry.href}
+          class="nav__link"
+          aria-current={isCurrent(entry.href, path) ? 'page' : undefined}
+        >
+          <span {...text(entry.key)}>{t(entry.key)}</span>
+          {isGroup(entry) && <Icon name="chevron" class="nav__mark" />}
+        </a>
+        {isGroup(entry) && (
+          <div class="nav__panel">
+            <ul class="nav__sub" role="list">
+              {entry.items.map((item) => (
+                <li>
+                  <a href={item.href} class="nav__sublink" aria-current={path === item.href ? 'page' : undefined}>
+                    <span class="nav__subtitle" {...text(item.key)}>{t(item.key)}</span>
+                    {item.textKey && <span class="nav__subtext" {...text(item.textKey)}>{t(item.textKey)}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a href={entry.href} class="nav__all">
+              <span {...text(entry.allKey)}>{t(entry.allKey)}</span>
+              <Icon name="arrow" />
+            </a>
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.25rem, 0.2rem + 0.8vw, 1.25rem);
+    margin: 0;
+  }
+
+  .nav__item {
+    position: relative;
+  }
+
+  .nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    transition: color 0.2s var(--ease);
+  }
+
+  .nav__link:hover,
+  .nav__item--group:focus-within .nav__link,
+  .nav__link[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .nav__link[aria-current='page'] span {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.5rem;
+  }
+
+  .nav__mark {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: rotate 0.25s var(--ease);
+  }
+
+  .nav__item--group:hover .nav__mark,
+  .nav__item--group:focus-within .nav__mark {
+    rotate: 180deg;
+  }
+
+  .nav__panel {
+    position: absolute;
+    left: -0.75rem;
+    top: 100%;
+    z-index: 55;
+    width: 23rem;
+    padding: 0.6rem;
+    border-radius: var(--radius);
+    background: var(--sheet);
+    border: 1px solid var(--edge-strong);
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.4);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 6px;
+    transition:
+      opacity 0.2s var(--ease),
+      translate 0.2s var(--ease),
+      visibility 0s linear 0.2s;
+  }
+
+  .nav__item--group:hover .nav__panel,
+  .nav__item--group:focus-within .nav__panel {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition:
+      opacity 0.2s var(--ease),
+      translate 0.2s var(--ease),
+      visibility 0s;
+  }
+
+  .nav__sub {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0;
+  }
+
+  .nav__sublink {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-s);
+    transition: background-color 0.2s var(--ease);
+  }
+
+  .nav__sublink:hover,
+  .nav__sublink:focus-visible {
+    background: var(--sheet-2);
+  }
+
+  .nav__sublink[aria-current='page'] .nav__subtitle {
+    color: var(--accent-ink);
+  }
+
+  .nav__subtitle {
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .nav__subtext {
+    color: var(--mute);
+    font-size: 0.84rem;
+  }
+
+  .nav__all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    padding: 0.75rem;
+    border-top: 1px solid var(--edge);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .nav__all svg {
+    width: 1rem;
+    height: 1rem;
+    transition: translate 0.2s var(--ease);
+  }
+
+  .nav__all:hover svg {
+    translate: 3px 0;
+  }
+</style>

@@ -1,0 +1,119 @@
+---
+import { reveal, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+
+const items = en.home.problem.items;
+---
+
+<section class="band problem">
+  <div class="shell problem__grid">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.problem.title')}>{t('home.problem.title')}</h2>
+      <p {...text('home.problem.lede')}>{t('home.problem.lede')}</p>
+    </div>
+    <ul class="problem__list" role="list">
+      {items.map((_, i) => (
+        <li class="problem__item" {...reveal()} style={`--d: ${i * 0.08}s`}>
+          <p class="problem__trace mono" {...text(`home.problem.items.${i}.trace`)}>{t(`home.problem.items.${i}.trace`)}</p>
+          <h3 class="problem__title" {...text(`home.problem.items.${i}.title`)}>{t(`home.problem.items.${i}.title`)}</h3>
+          <p class="problem__text" {...text(`home.problem.items.${i}.text`)}>{t(`home.problem.items.${i}.text`)}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .problem {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .problem::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 22rem;
+    z-index: -1;
+    background:
+      radial-gradient(40% 70% at 85% 0%, rgb(var(--aurora-3) / 0.14), transparent 70%),
+      radial-gradient(30% 60% at 20% 0%, rgb(var(--aurora-2) / 0.1), transparent 70%);
+    pointer-events: none;
+  }
+
+  .problem__grid {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .problem__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 0 clamp(2rem, 1rem + 3vw, 4rem);
+    margin: 0;
+  }
+
+  .problem__item {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 1.75rem 0 2.25rem;
+    border-top: 1px solid var(--edge-strong);
+  }
+
+  .problem__trace {
+    justify-self: start;
+    max-width: 100%;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-s);
+    border: 1px dashed color-mix(in oklab, var(--bad) 55%, var(--edge-strong));
+    background: color-mix(in oklab, var(--bad) 7%, transparent);
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  .problem__item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgb(var(--aurora-1)), rgb(var(--aurora-2)), rgb(var(--aurora-3)));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.7s var(--ease);
+  }
+
+  .problem__item:hover::before {
+    transform: scaleX(1);
+  }
+
+  .problem__title {
+    font-size: var(--step-2);
+  }
+
+  .problem__text {
+    color: var(--ink-2);
+    max-width: 34rem;
+  }
+
+  @media (min-width: 64rem) {
+    .problem__grid {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      align-items: start;
+    }
+
+    .problem__grid .head {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+
+    .problem__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

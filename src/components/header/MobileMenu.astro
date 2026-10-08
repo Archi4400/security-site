@@ -1,0 +1,222 @@
+---
+import { label, menuDialog, t, text } from '../../engine';
+import { LOGIN, REGISTER } from '../../brand';
+import Brand from '../Brand.astro';
+import Icon from '../Icon.astro';
+import LangSwitcher from './LangSwitcher.astro';
+import ThemeSwitch from './ThemeSwitch.astro';
+import { isCurrent, isGroup, navRoutes, type NavEntry } from './navRoutes';
+
+interface Props {
+  nav: ReturnType<typeof menuDialog>;
+  path: string;
+}
+
+const { nav, path } = Astro.props;
+const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, path) || entry.items.some((item) => item.href === path));
+---
+
+<dialog {...nav.dialog()} class="sheet">
+  <div class="sheet__top">
+    <Brand />
+    <h2 {...nav.title()} data-sr>{t('ui.menu')}</h2>
+    <button {...nav.close()} class="sheet__close"><Icon name="close" /></button>
+  </div>
+
+  <nav class="sheet__nav" {...label('nav.label')}>
+    <ul class="sheet__list" role="list">
+      {navRoutes.map((entry, i) => (
+        <li class="sheet__item">
+          <div class="sheet__row">
+            <a href={entry.href} id={`sheet-link-${i}`} class="sheet__link" aria-current={isCurrent(entry.href, path) ? 'page' : undefined} {...text(entry.key)}>
+              {t(entry.key)}
+            </a>
+            {isGroup(entry) && (
+              <button type="button" class="sheet__toggle" aria-expanded={isOpen(entry) ? 'true' : 'false'} aria-controls={`sheet-sub-${i}`} aria-labelledby={`sheet-link-${i}`} data-sheet-toggle>
+                <Icon name="chevron" />
+              </button>
+            )}
+          </div>
+          {isGroup(entry) && (
+            <ul class="sheet__sub" id={`sheet-sub-${i}`} role="list" hidden={!isOpen(entry)}>
+              {entry.items.map((item) => (
+                <li>
+                  <a href={item.href} class="sheet__sublink" aria-current={path === item.href ? 'page' : undefined} {...text(item.key)}>
+                    {t(item.key)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <div class="sheet__account">
+    <a href={LOGIN} class="btn btn--line"><Icon name="user" /><span {...text('nav.login')}>{t('nav.login')}</span></a>
+    <a href={REGISTER} class="btn btn--solid"><span {...text('nav.register')}>{t('nav.register')}</span></a>
+  </div>
+
+  <div class="sheet__prefs">
+    <LangSwitcher id="lang-sheet" up />
+    <ThemeSwitch id="theme-sheet" />
+  </div>
+</dialog>
+
+<script>
+  for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-sheet-toggle]')) {
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(open));
+      document.getElementById(toggle.getAttribute('aria-controls')!)!.hidden = !open;
+    });
+  }
+</script>
+
+<style>
+  .sheet {
+    width: min(100%, 26rem);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0 0 0 auto;
+    padding: 1rem var(--gutter) 2rem;
+    border: 0;
+    border-left: 1px solid var(--edge);
+    background: var(--ground);
+    color: var(--ink);
+    overflow-y: auto;
+  }
+
+  .sheet[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: sheet-in 0.35s var(--ease);
+  }
+
+  .sheet::backdrop {
+    background: rgb(0 0 0 / 0.55);
+    backdrop-filter: blur(4px);
+  }
+
+  @keyframes sheet-in {
+    from {
+      translate: 24px 0;
+      opacity: 0;
+    }
+  }
+
+  .sheet__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sheet__close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--edge-strong);
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .sheet__close svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .sheet__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .sheet__item {
+    border-bottom: 1px solid var(--edge);
+    padding-block: 0.4rem;
+  }
+
+  .sheet__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .sheet__toggle {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--edge);
+    border-radius: 50%;
+    background: none;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+
+  .sheet__toggle :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    transition: rotate 0.25s var(--ease);
+  }
+
+  .sheet__toggle[aria-expanded='true'] :global(svg) {
+    rotate: 180deg;
+  }
+
+  .sheet__sub[hidden] {
+    display: none;
+  }
+
+  .sheet__link {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+
+  .sheet__link[aria-current='page'],
+  .sheet__sublink[aria-current='page'] {
+    color: var(--accent-ink);
+  }
+
+  .sheet__sub {
+    display: grid;
+    margin: 0 0 0.5rem;
+    padding-left: 0.9rem;
+    border-left: 1px solid var(--edge-strong);
+  }
+
+  .sheet__sublink {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    color: var(--ink-2);
+  }
+
+  .sheet__account {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+    gap: 0.6rem;
+  }
+
+  .sheet__account .btn {
+    white-space: nowrap;
+  }
+
+  .sheet__prefs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+</style>

@@ -1,0 +1,117 @@
+---
+import { reveal, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+
+const rows = en.home.compare.rows;
+---
+
+<section class="band cmp">
+  <div class="shell cmp__wrap">
+    <div class="head" {...reveal()}>
+      <h2 id="cmp-title" {...text('home.compare.title')}>{t('home.compare.title')}</h2>
+      <p {...text('home.compare.lede')}>{t('home.compare.lede')}</p>
+    </div>
+    <div class="cmp__card panel" data-lean {...reveal()}>
+      <div class="cmp__scroll">
+        <table class="cmp__table">
+          <caption data-sr {...text('home.compare.caption')}>{t('home.compare.caption')}</caption>
+          <thead>
+            <tr>
+              <th scope="col" {...text('home.compare.col')}>{t('home.compare.col')}</th>
+              <th scope="col" class="cmp__us" {...text('home.compare.us')}>{t('home.compare.us')}</th>
+              <th scope="col" {...text('home.compare.diy')}>{t('home.compare.diy')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((_, i) => (
+              <tr>
+                <th scope="row" {...text(`home.compare.rows.${i}.q`)}>{t(`home.compare.rows.${i}.q`)}</th>
+                <td class="cmp__us" {...text(`home.compare.rows.${i}.us`)}>{t(`home.compare.rows.${i}.us`)}</td>
+                <td {...text(`home.compare.rows.${i}.diy`)}>{t(`home.compare.rows.${i}.diy`)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cmp__wrap {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .cmp__card {
+    min-width: 0;
+    padding: 0.5rem;
+  }
+
+  .cmp__scroll {
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .cmp__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .cmp__table th,
+  .cmp__table td {
+    padding: 1rem clamp(0.6rem, 0.3rem + 1vw, 1.25rem);
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .cmp__table tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .cmp__table thead th {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--mute);
+  }
+
+  .cmp__table tbody th {
+    font-weight: 500;
+    width: 34%;
+  }
+
+  .cmp__table td {
+    color: var(--ink-2);
+  }
+
+  .cmp__table .cmp__us {
+    color: var(--ink);
+    background: color-mix(in oklab, var(--accent) 9%, transparent);
+  }
+
+  .cmp__table thead .cmp__us {
+    color: var(--accent-ink);
+    border-radius: var(--radius-s) var(--radius-s) 0 0;
+  }
+
+  .cmp__table tbody tr {
+    transition: background-color 0.2s var(--ease);
+  }
+
+  .cmp__table tbody tr:hover {
+    background: var(--sheet-2);
+  }
+
+  @media (max-width: 40rem) {
+    .cmp__table {
+      font-size: 0.86rem;
+    }
+
+    .cmp__table th,
+    .cmp__table td {
+      padding: 0.8rem 0.5rem;
+    }
+  }
+</style>

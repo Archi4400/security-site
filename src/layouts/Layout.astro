@@ -1,0 +1,56 @@
+---
+import { Head, Runtime, rootAttrs, t, text } from '../engine';
+import '../styles/global.css';
+import { BRAND, SITE } from '../brand';
+import Header from '../components/header/Header.astro';
+import Footer from '../components/footer/Footer.astro';
+
+interface Props {
+  metaKey: string;
+  path: string;
+  noindex?: boolean;
+}
+
+const { metaKey, path, noindex } = Astro.props;
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: BRAND,
+  url: SITE,
+  logo: new URL('/logo/logo_dark.svg', SITE).href,
+});
+---
+
+<!doctype html>
+<html {...rootAttrs()}>
+  <head>
+    <Head metaKey={metaKey} path={path} noindex={noindex} siteName={BRAND} />
+    <link rel="icon" href="/logo/icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <script type="application/ld+json" set:html={jsonLd} />
+  </head>
+  <body>
+    <a class="skip" href="#main" {...text('ui.skip')}>{t('ui.skip')}</a>
+    <Header path={path} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <Runtime />
+    <script>
+      import { reducedMotion, start } from '../engine/client';
+      import { wireLean } from '../lib/lean';
+      import { wireSpot } from '../lib/spot';
+
+      start();
+      wireLean(reducedMotion);
+      wireSpot();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,44 @@
+---
+import config from './load-config';
+import { i18n } from './i18n/server';
+import { dictionaryUrls } from './i18n/files';
+import { headScript } from './head-script';
+import './styles.css';
+
+interface Props {
+  /** Dictionary path of the page's meta block, e.g. `meta.home`. */
+  metaKey: string;
+  path: string;
+  siteName: string;
+  noindex?: boolean;
+  image?: string;
+}
+
+const { metaKey, path, siteName, noindex = false, image = '/og.png' } = Astro.props;
+const site = Astro.site!;
+const title = i18n.t(`${metaKey}.title`);
+const description = i18n.t(`${metaKey}.desc`);
+const canonical = new URL(path, site).href;
+const script = headScript({
+  lang: config.i18n.defaultLang,
+  files: dictionaryUrls(config.i18n.dictionaries),
+  color: config.theme.color,
+});
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title data-meta={metaKey}>{title}</title>
+<meta name="description" content={description} data-meta-desc={metaKey} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex" />}
+<meta name="theme-color" content={config.theme.color[config.theme.default]} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={new URL(image, site).href} />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<script is:inline set:html={script} />

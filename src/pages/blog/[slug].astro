@@ -1,0 +1,131 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Aurora from '../../components/Aurora.astro';
+import Icon from '../../components/Icon.astro';
+import PostCards from '../../components/sections/PostCards.astro';
+import CloseCall from '../../components/sections/CloseCall.astro';
+import { countUp, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+import { posts, type Post } from '../../lib/posts';
+
+export function getStaticPaths() {
+  return posts.map((p) => ({ params: { slug: p.slug }, props: { post: p } }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const k = post.key;
+const body = en.blog.posts[k].body;
+const read = countUp(`read-${k}`, post.minutes, { key: 'blog.minutes' });
+---
+
+<Layout metaKey={`meta.${k}`} path={`/blog/${post.slug}`}>
+  <article>
+    <header class="ah">
+      <Aurora intensity={0.5} scale={14} lean={0.03} rise={1.2} />
+      <div class="shell ah__wrap">
+        <a href="/blog" class="link ah__back"><Icon name="arrow" class="ah__back-icon" /><span {...text('common.back')}>{t('common.back')}</span></a>
+        <p class="ah__meta">
+          <span class="chip" {...text(`blog.posts.${k}.tag`)}>{t(`blog.posts.${k}.tag`)}</span>
+          <time datetime={post.date} {...text(`blog.posts.${k}.date`)}>{t(`blog.posts.${k}.date`)}</time>
+          <span><span {...read.root()}><span {...read.value()}>{read.text}</span><span {...read.digits()} /></span></span>
+        </p>
+        <h1 class="ah__title" {...text(`blog.posts.${k}.title`)}>{t(`blog.posts.${k}.title`)}</h1>
+        <p class="ah__lede lede" {...text(`blog.posts.${k}.lede`)}>{t(`blog.posts.${k}.lede`)}</p>
+      </div>
+    </header>
+    <div class="shell ab">
+      {body.map((_, i) => (
+        <p {...text(`blog.posts.${k}.body.${i}`)}>{t(`blog.posts.${k}.body.${i}`)}</p>
+      ))}
+    </div>
+  </article>
+
+  <section class="band more">
+    <div class="shell more__wrap">
+      <h2 class="more__title" {...text('blog.head.title')}>{t('blog.head.title')}</h2>
+      <PostCards except={k} />
+    </div>
+  </section>
+
+  <CloseCall />
+</Layout>
+
+<style>
+  .ah {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(3rem, 2rem + 4vw, 6rem) clamp(2.5rem, 2rem + 3vw, 4rem);
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .ah__wrap {
+    display: grid;
+    gap: 1.2rem;
+    max-width: 52rem;
+  }
+
+  .ah__back {
+    justify-self: start;
+    min-height: 44px;
+    color: var(--ink-2);
+  }
+
+  .ah__back-icon {
+    rotate: 180deg;
+  }
+
+  .ah__back:hover .ah__back-icon {
+    translate: -3px 0;
+  }
+
+  .ah__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+
+  .ah__title {
+    font-size: var(--step-4);
+    letter-spacing: -0.028em;
+  }
+
+  .ab {
+    display: grid;
+    gap: 1.4rem;
+    max-width: 52rem;
+    padding-block: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+    font-size: var(--step-1);
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+
+  .ab p {
+    max-width: 44rem;
+  }
+
+  .ab p:first-child {
+    color: var(--ink);
+  }
+
+  .more {
+    background: var(--ground-2);
+    border-top: 1px solid var(--edge);
+  }
+
+  .more__wrap {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .more__title {
+    font-size: var(--step-3);
+  }
+</style>

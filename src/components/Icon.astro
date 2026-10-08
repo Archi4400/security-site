@@ -1,0 +1,27 @@
+---
+import { iconPaths, type IconName } from '../lib/icons';
+
+interface Props {
+  name: IconName;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { name, class: cls, ...rest } = Astro.props;
+---
+
+<svg
+  class={cls}
+  viewBox="0 0 24 24"
+  width="24"
+  height="24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.7"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  {...rest}
+  set:html={iconPaths[name]}
+/>

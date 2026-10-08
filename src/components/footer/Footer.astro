@@ -1,0 +1,129 @@
+---
+import { label, t, text } from '../../engine';
+import Brand from '../Brand.astro';
+import Icon from '../Icon.astro';
+import type { IconName } from '../../lib/icons';
+import FooterColumn from './FooterColumn.astro';
+import { aboutLinks, solutionLinks, type NavLink } from '../header/navRoutes';
+
+const product: NavLink[] = [...solutionLinks, { href: '/pricing', key: 'nav.pricing' }];
+const company: NavLink[] = [...aboutLinks, { href: '/blog', key: 'nav.blog' }, { href: '/contact', key: 'nav.contact' }];
+const legal: NavLink[] = [
+  { href: '/privacy-policy', key: 'footer.privacy' },
+  { href: '/terms-conditions', key: 'footer.terms' },
+  { href: '/cookie-policy', key: 'footer.cookies' },
+  { href: '/site-map', key: 'footer.siteMap' },
+];
+
+const socials: { icon: IconName; key: string; href: string }[] = [
+  { icon: 'linkedin', key: 'footer.linkedin', href: 'https://www.linkedin.com/' },
+  { icon: 'x', key: 'footer.x', href: 'https://x.com/' },
+  { icon: 'telegram', key: 'footer.telegram', href: 'https://t.me/' },
+  { icon: 'github', key: 'footer.github', href: 'https://github.com/' },
+  { icon: 'youtube', key: 'footer.youtube', href: 'https://www.youtube.com/' },
+];
+---
+
+<footer class="foot">
+  <div class="shell foot__grid">
+    <div class="foot__brand">
+      <Brand />
+      <p class="foot__blurb" {...text('footer.blurb')}>{t('footer.blurb')}</p>
+      <div class="foot__social">
+        <h2 data-sr {...text('footer.social')}>{t('footer.social')}</h2>
+        <ul class="foot__icons" role="list">
+          {socials.map((s) => (
+            <li>
+              <a href={s.href} class="foot__icon" rel="noopener" target="_blank" {...label(s.key)}>
+                <Icon name={s.icon} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <FooterColumn titleKey="footer.product" links={product} />
+    <FooterColumn titleKey="footer.company" links={company} />
+    <FooterColumn titleKey="footer.legal" links={legal} />
+  </div>
+  <div class="shell foot__base">
+    <p {...text('footer.rights')}>{t('footer.rights')}</p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    position: relative;
+    border-top: 1px solid var(--edge);
+    background: var(--ground-2);
+    padding-top: clamp(3rem, 2rem + 4vw, 5rem);
+  }
+
+  .foot__grid {
+    display: grid;
+    gap: 2.5rem 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  }
+
+  .foot__brand {
+    display: grid;
+    align-content: start;
+    gap: 1.1rem;
+    grid-column: 1 / -1;
+    max-width: 26rem;
+  }
+
+  .foot__blurb {
+    color: var(--mute);
+    font-size: 0.94rem;
+  }
+
+  .foot__icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .foot__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    color: var(--ink-2);
+    transition:
+      color 0.2s var(--ease),
+      border-color 0.2s var(--ease),
+      background-color 0.2s var(--ease);
+  }
+
+  .foot__icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .foot__icon:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .foot__base {
+    margin-top: clamp(2.5rem, 2rem + 3vw, 4rem);
+    padding-block: 1.5rem 2rem;
+    border-top: 1px solid var(--edge);
+    color: var(--mute);
+    font-size: 0.86rem;
+  }
+
+  @media (min-width: 64rem) {
+    .foot__grid {
+      grid-template-columns: 1.5fr repeat(3, 1fr);
+    }
+
+    .foot__brand {
+      grid-column: auto;
+    }
+  }
+</style>

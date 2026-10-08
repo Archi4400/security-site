@@ -1,0 +1,101 @@
+---
+import { t, text } from '../../engine';
+import { REGISTER } from '../../brand';
+import Aurora from '../Aurora.astro';
+import Icon from '../Icon.astro';
+import StatusPanel from '../StatusPanel.astro';
+---
+
+<section class="hero">
+  <Aurora intensity={1} scale={11} lean={0.06} fps={45} rise={0.9} />
+  <div class="shell hero__grid">
+    <div class="hero__copy">
+      <p class="hero__kicker" {...text('home.hero.kicker')}>{t('home.hero.kicker')}</p>
+      <h1 class="hero__title" {...text('home.hero.title')}>{t('home.hero.title')}</h1>
+      <p class="hero__lede lede" {...text('home.hero.lede')}>{t('home.hero.lede')}</p>
+      <div class="hero__actions">
+        <a href={REGISTER} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span><Icon name="out" /></a>
+        <a href="#how" class="btn btn--line"><span {...text('home.hero.secondary')}>{t('home.hero.secondary')}</span></a>
+      </div>
+    </div>
+    <StatusPanel arrive class="hero__panel" data-lean />
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: min(56rem, calc(100svh - var(--header-h)));
+    display: grid;
+    align-items: center;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(90deg, color-mix(in oklab, var(--ground) 70%, transparent) 0%, color-mix(in oklab, var(--ground) 30%, transparent) 34%, transparent 55%);
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+  }
+
+  .hero__copy {
+    display: grid;
+    align-content: center;
+    gap: 1.4rem;
+    max-width: 40rem;
+  }
+
+  .hero__kicker {
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .hero__title {
+    font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+
+  .hero__lede {
+    max-width: 34rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+  }
+
+  .hero__panel {
+    align-self: center;
+    max-width: 36rem;
+    width: 100%;
+  }
+
+  @media (max-width: 30rem) {
+    .hero__actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .hero__panel {
+      justify-self: end;
+    }
+  }
+</style>

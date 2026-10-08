@@ -1,0 +1,55 @@
+---
+import { t, text } from '../../engine';
+import type { NavLink } from '../header/navRoutes';
+
+interface Props {
+  titleKey: string;
+  links: NavLink[];
+}
+
+const { titleKey, links } = Astro.props;
+---
+
+<div class="col">
+  <h2 class="col__title" {...text(titleKey)}>{t(titleKey)}</h2>
+  <ul class="col__list" role="list">
+    {links.map((link) => (
+      <li><a href={link.href} class="col__link" {...text(link.key)}>{t(link.key)}</a></li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .col {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .col__title {
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--mute);
+  }
+
+  .col__list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+
+  .col__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-2);
+    font-size: 0.94rem;
+    transition: color 0.2s var(--ease);
+  }
+
+  .col__link:hover {
+    color: var(--ink);
+  }
+</style>

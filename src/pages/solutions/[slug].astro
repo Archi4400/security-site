@@ -1,0 +1,165 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHead from '../../components/sections/PageHead.astro';
+import SolutionCards from '../../components/sections/SolutionCards.astro';
+import CloseCall from '../../components/sections/CloseCall.astro';
+import { reveal, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+import { solutions, type Solution } from '../../lib/solutions';
+
+export function getStaticPaths() {
+  return solutions.map((s) => ({ params: { slug: s.slug }, props: { solution: s } }));
+}
+
+interface Props {
+  solution: Solution;
+}
+
+const { solution } = Astro.props;
+const k = solution.key;
+const rules = en.solutions[k].rules;
+const notes = [
+  { head: 'common.howCaught', body: `solutions.${k}.how` },
+  { head: 'common.alertShows', body: `solutions.${k}.shows` },
+  { head: 'common.limit', body: `solutions.${k}.limit` },
+];
+---
+
+<Layout metaKey={`meta.${k}`} path={`/solutions/${solution.slug}`}>
+  <PageHead titleKey={`solutions.${k}.title`} ledeKey={`solutions.${k}.lede`} kickerKey="nav.solutions" />
+
+  <section class="band sd">
+    <div class="shell sd__grid">
+      <div class="sd__rules panel" data-lean {...reveal()}>
+        <h2 class="sd__label" {...text('common.rules')}>{t('common.rules')}</h2>
+        <ul class="sd__list" role="list">
+          {rules.map((r, i) => (
+            <li class="sd__rule">
+              <code class="chip">{r.id}</code>
+              <span {...text(`solutions.${k}.rules.${i}.text`)}>{t(`solutions.${k}.rules.${i}.text`)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="sd__notes">
+        {notes.map((n, i) => (
+          <article class:list={['sd__note', i === 2 && 'sd__note--limit']} {...reveal()} style={`--d: ${i * 0.08}s`}>
+            <h2 class="sd__head" {...text(n.head)}>{t(n.head)}</h2>
+            <p {...text(n.body)}>{t(n.body)}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band sd-more">
+    <div class="shell sd-more__wrap">
+      <h2 class="sd-more__title" {...text('common.related')}>{t('common.related')}</h2>
+      <SolutionCards except={k} />
+    </div>
+  </section>
+
+  <CloseCall />
+</Layout>
+
+<style>
+  .sd__grid {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .sd__rules {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.1rem, 0.8rem + 1vw, 1.75rem);
+    min-width: 0;
+  }
+
+  .sd__label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--mute);
+    letter-spacing: 0;
+  }
+
+  .sd__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .sd__rule {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--edge);
+    transition: background-color 0.2s var(--ease);
+  }
+
+  .sd__rule .chip {
+    justify-self: start;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .sd__notes {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .sd__note {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+  }
+
+  .sd__note p {
+    color: var(--ink-2);
+  }
+
+  .sd__note--limit {
+    border-style: dashed;
+    background: transparent;
+  }
+
+  .sd__head {
+    font-size: var(--step-1);
+  }
+
+  .sd-more {
+    background: var(--ground-2);
+    border-top: 1px solid var(--edge);
+  }
+
+  .sd-more__wrap {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .sd-more__title {
+    font-size: var(--step-3);
+  }
+
+  @media (min-width: 52rem) {
+    .sd__rule {
+      grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+      align-items: center;
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .sd__grid {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    }
+
+    .sd__notes {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+  }
+</style>

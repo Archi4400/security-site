@@ -1,0 +1,391 @@
+---
+import { label, reveal, t, text } from '../../engine';
+import StatusPanel from '../StatusPanel.astro';
+
+interface Props {
+  /** Without its own heading and band, for a page that already introduces the portal. */
+  headless?: boolean;
+}
+
+const { headless = false } = Astro.props;
+const tabs = ['incident', 'coverage', 'score', 'status'] as const;
+const coverage = [
+  { key: 'c1', state: 'works', fill: 100 },
+  { key: 'c2', state: 'works', fill: 100 },
+  { key: 'c3', state: 'works', fill: 100 },
+  { key: 'c4', state: 'partial', fill: 45 },
+];
+const factors = [
+  { key: 'f1', share: 30, done: 30 },
+  { key: 'f2', share: 25, done: 25 },
+  { key: 'f3', share: 25, done: 12 },
+  { key: 'f4', share: 20, done: 15 },
+];
+---
+
+<section class:list={['show', !headless && 'band']}>
+  <div class:list={[!headless && 'shell', 'show__wrap']}>
+    {!headless && <div class="head head--centre" {...reveal()}>
+      <h2 {...text('home.showcase.title')}>{t('home.showcase.title')}</h2>
+      <p {...text('home.showcase.lede')}>{t('home.showcase.lede')}</p>
+    </div>}
+
+    <div class="show__stage" data-show {...reveal()}>
+      <div class="show__tabs" role="group" {...label('home.showcase.label')}>
+        {tabs.map((tab, i) => (
+          <button type="button" class="show__tab" aria-pressed={i === 0 ? 'true' : 'false'} data-tab={tab} {...text(`home.showcase.tabs.${tab}.name`)}>
+            {t(`home.showcase.tabs.${tab}.name`)}
+          </button>
+        ))}
+      </div>
+
+      <div class="show__frame">
+        <div class="show__glow" aria-hidden="true"></div>
+
+        <div class="show__pane" data-pane="status" hidden>
+          <StatusPanel class="show__panel" data-lean />
+        </div>
+
+        <div class="show__pane" data-pane="incident">
+          <figure class="panel show__panel show__card" data-lean>
+            <div class="show__card-top">
+              <span class="dot sev--mid" aria-hidden="true"></span>
+              <h3 {...text('home.showcase.incident.title')}>{t('home.showcase.incident.title')}</h3>
+              <span class="chip">id.vanished_account</span>
+            </div>
+            <dl class="show__facts">
+              {(['who', 'from', 'reached', 'action'] as const).map((f) => (
+                <div>
+                  <dt {...text(`home.showcase.incident.${f}`)}>{t(`home.showcase.incident.${f}`)}</dt>
+                  <dd {...text(`home.showcase.incident.${f}Value`)}>{t(`home.showcase.incident.${f}Value`)}</dd>
+                </div>
+              ))}
+            </dl>
+            <ol class="show__path" role="list" aria-hidden="true">
+              <li class="mono">tap</li>
+              <li class="mono">waf</li>
+              <li class="mono">connector</li>
+              <li class="mono">brain</li>
+              <li class="mono">telegram</li>
+            </ol>
+            <figcaption class="note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+          </figure>
+        </div>
+
+        <div class="show__pane" data-pane="coverage" hidden>
+          <figure class="panel show__panel show__card" data-lean>
+            <ul class="show__cov" role="list">
+              {coverage.map((c) => (
+                <li class="show__cov-row">
+                  <span class="show__cov-name" {...text(`home.showcase.coverage.${c.key}`)}>{t(`home.showcase.coverage.${c.key}`)}</span>
+                  <span class="show__bar" style={`--fill: ${c.fill}%`} aria-hidden="true"><span></span></span>
+                  <span class:list={['show__cov-state', `show__cov-state--${c.state}`]} {...text(`home.showcase.coverage.${c.state}`)}>{t(`home.showcase.coverage.${c.state}`)}</span>
+                </li>
+              ))}
+            </ul>
+            <p class="show__missing"><span class="dot sev--mid" aria-hidden="true"></span><span {...text('home.showcase.coverage.missing')}>{t('home.showcase.coverage.missing')}</span></p>
+            <figcaption class="note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+          </figure>
+        </div>
+
+        <div class="show__pane" data-pane="score" hidden>
+          <figure class="panel show__panel show__card" data-lean>
+            <p class="show__total mono">82<span>/100</span></p>
+            <ul class="show__factors" role="list">
+              {factors.map((f) => (
+                <li>
+                  <span {...text(`home.showcase.score.${f.key}`)}>{t(`home.showcase.score.${f.key}`)}</span>
+                  <span class="mono">{f.done} / {f.share}</span>
+                </li>
+              ))}
+            </ul>
+            <figcaption class="note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="show__desc">
+        {tabs.map((tab, i) => (
+          <p data-desc={tab} hidden={i !== 0} {...text(`home.showcase.tabs.${tab}.text`)}>{t(`home.showcase.tabs.${tab}.text`)}</p>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .show {
+    overflow: clip;
+  }
+
+  .show__wrap {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
+
+  .show__stage {
+    display: grid;
+    justify-items: center;
+    gap: 1.75rem;
+  }
+
+  .show__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    max-width: 100%;
+  }
+
+  .show__tab {
+    min-height: 2.75rem;
+    padding: 0.5rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-2);
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition:
+      background-color 0.25s var(--ease),
+      color 0.25s var(--ease);
+  }
+
+  .show__tab:hover {
+    color: var(--ink);
+  }
+
+  .show__tab[aria-pressed='true'] {
+    background: var(--cta);
+    color: var(--cta-ink);
+    font-weight: 500;
+  }
+
+  .show__frame {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    width: min(100%, 44rem);
+    min-height: 26rem;
+    align-items: center;
+  }
+
+  .show__glow {
+    position: absolute;
+    inset: 10% -15% -5%;
+    z-index: -1;
+    background:
+      radial-gradient(40% 50% at 30% 70%, rgb(var(--aurora-2) / 0.45), transparent 70%),
+      radial-gradient(45% 55% at 75% 40%, rgb(var(--aurora-3) / 0.5), transparent 70%),
+      radial-gradient(30% 35% at 20% 30%, rgb(var(--aurora-1) / 0.3), transparent 70%);
+    filter: blur(30px);
+    animation: glow-drift 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow-drift {
+    to {
+      translate: 4% -3%;
+      scale: 1.06;
+    }
+  }
+
+  .show__pane {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .show__pane:not([hidden]) {
+    animation: pane-in 0.45s var(--ease);
+  }
+
+  @keyframes pane-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  .show__card {
+    display: grid;
+    gap: 1.2rem;
+    padding: clamp(1.1rem, 0.8rem + 1vw, 1.6rem);
+  }
+
+  .show__card-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+  }
+
+  .show__card-top h3 {
+    font-size: var(--step-1);
+    flex: 1 1 14rem;
+  }
+
+  .show__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .show__facts div {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+  }
+
+  .show__facts dt {
+    font-size: 0.78rem;
+    color: var(--mute);
+  }
+
+  .show__facts dd {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .show__path {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .show__path li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--ink-2);
+  }
+
+  .show__path li + li::before {
+    content: '';
+    width: 1.2rem;
+    height: 1px;
+    background: var(--edge-strong);
+  }
+
+  .show__cov {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .show__cov-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1rem;
+    align-items: center;
+  }
+
+  .show__bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: var(--edge);
+    overflow: hidden;
+  }
+
+  .show__bar span {
+    display: block;
+    width: var(--fill);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgb(var(--aurora-3)), rgb(var(--aurora-2)));
+  }
+
+  .show__cov-state {
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .show__cov-state--works {
+    color: var(--ok);
+  }
+
+  .show__cov-state--partial {
+    color: var(--warn);
+  }
+
+  .show__missing {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius-s);
+    border: 1px dashed var(--edge-strong);
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
+
+  .show__total {
+    font-size: clamp(3rem, 2rem + 4vw, 4.5rem);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .show__total span {
+    font-size: 0.4em;
+    color: var(--mute);
+  }
+
+  .show__factors {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .show__factors li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+    font-size: 0.93rem;
+  }
+
+  .show__desc {
+    max-width: 40rem;
+    text-align: center;
+    color: var(--ink-2);
+    min-height: 3.2em;
+  }
+
+  html:not(.js) .show__tabs {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .show__glow,
+    .show__pane:not([hidden]) {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  for (const stage of document.querySelectorAll<HTMLElement>('[data-show]')) {
+    const tabs = Array.from(stage.querySelectorAll<HTMLButtonElement>('[data-tab]'));
+    const panes = Array.from(stage.querySelectorAll<HTMLElement>('[data-pane]'));
+    const descs = Array.from(stage.querySelectorAll<HTMLElement>('[data-desc]'));
+    for (const tab of tabs) {
+      tab.addEventListener('click', () => {
+        const name = tab.dataset.tab;
+        for (const other of tabs) other.setAttribute('aria-pressed', String(other === tab));
+        for (const pane of panes) pane.hidden = pane.dataset.pane !== name;
+        for (const desc of descs) desc.hidden = desc.dataset.desc !== name;
+      });
+    }
+  }
+</script>

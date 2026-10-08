@@ -1,0 +1,100 @@
+{
+  "langMenu": {
+    "expected": true,
+    "name": "lang",
+    "root": { "hook": "data-lang-menu", "getter": "root" },
+    "parts": {
+      "trigger": { "hook": "data-lang-trigger", "tag": "button", "count": "one" },
+      "label": { "hook": "data-lang-label", "count": "one" },
+      "flag": {
+        "hook": "data-lang-flag",
+        "value": "language",
+        "count": "each-language",
+        "hint": "a flag component must spread the rest of its props onto its root"
+      },
+      "code": { "hook": "data-lang-code", "count": "one" },
+      "menu": { "hook": "data-lang-list", "count": "one" },
+      "item": { "hook": "data-lang-item", "value": "language", "tag": "button", "count": "each-language" }
+    },
+    "links": [
+      ["trigger", "aria-controls", "menu"],
+      ["menu", "aria-labelledby", "trigger"]
+    ]
+  },
+  "menuDialog": {
+    "expected": true,
+    "name": "menu",
+    "root": { "hook": "data-menu-dialog", "getter": "dialog", "tag": "dialog" },
+    "parts": {
+      "title": { "hook": "data-menu-title", "count": "one" },
+      "close": { "hook": "data-menu-close", "tag": "button", "count": "many" },
+      "opener": { "hook": "data-menu-opener", "tag": "button", "count": "many", "scope": "page" }
+    },
+    "links": [["root", "aria-labelledby", "title"]]
+  },
+  "themeGroup": {
+    "expected": true,
+    "name": "theme",
+    "root": { "hook": "data-theme-group", "getter": "group" },
+    "parts": {
+      "label": { "hook": "data-theme-label", "count": "one" },
+      "option": { "hook": "data-theme-option", "value": "theme", "tag": "button", "count": "each-theme" }
+    },
+    "links": [["root", "aria-labelledby", "label"]]
+  },
+  "countUp": {
+    "name": "count",
+    "root": { "hook": "data-count", "getter": "root" },
+    "parts": {
+      "value": { "hook": "data-count-value", "count": "one" },
+      "digits": { "hook": "data-count-digits", "count": "one" }
+    },
+    "links": []
+  },
+  "tape": {
+    "expected": true,
+    "name": "tp",
+    "root": { "hook": "data-tape", "getter": "root" },
+    "parts": {
+      "label": { "hook": "data-tape-label", "count": "one" },
+      "view": { "hook": "data-tape-view", "count": "one" },
+      "track": { "hook": "data-tape-track", "count": "one", "in": "view" },
+      "run": { "hook": "data-tape-run", "count": "one", "in": "track" },
+      "hold": { "hook": "data-tape-hold", "tag": "button", "count": "one", "outside": "view" }
+    },
+    "links": [["view", "aria-labelledby", "label"]]
+  },
+  "select": {
+    "name": "pick",
+    "root": { "hook": "data-pick", "getter": "root" },
+    "claims": { "role": "combobox", "part": "trigger" },
+    "parts": {
+      "label": { "hook": "data-pick-label", "tag": "label", "count": "one", "outside": "ui" },
+      "native": {
+        "hook": "data-pick-native",
+        "tag": "select",
+        "count": "one",
+        "outside": "ui",
+        "without": { "required": "a value is always chosen", "multiple": "one value is chosen" }
+      },
+      "option": { "hook": "data-pick-option", "tag": "option", "count": "each-option", "value": "option", "attr": "value", "in": "native" },
+      "ui": { "hook": "data-pick-ui", "count": "one" },
+      "trigger": { "hook": "data-pick-trigger", "tag": "button", "count": "one", "in": "ui" },
+      "value": { "hook": "data-pick-value", "count": "one", "in": "trigger" },
+      "list": { "hook": "data-pick-list", "count": "one", "in": "ui", "outside": "trigger" },
+      "item": {
+        "hook": "data-pick-item",
+        "count": "each-option",
+        "value": "option",
+        "attr": "data-value",
+        "in": "list",
+        "plain": "draw its mark with CSS on [aria-selected='true']"
+      }
+    },
+    "links": [
+      ["trigger", "aria-labelledby", "label"],
+      ["trigger", "aria-controls", "list"],
+      ["list", "aria-labelledby", "label"]
+    ]
+  }
+}

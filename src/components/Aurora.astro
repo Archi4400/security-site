@@ -1,0 +1,112 @@
+---
+interface Props {
+  /** 0..1; only the hero goes above 0.7. */
+  intensity?: number;
+  /** CSS pixels per buffer pixel; bigger is cheaper and softer. */
+  scale?: number;
+  /** How far the lights lean toward the pointer; 0 turns the response off. */
+  lean?: number;
+  fps?: number;
+  /** Vertical position of the light sources, 0 top to 1 bottom. */
+  rise?: number;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { intensity = 0.5, scale = 12, lean = 0, fps = 30, rise = 1, class: cls = '', ...rest } = Astro.props;
+const config = JSON.stringify({ intensity, scale, lean, fps, rise });
+---
+
+<div class:list={['aurora', cls]} data-aurora={config} aria-hidden="true" {...rest}>
+  <canvas class="aurora__c"></canvas>
+</div>
+
+<style>
+  .aurora {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--ground);
+    overflow: hidden;
+  }
+
+  .aurora__c {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+</style>
+
+<script>
+  import { createAurora, type Aurora, type AuroraConfig } from '../lib/aurora';
+  import { onReducedMotion, onTheme } from '../engine/client';
+
+  interface Mounted {
+    root: HTMLElement;
+    field: Aurora;
+    lean: number;
+    visible: boolean;
+  }
+
+  const mounted: Mounted[] = [];
+  for (const root of document.querySelectorAll<HTMLElement>('[data-aurora]')) {
+    const canvas = root.querySelector('canvas');
+    if (!canvas) continue;
+    const config = JSON.parse(root.dataset.aurora ?? '{}') as AuroraConfig;
+    const field = createAurora(root, canvas, config);
+    if (field) mounted.push({ root, field, lean: config.lean, visible: false });
+  }
+
+  if (mounted.length) {
+    let still = false;
+    const run = (item: Mounted): void => {
+      if (still || document.hidden || !item.visible) item.field.stop();
+      else item.field.start();
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const item = mounted.find((m) => m.root === entry.target);
+          if (!item) continue;
+          item.visible = entry.isIntersecting;
+          run(item);
+        }
+      },
+      { rootMargin: '80px' },
+    );
+    for (const item of mounted) io.observe(item.root);
+
+    document.addEventListener('visibilitychange', () => mounted.forEach(run));
+
+    onReducedMotion((reduced) => {
+      still = reduced;
+      for (const item of mounted) {
+        if (reduced) item.field.still();
+        run(item);
+      }
+    });
+
+    onTheme(() => {
+      for (const item of mounted) item.field.refreshInk();
+    });
+
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const leaners = mounted.filter((m) => m.lean > 0);
+    if (fine && leaners.length) {
+      window.addEventListener(
+        'pointermove',
+        (event) => {
+          for (const item of leaners) item.field.point(event.clientX, event.clientY);
+        },
+        { passive: true },
+      );
+    }
+
+    let timer = 0;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => mounted.forEach((m) => m.field.resize()), 150);
+    });
+  }
+</script>

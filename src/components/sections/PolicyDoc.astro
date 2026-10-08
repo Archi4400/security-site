@@ -1,0 +1,113 @@
+---
+import { t, text } from '../../engine';
+import { legalEn } from '../../i18n/locales/legal-en';
+import PageHead from './PageHead.astro';
+
+interface Props {
+  doc: 'privacy' | 'terms' | 'cookies';
+}
+
+const { doc } = Astro.props;
+const sections = legalEn[doc].sections;
+const base = `legalText.${doc}`;
+const anchor = (i: number) => `${doc}-${i + 1}`;
+---
+
+<PageHead titleKey={`${base}.title`} ledeKey={`${base}.lede`}>
+  <p class="lg__updated" {...text('legal.updated')}>{t('legal.updated')}</p>
+</PageHead>
+
+<div class="shell band lg">
+  <nav class="lg__toc" aria-labelledby={`${doc}-toc`}>
+    <h2 id={`${doc}-toc`} class="lg__toc-title" {...text('legal.contents')}>{t('legal.contents')}</h2>
+    <ol class="lg__toc-list">
+      {sections.map((_, i) => (
+        <li><a href={`#${anchor(i)}`} {...text(`${base}.sections.${i}.title`)}>{t(`${base}.sections.${i}.title`)}</a></li>
+      ))}
+    </ol>
+  </nav>
+  <div class="lg__body">
+    {sections.map((s, i) => (
+      <section class="lg__sec" id={anchor(i)}>
+        <h2 {...text(`${base}.sections.${i}.title`)}>{t(`${base}.sections.${i}.title`)}</h2>
+        {s.body.map((_, j) => <p {...text(`${base}.sections.${i}.body.${j}`)}>{t(`${base}.sections.${i}.body.${j}`)}</p>)}
+      </section>
+    ))}
+  </div>
+</div>
+
+<style>
+  .lg__updated {
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+
+  .lg {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .lg__toc {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lg__toc-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--mute);
+    letter-spacing: 0;
+  }
+
+  .lg__toc-list {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--mute);
+    font-size: 0.92rem;
+  }
+
+  .lg__toc-list a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: var(--ink-2);
+  }
+
+  .lg__toc-list a:hover {
+    color: var(--ink);
+  }
+
+  .lg__body {
+    display: grid;
+    gap: 2.25rem;
+    max-width: 46rem;
+  }
+
+  .lg__sec {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .lg__sec h2 {
+    font-size: var(--step-2);
+  }
+
+  .lg__sec p {
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 64rem) {
+    .lg {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      gap: 4rem;
+    }
+
+    .lg__toc {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+  }
+</style>

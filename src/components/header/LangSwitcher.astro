@@ -1,0 +1,137 @@
+---
+import { flagHref, langMenu, languages, t } from '../../engine';
+import Icon from '../Icon.astro';
+
+interface Props {
+  id: string;
+  class?: string;
+  /** Opens upward from the button's left edge, for a switcher at the foot of the menu dialog. */
+  up?: boolean;
+}
+
+const { id, class: cls, up = false } = Astro.props;
+const lang = langMenu(id);
+const first = languages[0]!;
+---
+
+<div {...lang.root()} class:list={['lang', up && 'lang--up', cls]}>
+  <button {...lang.trigger()} class="lang__button">
+    <span {...lang.label()} data-sr>{t('ui.language')}</span>
+    {languages.map((l) => (
+      <svg {...lang.flag(l.code)} class="lang__flag" aria-hidden="true"><use href={flagHref(l.flag)} /></svg>
+    ))}
+    <span {...lang.code()} class="lang__code">{first.short}</span>
+    <Icon name="chevron" class="lang__mark" />
+  </button>
+  <ul {...lang.menu()} class="lang__list">
+    {languages.map((l) => (
+      <li {...lang.row()}>
+        <button {...lang.item(l.code)} class="lang__item">{l.label}</button>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .lang {
+    position: relative;
+  }
+
+  .lang__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 0.35rem;
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: color 0.2s var(--ease);
+  }
+
+  .lang__button:hover {
+    color: var(--ink);
+  }
+
+  .lang__flag {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    flex: none;
+  }
+
+  .lang__code {
+    font-weight: 500;
+  }
+
+  .lang__mark {
+    width: 0.85rem;
+    height: 0.85rem;
+    transition: rotate 0.25s var(--ease);
+  }
+
+  .lang__button[aria-expanded='true'] .lang__mark {
+    rotate: 180deg;
+  }
+
+  .lang__list {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.25rem);
+    z-index: 60;
+    min-width: 11rem;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+    border-radius: var(--radius-s);
+    background: var(--sheet);
+    border: 1px solid var(--edge-strong);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+  }
+
+  .lang--up .lang__list {
+    top: auto;
+    bottom: calc(100% + 0.25rem);
+    right: auto;
+    left: 0;
+  }
+
+  .lang__list:not([hidden]) {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .lang__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lang__item:hover,
+  .lang__item:focus-visible {
+    background: var(--sheet-2);
+  }
+
+  .lang__item[aria-checked='true'] {
+    font-weight: 600;
+  }
+
+  .lang__item[aria-checked='true']::after {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+</style>

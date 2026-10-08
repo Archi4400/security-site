@@ -1,0 +1,52 @@
+---
+import { t, text } from '../../engine';
+import Aurora from '../Aurora.astro';
+
+interface Props {
+  titleKey: string;
+  ledeKey?: string;
+  kickerKey?: string;
+}
+
+const { titleKey, ledeKey, kickerKey } = Astro.props;
+---
+
+<section class="ph">
+  <Aurora intensity={0.55} scale={14} lean={0.03} fps={30} rise={1.15} />
+  <div class="shell ph__wrap">
+    {kickerKey && <p class="ph__kicker" {...text(kickerKey)}>{t(kickerKey)}</p>}
+    <h1 class="ph__title" {...text(titleKey)}>{t(titleKey)}</h1>
+    {ledeKey && <p class="ph__lede lede" {...text(ledeKey)}>{t(ledeKey)}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .ph {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(3.5rem, 2.5rem + 5vw, 7rem) clamp(3rem, 2rem + 4vw, 5.5rem);
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .ph__wrap {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .ph__kicker {
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .ph__title {
+    max-width: 18ch;
+    font-size: var(--step-4);
+    letter-spacing: -0.028em;
+  }
+
+  .ph__lede {
+    max-width: 44rem;
+  }
+</style>

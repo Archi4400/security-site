@@ -1,0 +1,66 @@
+---
+import { t, text, themeGroup } from '../../engine';
+import Icon from '../Icon.astro';
+
+interface Props {
+  id: string;
+  class?: string;
+}
+
+const { id, class: cls } = Astro.props;
+const mode = themeGroup(id);
+---
+
+<div {...mode.group()} class:list={['mode', cls]}>
+  <span {...mode.label()} data-sr {...text('ui.theme')}>{t('ui.theme')}</span>
+  <button {...mode.option('light')} class="mode__btn">
+    <Icon name="sun" />
+    <span data-sr {...text('ui.themeLight')}>{t('ui.themeLight')}</span>
+  </button>
+  <button {...mode.option('dark')} class="mode__btn">
+    <Icon name="moon" />
+    <span data-sr {...text('ui.themeDark')}>{t('ui.themeDark')}</span>
+  </button>
+</div>
+
+<style>
+  .mode {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+  }
+
+  .mode__btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--mute);
+    cursor: pointer;
+    transition: color 0.2s var(--ease);
+  }
+
+  .mode__btn svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .mode__btn:hover {
+    color: var(--ink);
+  }
+
+  .mode__btn[aria-pressed='true'] {
+    color: var(--ink);
+    background: var(--sheet-2);
+    box-shadow: inset 0 0 0 1px var(--edge-strong);
+  }
+
+  .mode__btn[aria-pressed='true'] svg {
+    stroke-width: 2.2;
+  }
+</style>

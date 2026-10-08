@@ -1,0 +1,240 @@
+---
+import { countUp, t, text } from '../engine';
+
+interface Props {
+  /** Plays the incidents in one by one on load. */
+  arrive?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { arrive = false, class: cls, ...rest } = Astro.props;
+const rows = [
+  { key: 'panel.i1', time: 'panel.t1', sev: 'high', sevKey: 'panel.high' },
+  { key: 'panel.i2', time: 'panel.t2', sev: 'mid', sevKey: 'panel.mid' },
+  { key: 'panel.i3', time: 'panel.t3', sev: 'mid', sevKey: 'panel.mid' },
+  { key: 'panel.i4', time: 'panel.t4', sev: 'low', sevKey: 'panel.low' },
+];
+const score = countUp(`score-${arrive ? 'hero' : 'page'}`, 82);
+---
+
+<figure class:list={['status panel', arrive && 'status--arrive', cls]} {...rest}>
+  <div class="status__top">
+    <span {...text('panel.status')}>{t('panel.status')}</span>
+    <span class="status__since" {...text('panel.since')}>{t('panel.since')}</span>
+  </div>
+  <div class="status__grid">
+    <div class="status__score">
+      <div class="status__ring" style="--p: 82">
+        <span class="status__num mono"><span {...score.root()}><span {...score.value()}>{score.text}</span><span {...score.digits()} /></span></span>
+      </div>
+      <span class="status__label" {...text('panel.score')}>{t('panel.score')}</span>
+      <span class="status__formula" {...text('panel.formula')}>{t('panel.formula')}</span>
+    </div>
+    <ul class="status__list" role="list">
+      {rows.map((row, i) => (
+        <li class="status__row" style={`--i: ${i}`}>
+          <span class={`dot sev--${row.sev}`} aria-hidden="true"></span>
+          <span class="status__text" {...text(row.key)}>{t(row.key)}</span>
+          <span class={`status__sev sev--${row.sev}`} {...text(row.sevKey)}>{t(row.sevKey)}</span>
+          <span class="status__time mono" {...text(row.time)}>{t(row.time)}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <dl class="status__stats">
+    <div><dt {...text('panel.rules')}>{t('panel.rules')}</dt><dd class="mono">34</dd></div>
+    <div><dt {...text('panel.open')}>{t('panel.open')}</dt><dd class="mono">3</dd></div>
+    <div><dt {...text('panel.waf')}>{t('panel.waf')}</dt><dd class="mono" {...text('panel.wafValue')}>{t('panel.wafValue')}</dd></div>
+  </dl>
+  <figcaption class="status__cap note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+</figure>
+
+<style>
+  .status {
+    container-type: inline-size;
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1rem, 0.7rem + 1vw, 1.4rem);
+    min-width: 0;
+  }
+
+  .status__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--edge);
+    font-size: 0.86rem;
+    color: var(--mute);
+  }
+
+  .status__top > :first-child {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .status__grid {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .status__score {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.2rem;
+    padding: 1rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+    text-align: center;
+  }
+
+  .status__ring {
+    --p: 0;
+    display: grid;
+    place-items: center;
+    width: 6rem;
+    aspect-ratio: 1;
+    margin-bottom: 0.5rem;
+    border-radius: 50%;
+    background:
+      radial-gradient(closest-side, var(--sheet) 78%, transparent 79%),
+      conic-gradient(var(--accent) calc(var(--p) * 1%), var(--edge) 0);
+  }
+
+  .status__num {
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  .status__num :global([data-count]) {
+    justify-items: center;
+  }
+
+  .status__label {
+    font-size: 0.84rem;
+  }
+
+  .status__formula {
+    font-size: 0.78rem;
+    color: var(--mute);
+  }
+
+  .status__list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .status__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+    font-size: 0.9rem;
+    line-height: 1.35;
+    transition:
+      border-color 0.25s var(--ease),
+      background-color 0.25s var(--ease);
+  }
+
+  .status__row:hover {
+    border-color: var(--edge-strong);
+    background: var(--sheet-2);
+  }
+
+  .status__sev {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 0.76rem;
+    font-weight: 500;
+  }
+
+  .status__time {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    font-size: 0.76rem;
+    color: var(--mute);
+  }
+
+  .status__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .status__stats div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.15rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+    min-width: 0;
+  }
+
+  .status__stats dt {
+    font-size: 0.74rem;
+    color: var(--mute);
+    line-height: 1.3;
+  }
+
+  .status__stats dd {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+
+  .status__cap {
+    font-size: 0.76rem;
+  }
+
+  .status--arrive .status__row {
+    animation: row-in 0.6s var(--ease) both;
+    animation-delay: calc(0.35s + var(--i) * 0.16s);
+  }
+
+  .status--arrive .status__ring {
+    animation: ring-in 1.4s var(--ease) both 0.2s;
+  }
+
+  @property --p {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      translate: 0 10px;
+    }
+  }
+
+  @keyframes ring-in {
+    from {
+      --p: 0;
+    }
+  }
+
+  @container (min-width: 30rem) {
+    .status__grid {
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status--arrive .status__row,
+    .status--arrive .status__ring {
+      animation: none;
+    }
+  }
+</style>

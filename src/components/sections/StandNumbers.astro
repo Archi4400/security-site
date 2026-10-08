@@ -1,0 +1,78 @@
+---
+import { countUp, reveal, t, text } from '../../engine';
+
+const figures = [
+  { id: 'waf', value: 1.9, decimals: 1 },
+  { id: 'core', value: 535, decimals: 0 },
+  { id: 'joined', value: 1500, decimals: 0 },
+  { id: 'latency', value: 689, decimals: 0 },
+].map((f) => ({ ...f, c: countUp(`stand-${f.id}`, f.value, { decimals: f.decimals, key: `home.numbers.${f.id}.value` }) }));
+---
+
+<section class="band nums">
+  <div class="shell nums__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.numbers.title')}>{t('home.numbers.title')}</h2>
+      <p {...text('home.numbers.lede')}>{t('home.numbers.lede')}</p>
+    </div>
+    <dl class="nums__grid">
+      {figures.map((f, i) => (
+        <div class="nums__item" {...reveal()} style={`--d: ${i * 0.08}s`}>
+          <dt class="nums__text" {...text(`home.numbers.${f.id}.text`)}>{t(`home.numbers.${f.id}.text`)}</dt>
+          <dd class="nums__value mono">
+            <span {...f.c.root()}><span {...f.c.value()}>{f.c.text}</span><span {...f.c.digits()} /></span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .nums {
+    border-block: 1px solid var(--edge);
+    background:
+      radial-gradient(60% 120% at 100% 0%, rgb(var(--aurora-3) / 0.14), transparent 60%),
+      var(--ground-2);
+  }
+
+  .nums__wrap {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .nums__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 0;
+    margin: 0;
+  }
+
+  .nums__item {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1.5rem 1.5rem 1.5rem 0;
+    border-top: 1px solid var(--edge-strong);
+    min-width: 0;
+  }
+
+  .nums__value {
+    margin: 0;
+    font-size: clamp(2.2rem, 1.6rem + 2vw, 3.2rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .nums__value :global([data-count]) {
+    justify-items: start;
+  }
+
+  .nums__text {
+    color: var(--ink-2);
+    font-size: 0.94rem;
+    max-width: 16rem;
+  }
+</style>

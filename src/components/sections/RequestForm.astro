@@ -1,0 +1,376 @@
+---
+import { select, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+
+const topics = (['access', 'pricing', 'reseller', 'press', 'careers', 'other'] as const).map((v) => ({
+  value: v,
+  key: `contact.topics.${v}`,
+}));
+const topic = select('topic', { name: 'topic', labelKey: 'contact.topic', options: topics });
+const fields = [
+  { id: 'cf-name', name: 'name', type: 'text', auto: 'name', key: 'contact.name', err: 'contact.errName', required: true },
+  { id: 'cf-email', name: 'email', type: 'email', auto: 'email', key: 'contact.email', err: 'contact.errEmail', required: true },
+  { id: 'cf-company', name: 'company', type: 'text', auto: 'organization', key: 'contact.company', err: '', required: false },
+] as const;
+---
+
+<div class="cf" data-form-root>
+  <form class="cf__form" novalidate data-form>
+    <p class="cf__status" role="status" data-status></p>
+
+    {fields.map((f) => (
+      <div class="cf__field">
+        <label for={f.id} class="cf__label">
+          <span {...text(f.key)}>{t(f.key)}</span>
+          {f.required && <span class="cf__req" {...text('contact.required')}>{t('contact.required')}</span>}
+        </label>
+        <input id={f.id} name={f.name} type={f.type} autocomplete={f.auto} class="cf__input" required={f.required} data-err={f.err || undefined} />
+        {f.err && <p id={`${f.id}-err`} class="cf__err" hidden {...text(f.err)}>{t(f.err)}</p>}
+      </div>
+    ))}
+
+    <div {...topic.root()} class="cf__field">
+      <label {...topic.label()} class="cf__label">{t('contact.topic')}</label>
+      <select {...topic.native()} class="cf__native">
+        {topics.map((o) => <option {...topic.option(o.value)}>{t(o.key)}</option>)}
+      </select>
+      <div {...topic.ui()} class="picker">
+        <button {...topic.trigger()} class="picker__button cf__input">
+          <span {...topic.value()}>{t(topics[0]!.key)}</span>
+          <Icon name="chevron" class="picker__mark" />
+        </button>
+        <ul {...topic.list()} class="picker__list">
+          {topics.map((o) => <li {...topic.item(o.value)} class="picker__item">{t(o.key)}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="cf__field cf__field--wide">
+      <label for="cf-message" class="cf__label">
+        <span {...text('contact.message')}>{t('contact.message')}</span>
+        <span class="cf__req" {...text('contact.required')}>{t('contact.required')}</span>
+      </label>
+      <p id="cf-message-hint" class="cf__hint" {...text('contact.messageHint')}>{t('contact.messageHint')}</p>
+      <textarea id="cf-message" name="message" rows="5" class="cf__input cf__area" required aria-describedby="cf-message-hint" data-err="contact.errMessage"></textarea>
+      <p id="cf-message-err" class="cf__err" hidden {...text('contact.errMessage')}>{t('contact.errMessage')}</p>
+    </div>
+
+    <div class="cf__field cf__field--wide">
+      <div class="cf__consent">
+        <input id="cf-consent" name="consent" type="checkbox" class="cf__check" required data-err="contact.errConsent" />
+        <label for="cf-consent" {...text('contact.consent')}>{t('contact.consent')}</label>
+      </div>
+      <p id="cf-consent-err" class="cf__err" hidden {...text('contact.errConsent')}>{t('contact.errConsent')}</p>
+    </div>
+
+    <button type="submit" class="btn btn--solid cf__send"><span {...text('contact.send')}>{t('contact.send')}</span><Icon name="arrow" /></button>
+  </form>
+
+  <div class="cf__done" hidden data-done>
+    <Icon name="check" class="cf__done-icon" />
+    <h2 class="cf__done-title" tabindex="-1" data-done-title {...text('contact.doneTitle')}>{t('contact.doneTitle')}</h2>
+    <p {...text('contact.doneText')}>{t('contact.doneText')}</p>
+    <button type="button" class="btn btn--line" data-again><span {...text('contact.again')}>{t('contact.again')}</span></button>
+  </div>
+</div>
+
+<style>
+  .cf {
+    min-width: 0;
+  }
+
+  .cf__form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1.25rem 1rem;
+  }
+
+  .cf__form[hidden],
+  .cf__done[hidden] {
+    display: none;
+  }
+
+  .cf__status {
+    grid-column: 1 / -1;
+    color: var(--bad);
+    font-weight: 500;
+  }
+
+  .cf__status:empty {
+    display: none;
+  }
+
+  .cf__field {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .cf__field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .cf__label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .cf__req {
+    color: var(--mute);
+    font-weight: 400;
+    font-size: 0.82rem;
+  }
+
+  .cf__hint {
+    color: var(--mute);
+    font-size: 0.86rem;
+  }
+
+  .cf__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 0.95rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--ink);
+    font-size: 1rem;
+    transition: border-color 0.2s var(--ease);
+  }
+
+  .cf__input:hover {
+    border-color: var(--mute);
+  }
+
+  .cf__input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .cf__input[aria-invalid='true'] {
+    border-color: var(--bad);
+  }
+
+  .cf__area {
+    resize: vertical;
+    min-height: 8rem;
+  }
+
+  .cf__err {
+    color: var(--bad);
+    font-size: 0.86rem;
+  }
+
+  .cf__native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html:not(.js) .cf__native {
+    position: static;
+    width: 100%;
+    height: 3rem;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .picker {
+    position: relative;
+  }
+
+  .picker__button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .picker__mark {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    transition: rotate 0.25s var(--ease);
+  }
+
+  .picker__button[aria-expanded='true'] .picker__mark {
+    rotate: 180deg;
+  }
+
+  .picker__list {
+    top: calc(100% + 0.3rem);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 16rem;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+    overflow-y: auto;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.3);
+  }
+
+  .picker__list:not([hidden]) {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .picker__item {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 0.75rem 0 1.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .picker__item[data-active] {
+    background: var(--sheet-2);
+    box-shadow: inset 0 0 0 1px var(--edge-strong);
+  }
+
+  .picker__item[aria-selected='true'] {
+    font-weight: 600;
+  }
+
+  .picker__item[aria-selected='true']::before {
+    content: '';
+    position: absolute;
+    left: 0.65rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .cf__consent {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    gap: 0.75rem;
+    color: var(--ink-2);
+    font-size: 0.92rem;
+  }
+
+  .cf__check {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    flex: none;
+    accent-color: var(--accent);
+  }
+
+  .cf__send {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .cf__done {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border-radius: var(--radius);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+  }
+
+  .cf__done-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--ok);
+  }
+
+  .cf__done-title {
+    font-size: var(--step-2);
+  }
+</style>
+
+<script>
+  import { onLang, t } from '../../engine/client';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-form-root]')) {
+    const form = root.querySelector<HTMLFormElement>('[data-form]');
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    const done = root.querySelector<HTMLElement>('[data-done]');
+    const doneTitle = root.querySelector<HTMLElement>('[data-done-title]');
+    const again = root.querySelector<HTMLButtonElement>('[data-again]');
+    if (!form || !status || !done || !doneTitle || !again) continue;
+
+    const checked = Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[data-err]'));
+    let count = 0;
+
+    const invalid = (el: HTMLInputElement | HTMLTextAreaElement): boolean => {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') return !el.checked;
+      if (el.type === 'email') return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      return el.value.trim() === '';
+    };
+
+    const mark = (el: HTMLInputElement | HTMLTextAreaElement, bad: boolean): void => {
+      const err = form.querySelector<HTMLElement>(`#${el.id}-err`);
+      if (err) err.hidden = !bad;
+      const base = el.id === 'cf-message' ? 'cf-message-hint' : '';
+      if (bad) {
+        el.setAttribute('aria-invalid', 'true');
+        el.setAttribute('aria-describedby', [base, `${el.id}-err`].filter(Boolean).join(' '));
+      } else {
+        el.removeAttribute('aria-invalid');
+        if (base) el.setAttribute('aria-describedby', base);
+        else el.removeAttribute('aria-describedby');
+      }
+    };
+
+    const say = (): void => {
+      status.textContent = count === 0 ? '' : count === 1 ? t('contact.summaryOne') : t('contact.summary').replace('{n}', String(count));
+    };
+    onLang(say);
+
+    for (const el of checked) {
+      el.addEventListener(el instanceof HTMLInputElement && el.type === 'checkbox' ? 'change' : 'input', () => {
+        if (el.getAttribute('aria-invalid') === 'true') {
+          mark(el, invalid(el));
+          count = checked.filter((c) => c.getAttribute('aria-invalid') === 'true').length;
+          say();
+        }
+      });
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const bad = checked.filter(invalid);
+      for (const el of checked) mark(el, bad.includes(el));
+      count = bad.length;
+      say();
+      if (bad.length) {
+        bad[0]!.focus();
+        return;
+      }
+      form.reset();
+      form.hidden = true;
+      done.hidden = false;
+      doneTitle.focus();
+    });
+
+    again.addEventListener('click', () => {
+      done.hidden = true;
+      form.hidden = false;
+      count = 0;
+      say();
+      form.querySelector<HTMLInputElement>('input')?.focus();
+    });
+  }
+</script>

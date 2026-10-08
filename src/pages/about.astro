@@ -1,0 +1,302 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import CloseCall from '../components/sections/CloseCall.astro';
+import Icon from '../components/Icon.astro';
+import { countUp, reveal, t, text } from '../engine';
+import { en } from '../i18n/locales/en';
+import { aboutLinks } from '../components/header/navRoutes';
+
+const story = en.about.story.text;
+const principles = en.about.principles.items;
+const facts = [
+  { key: 'rules', c: countUp('about-rules', 34) },
+  { key: 'services', c: countUp('about-services', 7) },
+  { key: 'collectors', c: countUp('about-collectors', 3) },
+];
+const next = aboutLinks.filter((l) => l.href !== '/about');
+---
+
+<Layout metaKey="meta.about" path="/about">
+  <PageHead titleKey="about.head.title" ledeKey="about.head.lede" kickerKey="nav.about" />
+
+  <section class="band ab">
+    <div class="shell ab__grid">
+      <div class="ab__story" {...reveal()}>
+        <h2 {...text('about.story.title')}>{t('about.story.title')}</h2>
+        {story.map((_, i) => <p {...text(`about.story.text.${i}`)}>{t(`about.story.text.${i}`)}</p>)}
+      </div>
+      <dl class="ab__facts panel" data-lean {...reveal()}>
+        {facts.map((f) => (
+          <div class="ab__fact">
+            <dt {...text(`about.facts.${f.key}`)}>{t(`about.facts.${f.key}`)}</dt>
+            <dd class="mono"><span {...f.c.root()}><span {...f.c.value()}>{f.c.text}</span><span {...f.c.digits()} /></span></dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="band ap">
+    <div class="shell ap__wrap">
+      <div class="ap__main">
+      <h2 class="ap__title" {...reveal()} {...text('about.principles.title')}>{t('about.principles.title')}</h2>
+      <ul class="ap__list" role="list">
+        {principles.map((_, i) => (
+          <li class="ap__item" data-spot {...reveal()} style={`--d: ${i * 0.08}s`}>
+            <h3 {...text(`about.principles.items.${i}.title`)}>{t(`about.principles.items.${i}.title`)}</h3>
+            <p {...text(`about.principles.items.${i}.text`)}>{t(`about.principles.items.${i}.text`)}</p>
+          </li>
+        ))}
+      </ul>
+      </div>
+      <div class="ap__status panel" data-lean {...reveal()}>
+        <span class="ap__live mono"><span class="dot sev--low" aria-hidden="true"></span>34 / 34</span>
+        <h2 {...text('about.status.title')}>{t('about.status.title')}</h2>
+        <p {...text('about.status.text')}>{t('about.status.text')}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band an">
+    <div class="shell an__wrap">
+      <h2 class="an__title" {...text('about.next')}>{t('about.next')}</h2>
+      <ul class="an__list" role="list">
+        {next.map((l) => (
+          <li>
+            <a href={l.href} class="an__link">
+              <span class="an__name" {...text(l.key)}>{t(l.key)}</span>
+              {l.textKey && <span class="an__text" {...text(l.textKey)}>{t(l.textKey)}</span>}
+              <Icon name="arrow" class="an__go" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CloseCall />
+</Layout>
+
+<style>
+  .ab {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .ab::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 24rem;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(35% 70% at 90% 0%, rgb(var(--aurora-1) / 0.14), transparent 70%),
+      radial-gradient(30% 60% at 60% 0%, rgb(var(--aurora-2) / 0.1), transparent 70%);
+  }
+
+  .ab__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .ab__story {
+    display: grid;
+    gap: 1.2rem;
+    max-width: 44rem;
+  }
+
+  .ab__story h2 {
+    font-size: var(--step-3);
+  }
+
+  .ab__story p {
+    color: var(--ink-2);
+    font-size: var(--step-1);
+  }
+
+  .ab__facts {
+    display: grid;
+    margin: 0;
+    padding: 0.5rem 1.5rem;
+  }
+
+  .ab__fact {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.3rem;
+    padding-block: 1.1rem;
+  }
+
+  .ab__fact + .ab__fact {
+    border-top: 1px solid var(--edge);
+  }
+
+  .ab__fact dt {
+    color: var(--ink-2);
+  }
+
+  .ab__fact dd {
+    margin: 0;
+    font-size: var(--step-4);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .ab__fact dd :global([data-count]) {
+    justify-items: start;
+  }
+
+  .ap {
+    background: var(--ground-2);
+    border-block: 1px solid var(--edge);
+  }
+
+  .ap__wrap {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .ap__main {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .ap__title {
+    font-size: var(--step-3);
+  }
+
+  .ap__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .ap__item {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 0.5rem 2rem;
+    padding: 1.4rem 1rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .ap__item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(18rem circle at var(--mx, 20%) var(--my, 0%), rgb(var(--aurora-3) / 0.14), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease);
+  }
+
+  .ap__item:hover::before {
+    opacity: 1;
+  }
+
+  .ap__item h3 {
+    font-size: var(--step-1);
+  }
+
+  .ap__item p {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .ap__status {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.75rem;
+  }
+
+  .ap__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    font-size: 0.82rem;
+    color: var(--ink-2);
+  }
+
+  .ap__status h2 {
+    font-size: var(--step-2);
+  }
+
+  .ap__status p {
+    color: var(--ink-2);
+  }
+
+  .an__wrap {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .an__title {
+    font-size: var(--step-3);
+  }
+
+  .an__list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .an__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.2rem 1rem;
+    align-items: center;
+    padding-block: 1.2rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .an__name {
+    font-size: var(--step-1);
+    font-weight: 500;
+  }
+
+  .an__text {
+    grid-row: 2;
+    color: var(--mute);
+    font-size: 0.92rem;
+  }
+
+  .an__go {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 1.3rem;
+    height: 1.3rem;
+    transition: translate 0.25s var(--ease);
+  }
+
+  .an__link:hover .an__go {
+    translate: 4px 0;
+  }
+
+  .an__link:hover .an__name {
+    color: var(--accent-ink);
+  }
+
+  @media (min-width: 64rem) {
+    .ab__grid {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+
+    .ap__wrap {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+
+    .ap__item {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    }
+
+    .ap__status {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+    }
+  }
+</style>

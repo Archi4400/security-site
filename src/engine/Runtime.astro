@@ -1,0 +1,14 @@
+---
+import config from './load-config';
+import { dictionaryUrls } from './i18n/files';
+
+const data = {
+  lang: config.i18n.defaultLang,
+  languages: config.i18n.languages.map(({ code, short }) => ({ code, short })),
+  files: dictionaryUrls(config.i18n.dictionaries),
+  theme: config.theme,
+};
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+
+<script type="application/json" id="app-config" is:inline set:html={json} />

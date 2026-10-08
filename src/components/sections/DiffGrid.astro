@@ -1,0 +1,228 @@
+---
+import { reveal, t, text } from '../../engine';
+import { en } from '../../i18n/locales/en';
+
+const rest = en.home.diff.items.slice(1).map((_, i) => i + 1);
+---
+
+<section class="band diff">
+  <div class="shell diff__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.diff.title')}>{t('home.diff.title')}</h2>
+    </div>
+    <ul class="diff__grid" role="list">
+      <li class="diff__item diff__item--lead panel" data-lean data-spot {...reveal()}>
+        <div class="venn" aria-hidden="true">
+          <span class="venn__ring venn__ring--a"></span>
+          <span class="venn__ring venn__ring--b"></span>
+          <span class="venn__core"></span>
+          <span class="venn__label venn__label--a mono" {...text('home.diff.venn.traffic')}>{t('home.diff.venn.traffic')}</span>
+          <span class="venn__label venn__label--b mono" {...text('home.diff.venn.database')}>{t('home.diff.venn.database')}</span>
+          <span class="venn__label venn__label--both" {...text('home.diff.venn.both')}>{t('home.diff.venn.both')}</span>
+        </div>
+        <h3 class="diff__title" {...text('home.diff.items.0.title')}>{t('home.diff.items.0.title')}</h3>
+        <p class="diff__text" {...text('home.diff.items.0.text')}>{t('home.diff.items.0.text')}</p>
+      </li>
+      {rest.map((i) => (
+        <li class:list={['diff__item', i === 7 && 'diff__item--wide']} data-spot {...reveal()} style={`--d: ${(i % 2) * 0.06}s`}>
+          <h3 class="diff__title" {...text(`home.diff.items.${i}.title`)}>{t(`home.diff.items.${i}.title`)}</h3>
+          <p class="diff__text" {...text(`home.diff.items.${i}.text`)}>{t(`home.diff.items.${i}.text`)}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .diff__wrap {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
+
+  .diff__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .diff__item {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    overflow: hidden;
+    transition: border-color 0.3s var(--ease);
+  }
+
+  .diff__item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(18rem circle at var(--mx, 50%) var(--my, -30%), rgb(var(--aurora-2) / 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease);
+  }
+
+  .diff__item:hover {
+    border-color: var(--edge-strong);
+  }
+
+  .diff__item:hover::before {
+    opacity: 1;
+  }
+
+  .diff__item--lead {
+    align-content: end;
+    gap: 1rem;
+    padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+    background: var(--panel-bg);
+  }
+
+  .diff__item--lead .diff__title {
+    font-size: var(--step-3);
+  }
+
+  .diff__item--lead .diff__text {
+    font-size: var(--step-0);
+    max-width: 34rem;
+  }
+
+  .diff__title {
+    font-size: var(--step-1);
+  }
+
+  .diff__text {
+    color: var(--ink-2);
+    font-size: 0.94rem;
+  }
+
+  .venn {
+    position: relative;
+    height: clamp(11rem, 8rem + 10vw, 16rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .venn__ring {
+    position: absolute;
+    top: 50%;
+    width: 58%;
+    aspect-ratio: 1;
+    max-height: 100%;
+    border-radius: 50%;
+    translate: 0 -50%;
+    border: 1.5px solid;
+    animation: venn-a 9s ease-in-out infinite alternate;
+  }
+
+  .venn__ring--a {
+    left: 8%;
+    border-color: rgb(var(--aurora-1) / 0.85);
+    background: radial-gradient(circle at 35% 50%, rgb(var(--aurora-1) / 0.22), transparent 70%);
+  }
+
+  .venn__ring--b {
+    right: 8%;
+    border-color: rgb(var(--aurora-3) / 0.95);
+    background: radial-gradient(circle at 65% 50%, rgb(var(--aurora-3) / 0.25), transparent 70%);
+    animation-name: venn-b;
+  }
+
+  .venn__core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 22%;
+    aspect-ratio: 0.62;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(var(--aurora-2) / 0.75), transparent);
+    filter: blur(8px);
+    animation: venn-core 4.5s ease-in-out infinite alternate;
+  }
+
+  .venn__label {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    font-size: 0.82rem;
+    color: var(--ink-2);
+  }
+
+  .venn__label--a {
+    left: 14%;
+  }
+
+  .venn__label--b {
+    right: 14%;
+  }
+
+  .venn__label--both {
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    translate: -50% 0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+
+  :global(:root[data-theme='light']) .venn__ring--a {
+    border-color: #d9692a;
+  }
+
+  :global(:root[data-theme='light']) .venn__ring--b {
+    border-color: #3550e8;
+  }
+
+  @keyframes venn-a {
+    to {
+      translate: 6% -50%;
+    }
+  }
+
+  @keyframes venn-b {
+    to {
+      translate: -6% -50%;
+    }
+  }
+
+  @keyframes venn-core {
+    to {
+      opacity: 0.6;
+      scale: 1.2;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .diff__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .diff__item--lead {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+
+    .diff__item--wide {
+      grid-column: span 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .venn__ring,
+    .venn__core {
+      animation: none;
+    }
+  }
+</style>

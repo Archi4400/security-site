@@ -1,0 +1,177 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { reveal, t, text } from '../engine';
+import { en } from '../i18n/locales/en';
+
+const who = en.resellers.who.items;
+const gets = en.resellers.gets.items;
+const steps = en.resellers.steps.items;
+---
+
+<Layout metaKey="meta.resellers" path="/resellers">
+  <PageHead titleKey="resellers.head.title" ledeKey="resellers.head.lede" kickerKey="nav.about">
+    <a href="/contact" class="btn btn--solid rs__cta"><span {...text('resellers.apply')}>{t('resellers.apply')}</span><Icon name="arrow" /></a>
+  </PageHead>
+
+  <section class="band rs">
+    <div class="shell rs__wrap">
+      <div class="rs__who">
+        <h2 class="rs__title" {...reveal()} {...text('resellers.who.title')}>{t('resellers.who.title')}</h2>
+        <ul class="rs__cards" role="list">
+          {who.map((_, i) => (
+            <li class="rs__card panel" data-lean {...reveal()} style={`--d: ${i * 0.08}s`}>
+              <h3 {...text(`resellers.who.items.${i}.title`)}>{t(`resellers.who.items.${i}.title`)}</h3>
+              <p {...text(`resellers.who.items.${i}.text`)}>{t(`resellers.who.items.${i}.text`)}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="rs__split">
+        <div class="rs__gets" {...reveal()}>
+          <h2 class="rs__title" {...text('resellers.gets.title')}>{t('resellers.gets.title')}</h2>
+          <ul role="list">
+            {gets.map((_, i) => (
+              <li><Icon name="check" class="rs__mark" /><span {...text(`resellers.gets.items.${i}`)}>{t(`resellers.gets.items.${i}`)}</span></li>
+            ))}
+          </ul>
+        </div>
+        <div class="rs__steps" {...reveal()}>
+          <h2 class="rs__title" {...text('resellers.steps.title')}>{t('resellers.steps.title')}</h2>
+          <ol class="rs__list">
+            {steps.map((_, i) => (
+              <li class="rs__step">
+                <h3 {...text(`resellers.steps.items.${i}.title`)}>{t(`resellers.steps.items.${i}.title`)}</h3>
+                <p {...text(`resellers.steps.items.${i}.text`)}>{t(`resellers.steps.items.${i}.text`)}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .rs__cta {
+    justify-self: start;
+    margin-top: 0.5rem;
+  }
+
+  .rs__wrap {
+    display: grid;
+    gap: clamp(3rem, 2rem + 3vw, 5rem);
+  }
+
+  .rs__who {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .rs__title {
+    font-size: var(--step-3);
+  }
+
+  .rs__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .rs__card {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 1.75rem;
+  }
+
+  .rs__card h3 {
+    font-size: var(--step-2);
+  }
+
+  .rs__card p {
+    color: var(--ink-2);
+  }
+
+  .rs__split {
+    display: grid;
+    gap: 3rem;
+  }
+
+  .rs__gets,
+  .rs__steps {
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+  }
+
+  .rs__gets ul {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .rs__gets li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: baseline;
+    color: var(--ink-2);
+  }
+
+  .rs__mark {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+    translate: 0 0.2rem;
+    color: var(--accent-ink);
+  }
+
+  .rs__list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .rs__step {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: 1rem 0 1rem 3rem;
+    border-top: 1px solid var(--edge);
+    counter-increment: step;
+  }
+
+  .rs__step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    font: 500 0.85rem var(--mono);
+  }
+
+  .rs__step h3 {
+    font-size: var(--step-1);
+  }
+
+  .rs__step p {
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 64rem) {
+    .rs__split {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

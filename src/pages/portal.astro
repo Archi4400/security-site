@@ -1,0 +1,238 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/sections/PageHead.astro';
+import CloseCall from '../components/sections/CloseCall.astro';
+import PortalShowcase from '../components/sections/PortalShowcase.astro';
+import Icon from '../components/Icon.astro';
+import { reveal, t, text } from '../engine';
+import { en } from '../i18n/locales/en';
+
+const screens = en.portal.screens;
+const noise = en.portal.noise.items;
+---
+
+<Layout metaKey="meta.portal" path="/portal">
+  <PageHead titleKey="portal.head.title" ledeKey="portal.head.lede" kickerKey="nav.solutions" />
+
+  <section class="band pt">
+    <div class="shell pt__grid">
+      <div class="pt__screens">
+        <h2 class="pt__title" {...text('portal.screensTitle')}>{t('portal.screensTitle')}</h2>
+        <ol class="pt__list" role="list">
+          {screens.map((_, i) => (
+            <li class="pt__item" {...reveal()}>
+              <h3 {...text(`portal.screens.${i}.title`)}>{t(`portal.screens.${i}.title`)}</h3>
+              <p {...text(`portal.screens.${i}.text`)}>{t(`portal.screens.${i}.text`)}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="pt__stage">
+        <PortalShowcase headless />
+      </div>
+    </div>
+  </section>
+
+  <section class="band noise">
+    <div class="shell noise__grid">
+      <div class="noise__top">
+        <div class="head" {...reveal()}>
+          <h2 {...text('portal.noise.title')}>{t('portal.noise.title')}</h2>
+          <p {...text('portal.noise.lede')}>{t('portal.noise.lede')}</p>
+        </div>
+        <figure class="fold panel" data-lean {...reveal()}>
+          <div class="fold__card">
+            <span class="dot sev--mid" aria-hidden="true"></span>
+            <span class="fold__title" {...text('panel.i2')}>{t('panel.i2')}</span>
+            <span class="chip">×5</span>
+          </div>
+          <p class="fold__repeat mono" {...text('portal.noise.repeat')}>{t('portal.noise.repeat')}</p>
+          <div class="fold__story">
+            <span class="fold__label" {...text('portal.noise.story')}>{t('portal.noise.story')}</span>
+            <ul class="fold__ids" role="list">
+              <li><code class="chip">id.new_ip</code></li>
+              <li><code class="chip">id.session_moved</code></li>
+              <li><code class="chip">id.vanished_account</code></li>
+            </ul>
+          </div>
+          <figcaption class="note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+        </figure>
+      </div>
+      <ul class="noise__list" role="list">
+        {noise.map((_, i) => (
+          <li class="noise__item card" {...reveal()} style={`--d: ${i * 0.07}s`}>
+            <Icon name="check" class="noise__mark" />
+            <span {...text(`portal.noise.items.${i}`)}>{t(`portal.noise.items.${i}`)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CloseCall />
+</Layout>
+
+<style>
+  .pt {
+    overflow: clip;
+  }
+
+  .pt__grid {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 3vw, 4rem);
+    align-items: start;
+  }
+
+  .pt__stage {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+  }
+
+  .pt__screens {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .pt__title {
+    font-size: var(--step-3);
+  }
+
+  .pt__list {
+    display: grid;
+    margin: 0;
+  }
+
+  .pt__item {
+    display: grid;
+    gap: 0.35rem;
+    padding-block: 1.1rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .pt__item h3 {
+    font-size: var(--step-1);
+  }
+
+  .pt__item p {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .noise {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    background: var(--ground-2);
+    border-block: 1px solid var(--edge);
+  }
+
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: auto -10% -40% 30%;
+    height: 80%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(var(--aurora-1) / 0.18), transparent);
+    filter: blur(20px);
+  }
+
+  .noise__top {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .fold {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.25rem;
+    min-width: 0;
+  }
+
+  .fold__card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+  }
+
+  .fold__title {
+    flex: 1 1 12rem;
+    font-weight: 500;
+  }
+
+  .fold__repeat {
+    padding-left: 1rem;
+    border-left: 2px solid rgb(var(--aurora-1));
+    color: var(--ink-2);
+    font-size: 0.82rem;
+  }
+
+  .fold__story {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-s);
+    border: 1px dashed var(--edge-strong);
+  }
+
+  .fold__label {
+    font-size: 0.86rem;
+    color: var(--mute);
+  }
+
+  .fold__ids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .noise__grid {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .noise__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .noise__item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 1.25rem;
+    color: var(--ink-2);
+  }
+
+  .noise__mark {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: none;
+    color: var(--ok);
+  }
+
+  @media (min-width: 64rem) {
+    .pt__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .pt__stage {
+      position: sticky;
+      top: calc(var(--pinned-offset) + 2rem);
+      order: -1;
+    }
+
+    .noise__top {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+</style>

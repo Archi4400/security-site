@@ -1,0 +1,26 @@
+{
+  "name": "warden-landing",
+  "version": "0.1.0",
+  "description": "Marketing site for Warden.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --host 0.0.0.0 --port 3000",
+    "check": "astro check",
+    "cf:dev": "ASTRO_ADAPTER=cloudflare astro build && wrangler dev",
+    "deploy": "ASTRO_ADAPTER=cloudflare astro build && wrangler deploy",
+    "build:cf": "ASTRO_ADAPTER=cloudflare astro build"
+  },
+  "dependencies": {
+    "@astrojs/node": "11.1.6",
+    "@astrojs/sitemap": "3.7.4",
+    "astro": "7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/cloudflare": "14.3.4",
+    "wrangler": "4.148.0"
+  }
+}

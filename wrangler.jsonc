@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Cloudflare project name — this becomes part of the *.workers.dev URL.
+  "name": "security-site",
+  "compatibility_date": "2026-09-01",
+  // process.env (the market routes) needs Node compatibility in the Workers runtime.
+  "compatibility_flags": ["nodejs_compat"],
+  // Built with ASTRO_ADAPTER=cloudflare: the adapter's Worker serves the
+  // on-demand routes (/api/*), the prerendered pages and assets come from ASSETS.
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "binding": "ASSETS",
+    // astro.config.mjs has trailingSlash: "never" — serve /pricing, not /pricing/.
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+}
