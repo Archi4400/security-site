@@ -384,8 +384,10 @@ summary:active {
   translate: 0 16px;
 }
 
+/* --lean-amount scales the tilt for one panel; 1 is the site's full tilt */
 [data-lean] {
-  transform: perspective(1400px) rotateX(var(--lean-x, 0deg)) rotateY(var(--lean-y, 0deg));
+  transform: perspective(1400px) rotateX(calc(var(--lean-x, 0deg) * var(--lean-amount, 1)))
+    rotateY(calc(var(--lean-y, 0deg) * var(--lean-amount, 1)));
   transition: transform 0.6s var(--ease);
   will-change: transform;
 }
