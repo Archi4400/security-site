@@ -11,7 +11,7 @@ export const PLATFORM = PLATFORM_ENV?.trim() || 'https://companyname.example';
 export const LOGIN = PLATFORM;
 export const REGISTER = PLATFORM;
 
-/** The product's service names are the brand in lower case: warden-tap, warden-waf. */
+/** The product's service names are the brand in lower case: syoto-tap, syoto-waf. */
 export const SVC = BRAND.toLowerCase().replace(/\s+/g, '-');
 
 export const SUPPORT_EMAIL = `support@${HOST}`;

@@ -1,4 +1,4 @@
-# Warden — marketing site
+# Syoto — marketing site
 
 Astro 7 site in English and Spanish, with a light and a dark theme. Pages are
 prerendered; a small Node (or Cloudflare Workers) server serves them and the
@@ -15,7 +15,7 @@ Requires Node 22.12 or newer.
 Copy `.env.example` to `.env` and set it. Without it the buttons point to the
 placeholder `https://companyname.example`.
 
-The brand name (`Warden`) and the site's own address
+The brand name (`Syoto`) and the site's own address
 (`https://companyname.example`) are defaults in `astro.config.mjs`; change
 them there, or set `BRAND_NAME` and `SITE_URL` in `.env`.
 

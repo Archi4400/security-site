@@ -43,7 +43,7 @@ const notes = [
       </div>
       <div class="sd__notes">
         {notes.map((n, i) => (
-          <article class:list={['sd__note', i === 2 && 'sd__note--limit']} {...reveal()} style={`--d: ${i * 0.08}s`}>
+          <article class="sd__note" {...reveal()} style={`--d: ${i * 0.08}s`}>
             <h2 class="sd__head" {...text(n.head)}>{t(n.head)}</h2>
             <p {...text(n.body)}>{t(n.body)}</p>
           </article>
@@ -119,11 +119,6 @@ const notes = [
 
   .sd__note p {
     color: var(--ink-2);
-  }
-
-  .sd__note--limit {
-    border-style: dashed;
-    background: transparent;
   }
 
   .sd__head {

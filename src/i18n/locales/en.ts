@@ -94,6 +94,18 @@ export const en = {
       title: `A protection score that does not punish you for being attacked | ${BRAND}`,
       desc: 'How the protection score in the portal is built, and why attacks are deliberately left out of it.',
     },
+    offboarding: {
+      title: `The token that outlived the employee | ${BRAND}`,
+      desc: 'An employee leaves, the account is deleted, and an API token issued months ago keeps working. How it is seen, from traffic and the database together.',
+    },
+    thresholds: {
+      title: `One limit for everyone fits no one | ${BRAND}`,
+      desc: 'Why one threshold for every account either floods you with alerts or misses the slow export, and how personal thresholds are built instead.',
+    },
+    tenancy: {
+      title: `Tenant isolation belongs in the access layer | ${BRAND}`,
+      desc: 'Why every query for events must carry a tenant ID, and why isolation is not left to whoever writes a rule.',
+    },
     notFound: {
       title: `Page not found | ${BRAND}`,
       desc: `The page you asked for is not on the ${BRAND} site.`,
@@ -272,6 +284,7 @@ export const en = {
       title: 'A portal the owner can read',
       lede: 'A separate web application for the client company, in English and Russian, with light and dark themes. Not a dashboard an engineer has to decode.',
       label: 'Portal screens',
+      pause: 'Pause switching screens',
       tabs: {
         status: { name: 'Protection status', text: 'What happened since the last visit, traffic for the day, open incidents and the protection score.' },
         incident: { name: 'Incident card', text: 'What happened, who, from where, the attack path, whether it reached its target, the evidence and what to do — with related cards and stories.' },
@@ -500,12 +513,58 @@ export const en = {
       lede: 'Notes from the team on detection inside self-built CRMs.',
     },
     minutes: '{n} min read',
+    latest: 'Latest posts',
     posts: {
+      offboarding: {
+        tag: 'Detection',
+        date: 'October 6, 2026',
+        title: 'The token that outlived the employee',
+        lede: 'An employee leaves, the account is deleted — and an API token issued months ago keeps working. How that is seen, and why it is a rule of its own.',
+        cover: 'Two people at a wooden table with a notebook, coffee cups, a tablet and a leather bag',
+        figures: [
+          {
+            alt: 'A wallet, a phone, a watch, glasses and headphones laid out in rows on a grey surface',
+            caption: 'What an employee hands back on the last day. An API token is not on the list.',
+          },
+        ],
+        body: [
+          'Offboarding in a self-built CRM usually means one thing: the account is deleted or switched off. The laptop is handed back, the password stops working, and everyone moves on. What nobody checks is the API token the person created half a year ago for an integration — it was never tied to the sign-in page, so it never noticed.',
+          'The token keeps answering. Requests signed with it look like any other integration traffic, the application accepts them, and in many CRMs nothing is written down, because a request with a token is not a sign-in.',
+          'This is where the two sources meet. The traffic shows which credential each request carries — as a fingerprint, never the token itself. The database shows which accounts exist and who they belong to. A token still working for an account that is gone triggers id.vanished_account; an account the database has never heard of triggers id.unknown_account.',
+          'The alert says what happened in plain words — a token active for a removed employee — with the account, where the requests came from and what they reached. What to do is just as plain: revoke the session and rotate the token.',
+        ],
+      },
+      thresholds: {
+        tag: 'Detection',
+        date: 'September 29, 2026',
+        title: 'One limit for everyone fits no one',
+        lede: 'Why a single threshold either drowns you in alerts or misses the slow export — and how personal thresholds are built instead.',
+        cover: 'A black-and-white photo of a hand on a mouse next to a keyboard and a mug',
+        figures: [
+          {
+            alt: 'A desk seen from above: a monitor, a keyboard, a tablet, glasses and notebooks',
+            caption: 'The same export is routine for one person and unusual for another.',
+          },
+        ],
+        body: [
+          'A fixed limit looks fair: alert when anyone exports more than five hundred records a day. In practice the sales lead who exports every Monday sets it off each week, and the person who reads four hundred records a day for a month never does.',
+          'So each threshold is personal. It is computed from that person’s own history, and the working-rhythm model knows the weekday, the company’s time zone and shifts that run past midnight. A Monday export is normal for one person and unusual for another.',
+          'Every rule also has a second, long window. A slow export kept just below the daily threshold still adds up, and the long window catches what the short one would miss.',
+          'None of this is machine learning. The rules are static and readable; only the numbers in them are learned. When an alert fires, you see which threshold it crossed and why that threshold is what it is.',
+        ],
+      },
       signins: {
         tag: 'Detection',
         date: 'September 22, 2026',
         title: 'Why your CRM never sees a failed sign-in',
         lede: 'Self-built CRMs often write nothing when a sign-in fails. Here is how a failed sign-in can still be seen — from the traffic itself.',
+        cover: 'A man holding a phone in front of an open laptop',
+        figures: [
+          {
+            alt: 'A hand writing in a notebook next to a laptop and a wristwatch',
+            caption: 'The application never writes the failed attempt down. The traffic still carries it.',
+          },
+        ],
         body: [
           'Ask the owner of a self-built CRM how many failed sign-ins they had last week, and the honest answer is usually “we do not know”. The application never wrote them down. There is no journal of failed attempts, no session identifier in the logs, and the audit trail covers only what someone remembered to add.',
           'That gap is not a bug in one product — it is the norm. And it is why the classic route of collecting logs into Wazuh or ELK comes up short: there is nothing to collect. Password guessing, brute force on 2FA codes and reading customer records one at a time leave no trace in a log that was never written.',
@@ -518,6 +577,13 @@ export const en = {
         date: 'September 15, 2026',
         title: 'Allow-list, not deny-list: what leaves your infrastructure',
         lede: 'Why we refuse to filter data by listing what must not leave — and what does leave, exactly.',
+        cover: 'A vintage typewriter with a sheet of paper on a white background',
+        figures: [
+          {
+            alt: 'A close-up of the round keys of an old typewriter',
+            caption: 'A new field stays home until someone decides it may leave.',
+          },
+        ],
         body: [
           'A deny-list says: send everything except these fields. It works until someone adds a column called notes_internal and nobody updates the list. Then the new field leaves, quietly, on the next sync.',
           'An allow-list says the opposite: send only these fields. A new column stays home until someone decides it should not. That is why the connector applies an explicit allow-list and why a deny-list is ruled out as an approach.',
@@ -531,11 +597,37 @@ export const en = {
         date: 'September 8, 2026',
         title: 'A protection score that does not punish you for being attacked',
         lede: 'How the score in the portal is built, and why attacks are deliberately left out of it.',
+        cover: 'A laptop, an open notebook, earphones and a camera on a wooden desk',
+        figures: [
+          {
+            alt: 'A closed white laptop, books and a small desk calendar showing 18',
+            caption: 'The score counts what the company can fix on its own, not how often it was attacked.',
+          },
+        ],
         body: [
           'Most security scores mix two things: how well you are set up, and how much bad luck you had this week. A spike of attacks drags the number down, the owner panics, and nothing they can do will fix it — because the attacks were never in their control.',
           'The protection score in the portal is a number from 0 to 100 with an open formula. Everything in it is something the company can improve on its own: administrators with a second factor, dormant accounts closed, dormant admins removed, a rate limit on sign-in.',
           'Attacks are counted elsewhere — on the Traffic and Incidents screens — and never in the score. Being attacked is not a failing; leaving an admin without 2FA is.',
           'Next to the score sits the coverage screen, which answers a different question: which protection scenarios actually work on your data, and which data they still lack. Not “34 rules enabled”, but what really runs.',
+        ],
+      },
+      tenancy: {
+        tag: 'Architecture',
+        date: 'September 1, 2026',
+        title: 'Tenant isolation belongs in the access layer',
+        lede: 'Why every query for events must carry a tenant ID — and why that is not left to whoever writes a rule.',
+        cover: 'A desk by a window with a laptop, a lamp and a pen holder',
+        figures: [
+          {
+            alt: 'The front of a wooden apartment house with many windows and a white off-road car parked outside',
+            caption: 'Many tenants under one roof, and no door between them left to habit.',
+          },
+        ],
+        body: [
+          'A multi-tenant CRM keeps many client companies in one system, and so does the analysis behind it. The events of one tenant must never show up in the rules, reports or portal of another — not by design, and not by mistake.',
+          'The usual way to get this wrong is to make isolation a habit: every rule author remembers to add the tenant filter. It works until one rule, written in a hurry, forgets — and the mistake stays invisible until someone sees data that is not theirs.',
+          'So isolation sits one level lower. Every query for events must carry a tenant ID, and the access layer refuses one that does not. A rule cannot forget the filter, because without it the rule gets nothing at all.',
+          'The same thinking separates the parts of the system: the part that sees request bodies has no database access, and the part with database access never sees bodies. Compromising one gives no full picture.',
         ],
       },
     },
