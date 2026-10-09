@@ -1,13 +1,16 @@
 ---
 import { label, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
 import StatusPanel from '../StatusPanel.astro';
 
 interface Props {
   /** Without its own heading and band, for a page that already introduces the portal. */
   headless?: boolean;
+  /** Seconds each screen stays before the next comes on its own; without it the tabs switch only by hand. */
+  cycle?: number;
 }
 
-const { headless = false } = Astro.props;
+const { headless = false, cycle } = Astro.props;
 const tabs = ['incident', 'coverage', 'score', 'status'] as const;
 const coverage = [
   { key: 'c1', state: 'works', fill: 100 },
@@ -30,13 +33,22 @@ const factors = [
       <p {...text('home.showcase.lede')}>{t('home.showcase.lede')}</p>
     </div>}
 
-    <div class="show__stage" data-show {...reveal()}>
+    <div class="show__stage" data-show data-cycle={cycle ? cycle * 1000 : undefined} {...reveal()}>
       <div class="show__tabs" role="group" {...label('home.showcase.label')}>
-        {tabs.map((tab, i) => (
-          <button type="button" class="show__tab" aria-pressed={i === 0 ? 'true' : 'false'} data-tab={tab} {...text(`home.showcase.tabs.${tab}.name`)}>
-            {t(`home.showcase.tabs.${tab}.name`)}
+        <div class="show__picks">
+          {tabs.map((tab, i) => (
+            <button type="button" class="show__tab" aria-pressed={i === 0 ? 'true' : 'false'} data-tab={tab}>
+              <span {...text(`home.showcase.tabs.${tab}.name`)}>{t(`home.showcase.tabs.${tab}.name`)}</span>
+              {cycle && <span class="show__time" aria-hidden="true"><span data-time></span></span>}
+            </button>
+          ))}
+        </div>
+        {cycle && (
+          <button type="button" class="show__hold" aria-pressed="false" data-hold {...label('home.showcase.pause')}>
+            <Icon name="pause" class="show__pause" />
+            <Icon name="play" class="show__play" />
           </button>
-        ))}
+        )}
       </div>
 
       <div class="show__frame">
@@ -114,7 +126,8 @@ const factors = [
 </section>
 
 <style>
-  .show {
+  /* the glow reaches past the frame; a headless showcase leaves the clipping to the section around it */
+  .show.band {
     overflow: clip;
   }
 
@@ -129,19 +142,29 @@ const factors = [
     gap: 1.75rem;
   }
 
+  /* on a phone the tabs fill the pill, so the hold button sits under it; wider, both share one pill */
   .show__tabs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 100%;
+  }
+
+  .show__picks {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.35rem;
+    min-width: 0;
     padding: 0.35rem;
     border-radius: 999px;
     border: 1px solid var(--edge-strong);
     background: var(--sheet);
-    max-width: 100%;
   }
 
   .show__tab {
+    position: relative;
     min-height: 2.75rem;
     padding: 0.5rem 1.1rem;
     border: 0;
@@ -163,6 +186,86 @@ const factors = [
     background: var(--cta);
     color: var(--cta-ink);
     font-weight: 500;
+  }
+
+  /* the screen's time: a track in the tab's ink, so it reads on the pressed pill in both themes, filled with the problem rows' aurora line */
+  .show__time {
+    position: absolute;
+    inset: auto 1.1rem 0.3rem;
+    height: 2px;
+    border-radius: 999px;
+    background: color-mix(in oklab, currentColor 22%, transparent);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .show__time span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgb(var(--aurora-1)), rgb(var(--aurora-2)), rgb(var(--aurora-3)));
+    transform-origin: left;
+    scale: 0 1;
+  }
+
+  [data-cycle-state='on'] .show__tab[aria-pressed='true'] .show__time,
+  [data-cycle-state='paused'] .show__tab[aria-pressed='true'] .show__time {
+    opacity: 1;
+  }
+
+  .show__hold {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--edge-strong);
+    border-radius: 50%;
+    background: var(--sheet);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      background-color 0.25s var(--ease),
+      color 0.25s var(--ease);
+  }
+
+  .show__hold:hover {
+    background: var(--sheet-2);
+    color: var(--ink);
+  }
+
+  .show__hold svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .show__hold[aria-pressed='true'] .show__pause,
+  .show__hold[aria-pressed='false'] .show__play {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    .show__tabs {
+      flex-direction: row;
+      gap: 0.35rem;
+      padding: 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--edge-strong);
+      background: var(--sheet);
+    }
+
+    .show__picks {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+    }
+
+    .show__hold {
+      border-color: transparent;
+    }
   }
 
   .show__frame {
@@ -375,16 +478,125 @@ const factors = [
 </style>
 
 <script>
+  import { onReducedMotion, reducedMotion } from '../../engine/client';
+
+  const FINE = '(hover: hover) and (pointer: fine)';
+
+  /**
+   * Brings the next screen on every `ms` while the stage is in view and nobody is reading it. The
+   * fill of the pressed tab is the timer itself: its animation runs, holds and finishes the screen.
+   * The hold button pauses and resumes it; a tab picked by hand turns it off until the button
+   * starts it again. Returns the switch-off for those tabs.
+   */
+  function cycleTabs(stage: HTMLElement, tabs: HTMLButtonElement[], pick: (tab: HTMLButtonElement) => void, hold: HTMLButtonElement, ms: number): () => void {
+    const frame = stage.querySelector<HTMLElement>('.show__frame');
+    /** Why the timer stands still although it is on: out of view, page hidden, read under the pointer, keyboard focus. */
+    const holds = new Set<string>(['view']);
+    let run: Animation | null = null;
+    let paused = false;
+
+    const pressed = () => tabs.find((tab) => tab.getAttribute('aria-pressed') === 'true') ?? tabs[0]!;
+
+    const paint = () => {
+      stage.setAttribute('data-cycle-state', !run ? 'off' : paused ? 'paused' : 'on');
+      hold.setAttribute('aria-pressed', String(!run || paused));
+    };
+
+    const sync = () => {
+      if (!run) return;
+      if (paused || holds.size) run.pause();
+      else run.play();
+    };
+
+    const stop = () => {
+      run?.cancel();
+      run = null;
+      paused = false;
+      paint();
+    };
+
+    const start = () => {
+      run?.cancel();
+      run = null;
+      paused = false;
+      const fill = pressed().querySelector<HTMLElement>('[data-time]');
+      if (fill) {
+        const mine = fill.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: ms, easing: 'linear' });
+        run = mine;
+        // a timer cancelled by a stop or a restart rejects `finished`; only the live one moves on
+        mine.finished.then(
+          () => {
+            if (run !== mine) return;
+            pick(tabs[(tabs.indexOf(pressed()) + 1) % tabs.length]!);
+            start();
+          },
+          () => {},
+        );
+        sync();
+      }
+      paint();
+    };
+
+    const holdWhile = (reason: string, on: boolean) => {
+      if (on) holds.add(reason);
+      else holds.delete(reason);
+      sync();
+    };
+
+    hold.addEventListener('click', () => {
+      if (!run) start();
+      else {
+        paused = !paused;
+        paint();
+      }
+      // pressed from the keyboard, the button asks to run although focus is inside
+      holdWhile('focus', false);
+    });
+
+    new IntersectionObserver(([entry]) => holdWhile('view', !entry!.isIntersecting), { threshold: 0.25 }).observe(stage);
+    document.addEventListener('visibilitychange', () => holdWhile('page', document.hidden));
+    // the pointer reads the screen, not the tabs: a click on the button must not hold what it starts
+    if (frame && window.matchMedia(FINE).matches) {
+      frame.addEventListener('pointerenter', () => holdWhile('pointer', true));
+      frame.addEventListener('pointerleave', () => holdWhile('pointer', false));
+    }
+    stage.addEventListener('focusin', (event) => {
+      if ((event.target as Element).matches(':focus-visible')) holdWhile('focus', true);
+    });
+    stage.addEventListener('focusout', (event) => {
+      if (!stage.contains(event.relatedTarget as Node | null)) holdWhile('focus', false);
+    });
+
+    if (reducedMotion()) paint();
+    else start();
+    onReducedMotion((reduced) => {
+      if (!reduced || !run || paused) return;
+      paused = true;
+      sync();
+      paint();
+    });
+    return stop;
+  }
+
   for (const stage of document.querySelectorAll<HTMLElement>('[data-show]')) {
     const tabs = Array.from(stage.querySelectorAll<HTMLButtonElement>('[data-tab]'));
     const panes = Array.from(stage.querySelectorAll<HTMLElement>('[data-pane]'));
     const descs = Array.from(stage.querySelectorAll<HTMLElement>('[data-desc]'));
+    const hold = stage.querySelector<HTMLButtonElement>('[data-hold]');
+    const ms = Number(stage.dataset.cycle);
+
+    const pick = (tab: HTMLButtonElement) => {
+      const name = tab.dataset.tab;
+      for (const other of tabs) other.setAttribute('aria-pressed', String(other === tab));
+      for (const pane of panes) pane.hidden = pane.dataset.pane !== name;
+      for (const desc of descs) desc.hidden = desc.dataset.desc !== name;
+    };
+
+    const stop = hold && ms > 0 ? cycleTabs(stage, tabs, pick, hold, ms) : undefined;
     for (const tab of tabs) {
       tab.addEventListener('click', () => {
-        const name = tab.dataset.tab;
-        for (const other of tabs) other.setAttribute('aria-pressed', String(other === tab));
-        for (const pane of panes) pane.hidden = pane.dataset.pane !== name;
-        for (const desc of descs) desc.hidden = desc.dataset.desc !== name;
+        pick(tab);
+        stop?.();
       });
     }
   }

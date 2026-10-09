@@ -10,6 +10,8 @@ export const iconPaths = {
   check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   minus: '<path d="M6 12h12"/>',
   plus: '<path d="M12 6v12M6 12h12"/>',
+  pause: '<path d="M9 6v12M15 6v12"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5L8 5.5Z"/>',
   user: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/>',
   shield: '<path d="M12 3 5 6v5.5c0 4.4 3 8 7 9.5 4-1.5 7-5.1 7-9.5V6l-7-3Z"/>',
   key: '<circle cx="8" cy="14" r="4"/><path d="m11 11 9-9M17 5l2.5 2.5M15 7l2 2"/>',

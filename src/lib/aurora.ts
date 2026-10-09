@@ -193,7 +193,8 @@ export interface Aurora {
 }
 
 export function createAurora(root: HTMLElement, canvas: HTMLCanvasElement, cfg: AuroraConfig): Aurora | null {
-  const ctx = canvas.getContext('2d', { alpha: false });
+  // the visible canvas stays transparent: until its first frame the root's ground shows, not opaque black
+  const ctx = canvas.getContext('2d');
   const buffer = document.createElement('canvas');
   const bctx = buffer.getContext('2d', { alpha: false });
   if (!ctx || !bctx) return null;

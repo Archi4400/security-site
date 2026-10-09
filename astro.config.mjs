@@ -34,7 +34,7 @@ export default defineConfig({
   compressHTML: true,
   env: {
     schema: {
-      BRAND_NAME: envField.string({ context: 'client', access: 'public', default: 'Warden' }),
+      BRAND_NAME: envField.string({ context: 'client', access: 'public', default: 'Syoto' }),
       SITE_URL: envField.string({ context: 'client', access: 'public', url: true, default: SITE_URL }),
       PLATFORM: envField.string({ context: 'client', access: 'public', optional: true }),
     },

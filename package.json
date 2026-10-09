@@ -1,7 +1,7 @@
 {
-  "name": "warden-landing",
+  "name": "syoto-landing",
   "version": "0.1.0",
-  "description": "Marketing site for Warden.",
+  "description": "Marketing site for Syoto.",
   "private": true,
   "type": "module",
   "scripts": {

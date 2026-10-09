@@ -1,7 +1,7 @@
 /**
  * A panel tilts a few degrees after a fine pointer anywhere in its section.
  * Writes --lean-x / --lean-y on every [data-lean]; global.css turns them into
- * the transform.
+ * the transform, scaled by the panel's --lean-amount.
  */
 
 const TILT_Y_DEG = 3;

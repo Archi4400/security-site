@@ -94,6 +94,18 @@ export const es = {
       title: `Una puntuación de protección que no le castiga por ser atacado | ${BRAND}`,
       desc: 'Cómo se calcula la puntuación de protección del portal y por qué los ataques quedan fuera a propósito.',
     },
+    offboarding: {
+      title: `El token que sobrevivió al empleado | ${BRAND}`,
+      desc: 'Un empleado se va, su cuenta se elimina y un token de API emitido hace meses sigue funcionando. Cómo se detecta, a partir del tráfico y la base de datos a la vez.',
+    },
+    thresholds: {
+      title: `Un mismo límite para todos no sirve a nadie | ${BRAND}`,
+      desc: 'Por qué un único umbral para todas las cuentas o le inunda de alertas o deja pasar la exportación lenta, y cómo se construyen los umbrales personales.',
+    },
+    tenancy: {
+      title: `El aislamiento entre clientes pertenece a la capa de acceso | ${BRAND}`,
+      desc: 'Por qué cada consulta de eventos debe llevar un identificador de cliente, y por qué el aislamiento no se deja en manos de quien escribe una regla.',
+    },
     notFound: {
       title: `Página no encontrada | ${BRAND}`,
       desc: `La página que busca no está en el sitio de ${BRAND}.`,
@@ -272,6 +284,7 @@ export const es = {
       title: 'Un portal que el propietario puede leer',
       lede: 'Una aplicación web independiente para la empresa cliente, en inglés y ruso, con tema claro y oscuro. No un panel que un ingeniero tenga que descifrar.',
       label: 'Pantallas del portal',
+      pause: 'Pausar el cambio de pantallas',
       tabs: {
         status: { name: 'Estado de la protección', text: 'Qué ha pasado desde la última visita, el tráfico del día, los incidentes abiertos y la puntuación de protección.' },
         incident: { name: 'Tarjeta de incidente', text: 'Qué ha pasado, quién, desde dónde, la ruta del ataque, si llegó a su objetivo, la evidencia y qué hacer, con tarjetas e historias relacionadas.' },
@@ -500,12 +513,58 @@ export const es = {
       lede: 'Notas del equipo sobre detección dentro de CRM propios.',
     },
     minutes: '{n} min de lectura',
+    latest: 'Últimas publicaciones',
     posts: {
+      offboarding: {
+        tag: 'Detección',
+        date: '6 de octubre de 2026',
+        title: 'El token que sobrevivió al empleado',
+        lede: 'Un empleado se va, su cuenta se elimina y un token de API emitido hace meses sigue funcionando. Así se detecta, y por eso tiene su propia regla.',
+        cover: 'Dos personas en una mesa de madera con un cuaderno, tazas de café, una tableta y una bolsa de cuero',
+        figures: [
+          {
+            alt: 'Una cartera, un teléfono, un reloj, unas gafas y unos auriculares ordenados en filas sobre una superficie gris',
+            caption: 'Lo que un empleado devuelve el último día. Un token de API no está en la lista.',
+          },
+        ],
+        body: [
+          'En un CRM propio, la baja de un empleado suele significar una sola cosa: la cuenta se elimina o se desactiva. Se devuelve el portátil, la contraseña deja de funcionar y todos siguen adelante. Lo que nadie revisa es el token de API que esa persona creó hace medio año para una integración: nunca estuvo ligado a la página de acceso, así que no se enteró.',
+          'El token sigue respondiendo. Las peticiones firmadas con él parecen tráfico de integración como cualquier otro, la aplicación las acepta y en muchos CRM no se anota nada, porque una petición con token no es un inicio de sesión.',
+          'Aquí se unen las dos fuentes. El tráfico muestra qué credencial lleva cada petición, como huella y nunca el token en sí. La base de datos muestra qué cuentas existen y a quién pertenecen. Un token que sigue funcionando para una cuenta que ya no existe dispara id.vanished_account; una cuenta que la base de datos no conoce dispara id.unknown_account.',
+          'La alerta dice lo ocurrido con palabras claras —un token activo de un empleado eliminado— junto con la cuenta, desde dónde llegaron las peticiones y a qué accedieron. Qué hacer es igual de claro: revocar la sesión y rotar el token.',
+        ],
+      },
+      thresholds: {
+        tag: 'Detección',
+        date: '29 de septiembre de 2026',
+        title: 'Un mismo límite para todos no sirve a nadie',
+        lede: 'Por qué un único umbral o le inunda de alertas o deja pasar la exportación lenta, y cómo se construyen en su lugar los umbrales personales.',
+        cover: 'Foto en blanco y negro de una mano sobre un ratón junto a un teclado y una taza',
+        figures: [
+          {
+            alt: 'Un escritorio visto desde arriba: un monitor, un teclado, una tableta, unas gafas y cuadernos',
+            caption: 'La misma exportación es rutina para una persona e inusual para otra.',
+          },
+        ],
+        body: [
+          'Un límite fijo parece justo: alertar cuando alguien exporte más de quinientas fichas al día. En la práctica, el jefe de ventas que exporta cada lunes lo dispara todas las semanas, y la persona que lee cuatrocientas fichas al día durante un mes nunca lo hace.',
+          'Por eso cada umbral es personal. Se calcula a partir del propio historial de esa persona, y el modelo de ritmo de trabajo conoce el día de la semana, la zona horaria de la empresa y los turnos que pasan de medianoche. Una exportación del lunes es normal para una persona e inusual para otra.',
+          'Cada regla tiene además una segunda ventana, larga. Una exportación lenta mantenida justo por debajo del umbral diario se va sumando, y la ventana larga detecta lo que la corta dejaría pasar.',
+          'Nada de esto es aprendizaje automático. Las reglas son estáticas y legibles; solo se aprenden los números que contienen. Cuando salta una alerta, se ve qué umbral superó y por qué ese umbral es el que es.',
+        ],
+      },
       signins: {
         tag: 'Detección',
         date: '22 de septiembre de 2026',
         title: 'Por qué su CRM nunca ve un acceso fallido',
         lede: 'Los CRM propios a menudo no anotan nada cuando falla un inicio de sesión. Así es como se puede ver igualmente, a partir del propio tráfico.',
+        cover: 'Un hombre con un teléfono en la mano delante de un portátil abierto',
+        figures: [
+          {
+            alt: 'Una mano que escribe en un cuaderno junto a un portátil y un reloj de pulsera',
+            caption: 'La aplicación nunca anota el intento fallido. El tráfico sí lo lleva.',
+          },
+        ],
         body: [
           'Pregunte al propietario de un CRM propio cuántos accesos fallidos tuvo la semana pasada y la respuesta sincera suele ser «no lo sabemos». La aplicación nunca los anotó. No hay registro de intentos fallidos, ni identificador de sesión en los registros, y la auditoría cubre solo lo que alguien se acordó de añadir.',
           'Ese vacío no es un fallo de un producto concreto: es lo normal. Y por eso la vía clásica de reunir registros en Wazuh o ELK se queda corta: no hay nada que reunir. La adivinación de contraseñas, la fuerza bruta contra códigos 2FA y la lectura de fichas de clientes una a una no dejan rastro en un registro que nunca se escribió.',
@@ -518,6 +577,13 @@ export const es = {
         date: '15 de septiembre de 2026',
         title: 'Lista permitida, no lista de exclusión: qué sale de su infraestructura',
         lede: 'Por qué nos negamos a filtrar los datos enumerando lo que no debe salir, y qué sale exactamente.',
+        cover: 'Una máquina de escribir antigua con una hoja de papel sobre fondo blanco',
+        figures: [
+          {
+            alt: 'Primer plano de las teclas redondas de una máquina de escribir antigua',
+            caption: 'Un campo nuevo se queda en casa hasta que alguien decida que puede salir.',
+          },
+        ],
         body: [
           'Una lista de exclusión dice: envíe todo menos estos campos. Funciona hasta que alguien añade una columna llamada notes_internal y nadie actualiza la lista. Entonces el campo nuevo sale, sin ruido, en la siguiente sincronización.',
           'Una lista permitida dice lo contrario: envíe solo estos campos. Una columna nueva se queda en casa hasta que alguien decida otra cosa. Por eso el conector aplica una lista permitida explícita y por eso la lista de exclusión queda descartada como método.',
@@ -531,11 +597,37 @@ export const es = {
         date: '8 de septiembre de 2026',
         title: 'Una puntuación de protección que no le castiga por ser atacado',
         lede: 'Cómo se calcula la puntuación del portal y por qué los ataques quedan fuera a propósito.',
+        cover: 'Un portátil, un cuaderno abierto, unos auriculares y una cámara sobre un escritorio de madera',
+        figures: [
+          {
+            alt: 'Un portátil blanco cerrado, libros y un pequeño calendario de mesa que marca el 18',
+            caption: 'La puntuación cuenta lo que la empresa puede corregir por sí misma, no cuántas veces la atacaron.',
+          },
+        ],
         body: [
           'La mayoría de las puntuaciones de seguridad mezclan dos cosas: lo bien configurado que está usted y la mala suerte que ha tenido esta semana. Un pico de ataques hunde el número, el propietario se alarma y nada de lo que haga lo arreglará, porque los ataques nunca dependieron de él.',
           'La puntuación de protección del portal es un número de 0 a 100 con fórmula abierta. Todo lo que contiene es algo que la empresa puede mejorar por sí misma: administradores con segundo factor, cuentas inactivas cerradas, administradores inactivos retirados, un límite de intentos de acceso.',
           'Los ataques se cuentan en otro sitio, en las pantallas de Tráfico e Incidentes, y nunca en la puntuación. Que le ataquen no es un fallo; dejar a un administrador sin 2FA, sí.',
           'Junto a la puntuación está la pantalla de cobertura, que responde a otra pregunta: qué escenarios de protección funcionan realmente con sus datos y qué datos les faltan todavía. No «34 reglas activadas», sino lo que de verdad funciona.',
+        ],
+      },
+      tenancy: {
+        tag: 'Arquitectura',
+        date: '1 de septiembre de 2026',
+        title: 'El aislamiento entre clientes pertenece a la capa de acceso',
+        lede: 'Por qué cada consulta de eventos debe llevar un identificador de cliente, y por qué eso no se deja en manos de quien escribe una regla.',
+        cover: 'Un escritorio junto a una ventana con un portátil, una lámpara y un portalápices',
+        figures: [
+          {
+            alt: 'La fachada de un edificio de viviendas de madera con muchas ventanas y un todoterreno blanco aparcado delante',
+            caption: 'Muchos clientes bajo un mismo techo, y ninguna puerta entre ellos confiada a la costumbre.',
+          },
+        ],
+        body: [
+          'Un CRM multicliente guarda muchas empresas clientes en un solo sistema, y el análisis que lo protege también. Los eventos de un cliente nunca deben aparecer en las reglas, los informes o el portal de otro: ni por diseño ni por error.',
+          'La forma habitual de equivocarse es convertir el aislamiento en una costumbre: cada autor de reglas se acuerda de añadir el filtro por cliente. Funciona hasta que una regla escrita con prisa lo olvida, y el error sigue invisible hasta que alguien ve datos que no son suyos.',
+          'Por eso el aislamiento está un nivel más abajo. Cada consulta de eventos debe llevar un identificador de cliente, y la capa de acceso rechaza la que no lo lleve. Una regla no puede olvidar el filtro, porque sin él no recibe nada.',
+          'La misma idea separa las partes del sistema: la parte que ve los cuerpos de las peticiones no tiene acceso a la base de datos, y la que tiene acceso a la base de datos nunca ve los cuerpos. Comprometer una no da la imagen completa.',
         ],
       },
     },

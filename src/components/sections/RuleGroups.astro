@@ -60,6 +60,8 @@ const groups = ruleGroups.map((g) => ({ ...g, start: (order += g.ids.length) - g
     gap: 0.5rem;
     padding: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
     min-width: 0;
+    /* a panel this large swings far at its edges; half the tilt keeps it calm */
+    --lean-amount: 0.5;
   }
 
   .board__rows {

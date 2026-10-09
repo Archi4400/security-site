@@ -1,10 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import Aurora from '../../components/Aurora.astro';
 import Icon from '../../components/Icon.astro';
 import PostCards from '../../components/sections/PostCards.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
-import { countUp, t, text } from '../../engine';
+import { alt, countUp, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
 import { posts, type Post } from '../../lib/posts';
 
@@ -20,6 +21,9 @@ const { post } = Astro.props;
 const k = post.key;
 const body = en.blog.posts[k].body;
 const read = countUp(`read-${k}`, post.minutes, { key: 'blog.minutes' });
+const pictureWidths = [480, 768, 1152, 1536];
+// .ab is 52rem wide with the gutters inside it
+const pictureSizes = '(min-width: 52rem) 48rem, 100vw';
 ---
 
 <Layout metaKey={`meta.${k}`} path={`/blog/${post.slug}`}>
@@ -38,16 +42,25 @@ const read = countUp(`read-${k}`, post.minutes, { key: 'blog.minutes' });
       </div>
     </header>
     <div class="shell ab">
+      <Image src={post.cover} {...alt(`blog.posts.${k}.cover`)} widths={pictureWidths} sizes={pictureSizes} priority class="ab__picture" />
       {body.map((_, i) => (
-        <p {...text(`blog.posts.${k}.body.${i}`)}>{t(`blog.posts.${k}.body.${i}`)}</p>
+        <>
+          <p {...text(`blog.posts.${k}.body.${i}`)}>{t(`blog.posts.${k}.body.${i}`)}</p>
+          {post.figures.map((f, j) => f.after === i && (
+            <figure class="ab__figure">
+              <Image src={f.image} {...alt(`blog.posts.${k}.figures.${j}.alt`)} widths={pictureWidths} sizes={pictureSizes} class="ab__picture" />
+              <figcaption class="note" {...text(`blog.posts.${k}.figures.${j}.caption`)}>{t(`blog.posts.${k}.figures.${j}.caption`)}</figcaption>
+            </figure>
+          ))}
+        </>
       ))}
     </div>
   </article>
 
   <section class="band more">
     <div class="shell more__wrap">
-      <h2 class="more__title" {...text('blog.head.title')}>{t('blog.head.title')}</h2>
-      <PostCards except={k} />
+      <h2 class="more__title" {...text('blog.latest')}>{t('blog.latest')}</h2>
+      <PostCards except={k} limit={3} />
     </div>
   </section>
 
@@ -111,8 +124,22 @@ const read = countUp(`read-${k}`, post.minutes, { key: 'blog.minutes' });
     max-width: 44rem;
   }
 
-  .ab p:first-child {
+  .ab p:first-of-type {
     color: var(--ink);
+  }
+
+  .ab__picture {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background-color: var(--sheet);
+  }
+
+  .ab__figure {
+    display: grid;
+    gap: 0.75rem;
+    margin-block: 0.6rem;
   }
 
   .more {
