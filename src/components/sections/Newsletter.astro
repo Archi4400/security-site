@@ -1,0 +1,208 @@
+---
+import { placeholder, reveal, t, text } from '../../engine';
+import Aurora from '../Aurora.astro';
+import Icon from '../Icon.astro';
+---
+
+<section class="news">
+  <Aurora intensity={0.7} scale={14} lean={0.04} fps={30} rise={1.1} />
+  <div class="shell news__wrap" {...reveal()}>
+    <div class="news__copy">
+      <h2 class="news__title" {...text('home.news.title')}>{t('home.news.title')}</h2>
+      <p class="news__text lede" {...text('home.news.text')}>{t('home.news.text')}</p>
+    </div>
+
+    <div class="news__side" data-news>
+      <form class="news__form" novalidate data-news-form>
+        <label for="news-email" class="news__label" data-sr {...text('home.news.email')}>{t('home.news.email')}</label>
+        <input
+          id="news-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          class="news__input"
+          required
+          {...placeholder('home.news.email')}
+        />
+        <button type="submit" class="btn btn--solid news__send">
+          <span {...text('home.news.join')}>{t('home.news.join')}</span>
+          <Icon name="arrow" />
+        </button>
+        <p id="news-email-err" class="news__err" hidden {...text('home.news.error')}>{t('home.news.error')}</p>
+      </form>
+      <p class="news__done" role="status" data-news-done></p>
+      <p class="news__community">
+        <span {...text('home.news.community')}>{t('home.news.community')}</span>
+        <span class="news__soon" {...text('nav.soon')}>{t('nav.soon')}</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .news {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(4.5rem, 3rem + 6vw, 8rem);
+  }
+
+  .news::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--ground) 0%, transparent 55%);
+  }
+
+  .news__wrap {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .news__copy {
+    display: grid;
+    gap: 1rem;
+    max-width: 38rem;
+  }
+
+  .news__title {
+    font-size: var(--step-4);
+  }
+
+  .news__side {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .news__form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .news__input {
+    min-height: 3rem;
+    padding: 0.7rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: color-mix(in oklab, var(--sheet) 85%, transparent);
+    transition: border-color 0.2s var(--ease);
+  }
+
+  .news__input::placeholder {
+    color: var(--mute);
+  }
+
+  .news__input:hover,
+  .news__input:focus-visible {
+    border-color: var(--ink-2);
+  }
+
+  .news__input[aria-invalid='true'] {
+    border-color: var(--bad);
+  }
+
+  .news__err {
+    color: var(--bad);
+    font-size: 0.88rem;
+    padding-left: 1.25rem;
+  }
+
+  .news__done:empty {
+    display: none;
+  }
+
+  .news__done {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    font-weight: 500;
+    color: var(--ok);
+  }
+
+  .news__community {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--mute);
+    font-size: 0.9rem;
+  }
+
+  .news__soon {
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 40rem) {
+    .news__form {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .news__err {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .news__wrap {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 4rem;
+    }
+  }
+</style>
+
+<script>
+  import { onLang, t } from '../../engine/client';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-news]')) {
+    const form = root.querySelector<HTMLFormElement>('[data-news-form]');
+    const done = root.querySelector<HTMLElement>('[data-news-done]');
+    const input = form?.querySelector<HTMLInputElement>('input[type="email"]');
+    const err = form?.querySelector<HTMLElement>('#news-email-err');
+    if (!form || !done || !input || !err) continue;
+
+    const valid = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+    const mark = (bad: boolean) => {
+      err.hidden = !bad;
+      if (bad) {
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', 'news-email-err');
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-describedby');
+      }
+    };
+
+    input.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') === 'true') mark(!valid());
+    });
+
+    let sent = false;
+    const say = () => {
+      if (sent) done.textContent = t('home.news.done');
+    };
+    onLang(say);
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!valid()) {
+        mark(true);
+        input.focus();
+        return;
+      }
+      mark(false);
+      form.reset();
+      form.hidden = true;
+      sent = true;
+      say();
+    });
+  }
+</script>

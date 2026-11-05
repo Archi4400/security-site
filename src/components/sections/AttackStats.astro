@@ -1,0 +1,132 @@
+---
+import { countUp, html, reveal, t, text } from '../../engine';
+
+/** `note` is the number of the source under the figures; two figures can share one. */
+const figures = [
+  { value: 85, note: 1 },
+  { value: 70, note: 2 },
+  { value: 60, note: 3 },
+  { value: 29, note: 1 },
+].map((f, i) => ({ ...f, i, c: countUp(`attack-${i}`, f.value, { key: `home.stats.items.${i}.value` }) }));
+const notes = [1, 2, 3];
+---
+
+<section class="band stats">
+  <div class="shell stats__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.stats.title')}>{t('home.stats.title')}</h2>
+      <p class="stats__lede" {...html('home.stats.lede')} set:html={t('home.stats.lede')} />
+    </div>
+    <dl class="stats__grid">
+      {figures.map((f) => (
+        <div class="stats__item" {...reveal()} style={`--d: ${f.i * 0.08}s`}>
+          <dt class="stats__text">
+            <span {...text(`home.stats.items.${f.i}.text`)}>{t(`home.stats.items.${f.i}.text`)}</span><sup><a href={`#stat-source-${f.note}`} class="stats__ref">{f.note}</a></sup>
+          </dt>
+          <dd class="stats__value mono">
+            <span {...f.c.root()}><span {...f.c.value()}>{f.c.text}</span><span {...f.c.digits()} /></span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <div class="stats__sources">
+      <h3 class="stats__sources-title" {...text('home.stats.sources')}>{t('home.stats.sources')}</h3>
+      <ol class="stats__notes" role="list">
+        {notes.map((n, i) => (
+          <li id={`stat-source-${n}`}><sup>{n}</sup> <span {...text(`home.stats.notes.${i}`)}>{t(`home.stats.notes.${i}`)}</span></li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats {
+    border-block: 1px solid var(--edge);
+    background:
+      radial-gradient(60% 120% at 100% 0%, rgb(var(--aurora-1) / 0.12), transparent 60%),
+      radial-gradient(50% 100% at 0% 100%, rgb(var(--aurora-3) / 0.12), transparent 60%),
+      var(--ground-2);
+  }
+
+  .stats__wrap {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .stats__lede :global(strong) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 0;
+    margin: 0;
+  }
+
+  .stats__item {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    padding: 1.5rem 1.5rem 1.5rem 0;
+    border-top: 1px solid var(--edge-strong);
+    min-width: 0;
+  }
+
+  .stats__value {
+    margin: 0;
+    font-size: clamp(2.4rem, 1.7rem + 2.4vw, 3.6rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stats__value :global([data-count]) {
+    justify-items: start;
+  }
+
+  .stats__text {
+    color: var(--ink-2);
+    font-size: 0.94rem;
+    max-width: 16rem;
+  }
+
+  .stats__ref {
+    margin-left: 0.15rem;
+    color: var(--accent-ink);
+    font-size: 0.8em;
+  }
+
+  .stats__sources {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    color: var(--mute);
+    font-size: 0.8rem;
+  }
+
+  .stats__sources-title {
+    font-size: inherit;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .stats__notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+  }
+
+  .stats__notes li {
+    scroll-margin-top: var(--pinned-offset);
+  }
+
+  .stats__notes li:target {
+    color: var(--ink);
+  }
+</style>

@@ -4,23 +4,39 @@ import Brand from '../Brand.astro';
 import Icon from '../Icon.astro';
 import type { IconName } from '../../lib/icons';
 import FooterColumn from './FooterColumn.astro';
-import { aboutLinks, solutionLinks, type NavLink } from '../header/navRoutes';
+import { productLinks, type NavLink } from '../header/navRoutes';
 
-const product: NavLink[] = [...solutionLinks, { href: '/pricing', key: 'nav.pricing' }];
-const company: NavLink[] = [...aboutLinks, { href: '/blog', key: 'nav.blog' }, { href: '/contact', key: 'nav.contact' }];
+const company: NavLink[] = [
+  { href: '/about', key: 'footer.about' },
+  { href: '/careers', key: 'footer.careers' },
+  { href: '/contact', key: 'footer.contactUs' },
+];
+const explore: NavLink[] = [
+  { href: '/solutions', key: 'footer.capabilities' },
+  { href: '/#how', key: 'footer.how' },
+  { href: '/about', key: 'footer.about' },
+  { href: '/contact', key: 'footer.contact' },
+];
 const legal: NavLink[] = [
   { href: '/privacy-policy', key: 'footer.privacy' },
   { href: '/terms-conditions', key: 'footer.terms' },
   { href: '/cookie-policy', key: 'footer.cookies' },
-  { href: '/site-map', key: 'footer.siteMap' },
+];
+const resources: NavLink[] = [
+  { href: '', key: 'footer.docs', soon: true },
+  { href: '/blog', key: 'nav.blog' },
+  { href: '', key: 'footer.learning', soon: true },
+  { href: '', key: 'nav.community', soon: true },
+  { href: '/press', key: 'footer.press' },
+  { href: '/faq', key: 'footer.faq' },
 ];
 
 const socials: { icon: IconName; key: string; href: string }[] = [
+  { icon: 'facebook', key: 'footer.facebook', href: 'https://www.facebook.com/' },
   { icon: 'linkedin', key: 'footer.linkedin', href: 'https://www.linkedin.com/' },
-  { icon: 'x', key: 'footer.x', href: 'https://x.com/' },
-  { icon: 'telegram', key: 'footer.telegram', href: 'https://t.me/' },
-  { icon: 'github', key: 'footer.github', href: 'https://github.com/' },
   { icon: 'youtube', key: 'footer.youtube', href: 'https://www.youtube.com/' },
+  { icon: 'instagram', key: 'footer.instagram', href: 'https://www.instagram.com/' },
+  { icon: 'x', key: 'footer.x', href: 'https://x.com/' },
 ];
 ---
 
@@ -28,9 +44,9 @@ const socials: { icon: IconName; key: string; href: string }[] = [
   <div class="shell foot__grid">
     <div class="foot__brand">
       <Brand />
-      <p class="foot__blurb" {...text('footer.blurb')}>{t('footer.blurb')}</p>
+      <p class="foot__tagline" {...text('footer.tagline')}>{t('footer.tagline')}</p>
       <div class="foot__social">
-        <h2 data-sr {...text('footer.social')}>{t('footer.social')}</h2>
+        <h2 class="foot__social-title" {...text('footer.social')}>{t('footer.social')}</h2>
         <ul class="foot__icons" role="list">
           {socials.map((s) => (
             <li>
@@ -42,12 +58,15 @@ const socials: { icon: IconName; key: string; href: string }[] = [
         </ul>
       </div>
     </div>
-    <FooterColumn titleKey="footer.product" links={product} />
+    <FooterColumn titleKey="footer.products" links={productLinks} />
     <FooterColumn titleKey="footer.company" links={company} />
+    <FooterColumn titleKey="footer.explore" links={explore} />
+    <FooterColumn titleKey="footer.resources" links={resources} />
     <FooterColumn titleKey="footer.legal" links={legal} />
   </div>
   <div class="shell foot__base">
     <p {...text('footer.rights')}>{t('footer.rights')}</p>
+    <a href="/site-map" class="foot__map" {...text('footer.siteMap')}>{t('footer.siteMap')}</a>
   </div>
 </footer>
 
@@ -73,15 +92,29 @@ const socials: { icon: IconName; key: string; href: string }[] = [
     max-width: 26rem;
   }
 
-  .foot__blurb {
+  .foot__tagline {
+    color: var(--ink-2);
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .foot__social {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .foot__social-title {
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0;
     color: var(--mute);
-    font-size: 0.94rem;
   }
 
   .foot__icons {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.3rem;
     margin: 0;
   }
 
@@ -90,6 +123,7 @@ const socials: { icon: IconName; key: string; href: string }[] = [
     place-items: center;
     width: 44px;
     height: 44px;
+    flex: none;
     border-radius: 50%;
     border: 1px solid var(--edge-strong);
     color: var(--ink-2);
@@ -110,6 +144,11 @@ const socials: { icon: IconName; key: string; href: string }[] = [
   }
 
   .foot__base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
     margin-top: clamp(2.5rem, 2rem + 3vw, 4rem);
     padding-block: 1.5rem 2rem;
     border-top: 1px solid var(--edge);
@@ -117,9 +156,21 @@ const socials: { icon: IconName; key: string; href: string }[] = [
     font-size: 0.86rem;
   }
 
-  @media (min-width: 64rem) {
+  .foot__map {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    transition: color 0.2s var(--ease);
+  }
+
+  .foot__map:hover {
+    color: var(--ink);
+  }
+
+  /* the brand sits over the link columns until there is room for all six side by side */
+  @media (min-width: 90rem) {
     .foot__grid {
-      grid-template-columns: 1.5fr repeat(3, 1fr);
+      grid-template-columns: minmax(15rem, 1.4fr) repeat(5, minmax(0, 1fr));
     }
 
     .foot__brand {

@@ -1,0 +1,86 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import type { IconName } from '../../lib/icons';
+
+const icons: IconName[] = ['radar', 'eye', 'database'];
+---
+
+<section class="band within">
+  <div class="shell within__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.within.title')}>{t('home.within.title')}</h2>
+    </div>
+    <ul class="within__grid" role="list">
+      {icons.map((icon, i) => (
+        <li class="within__item card" data-spot {...reveal()} style={`--d: ${i * 0.08}s`}>
+          <span class="within__icon" aria-hidden="true"><Icon name={icon} /></span>
+          <h3 class="within__title" {...text(`home.within.items.${i}.title`)}>{t(`home.within.items.${i}.title`)}</h3>
+          <p class="within__text" {...text(`home.within.items.${i}.text`)}>{t(`home.within.items.${i}.text`)}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .within__wrap {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .within__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .within__item {
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    padding: clamp(1.4rem, 1rem + 1vw, 2rem);
+  }
+
+  /* a light that follows the pointer, fed by --mx / --my */
+  .within__item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(22rem circle at var(--mx, 50%) var(--my, -30%), rgb(var(--aurora-3) / 0.16), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .within__item:hover::before {
+    opacity: 1;
+  }
+
+  .within__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    border: 1px solid var(--edge-strong);
+    background: linear-gradient(135deg, rgb(var(--aurora-3) / 0.22), rgb(var(--aurora-2) / 0.12));
+    color: var(--accent-ink);
+  }
+
+  .within__icon :global(svg) {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .within__title {
+    font-size: var(--step-2);
+  }
+
+  .within__text {
+    color: var(--ink-2);
+  }
+</style>

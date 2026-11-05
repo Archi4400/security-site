@@ -14,7 +14,16 @@ const { titleKey, links } = Astro.props;
   <h2 class="col__title" {...text(titleKey)}>{t(titleKey)}</h2>
   <ul class="col__list" role="list">
     {links.map((link) => (
-      <li><a href={link.href} class="col__link" {...text(link.key)}>{t(link.key)}</a></li>
+      <li>
+        {link.soon ? (
+          <span class="col__link col__link--soon">
+            <span {...text(link.key)}>{t(link.key)}</span>
+            <span class="col__soon" {...text('nav.soon')}>{t('nav.soon')}</span>
+          </span>
+        ) : (
+          <a href={link.href} class="col__link" {...text(link.key)}>{t(link.key)}</a>
+        )}
+      </li>
     ))}
   </ul>
 </div>
@@ -49,7 +58,22 @@ const { titleKey, links } = Astro.props;
     transition: color 0.2s var(--ease);
   }
 
-  .col__link:hover {
+  a.col__link:hover {
     color: var(--ink);
+  }
+
+  .col__link--soon {
+    flex-wrap: wrap;
+    gap: 0.1rem 0.45rem;
+    color: var(--mute);
+  }
+
+  .col__soon {
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
   }
 </style>

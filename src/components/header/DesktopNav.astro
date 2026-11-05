@@ -1,7 +1,7 @@
 ---
 import { label, t, text } from '../../engine';
 import Icon from '../Icon.astro';
-import { isCurrent, isGroup, navRoutes } from './navRoutes';
+import { ATTACK, isCurrent, isGroup, navRoutes } from './navRoutes';
 
 interface Props {
   path: string;
@@ -14,34 +14,59 @@ const { path } = Astro.props;
   <ul class="nav__list" role="list">
     {navRoutes.map((entry) => (
       <li class:list={['nav__item', isGroup(entry) && 'nav__item--group']}>
-        <a
-          href={entry.href}
-          class="nav__link"
-          aria-current={isCurrent(entry.href, path) ? 'page' : undefined}
-        >
-          <span {...text(entry.key)}>{t(entry.key)}</span>
-          {isGroup(entry) && <Icon name="chevron" class="nav__mark" />}
-        </a>
+        {entry.href ? (
+          <a
+            href={entry.href}
+            class="nav__link"
+            aria-current={isCurrent(entry.href, path) ? 'page' : undefined}
+          >
+            <span {...text(entry.key)}>{t(entry.key)}</span>
+            {isGroup(entry) && <Icon name="chevron" class="nav__mark" />}
+          </a>
+        ) : (
+          <button type="button" class="nav__link">
+            <span {...text(entry.key)}>{t(entry.key)}</span>
+            <Icon name="chevron" class="nav__mark" />
+          </button>
+        )}
         {isGroup(entry) && (
-          <div class="nav__panel">
+          <div class:list={['nav__panel', entry.items.length > 5 && 'nav__panel--wide']}>
             <ul class="nav__sub" role="list">
               {entry.items.map((item) => (
                 <li>
-                  <a href={item.href} class="nav__sublink" aria-current={path === item.href ? 'page' : undefined}>
-                    <span class="nav__subtitle" {...text(item.key)}>{t(item.key)}</span>
-                    {item.textKey && <span class="nav__subtext" {...text(item.textKey)}>{t(item.textKey)}</span>}
-                  </a>
+                  {item.soon ? (
+                    <span class="nav__sublink nav__sublink--soon">
+                      <span class="nav__subtitle">
+                        <span {...text(item.key)}>{t(item.key)}</span>
+                        <span class="nav__soon" {...text('nav.soon')}>{t('nav.soon')}</span>
+                      </span>
+                      {item.textKey && <span class="nav__subtext" {...text(item.textKey)}>{t(item.textKey)}</span>}
+                    </span>
+                  ) : (
+                    <a href={item.href} class="nav__sublink" aria-current={path === item.href ? 'page' : undefined}>
+                      <span class="nav__subtitle" {...text(item.key)}>{t(item.key)}</span>
+                      {item.textKey && <span class="nav__subtext" {...text(item.textKey)}>{t(item.textKey)}</span>}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
-            <a href={entry.href} class="nav__all">
-              <span {...text(entry.allKey)}>{t(entry.allKey)}</span>
-              <Icon name="arrow" />
-            </a>
+            {entry.href && entry.allKey && (
+              <a href={entry.href} class="nav__all">
+                <span {...text(entry.allKey)}>{t(entry.allKey)}</span>
+                <Icon name="arrow" />
+              </a>
+            )}
           </div>
         )}
       </li>
     ))}
+    <li class="nav__item">
+      <a href={ATTACK} class="nav__link nav__link--attack">
+        <span class="dot" aria-hidden="true"></span>
+        <span {...text('nav.attack')}>{t('nav.attack')}</span>
+      </a>
+    </li>
   </ul>
 </nav>
 
@@ -63,10 +88,24 @@ const { path } = Astro.props;
     gap: 0.3rem;
     min-height: 44px;
     padding: 0 0.5rem;
+    border: 0;
+    background: none;
     color: var(--ink-2);
     font-size: 0.95rem;
     white-space: nowrap;
+    cursor: pointer;
     transition: color 0.2s var(--ease);
+  }
+
+  .nav__link--attack {
+    gap: 0.45rem;
+  }
+
+  .nav__link--attack .dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    color: var(--bad);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
   }
 
   .nav__link:hover,
@@ -83,6 +122,7 @@ const { path } = Astro.props;
   }
 
   .nav__mark {
+    flex: none;
     width: 0.85rem;
     height: 0.85rem;
     transition: rotate 0.25s var(--ease);
@@ -124,10 +164,18 @@ const { path } = Astro.props;
       visibility 0s;
   }
 
+  .nav__panel--wide {
+    width: 38rem;
+  }
+
   .nav__sub {
     display: grid;
     gap: 0.1rem;
     margin: 0;
+  }
+
+  .nav__panel--wide .nav__sub {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .nav__sublink {
@@ -138,9 +186,28 @@ const { path } = Astro.props;
     transition: background-color 0.2s var(--ease);
   }
 
-  .nav__sublink:hover,
-  .nav__sublink:focus-visible {
+  a.nav__sublink:hover,
+  a.nav__sublink:focus-visible {
     background: var(--sheet-2);
+  }
+
+  .nav__sublink--soon {
+    color: var(--mute);
+  }
+
+  .nav__sublink--soon .nav__subtitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav__soon {
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--ink-2);
   }
 
   .nav__sublink[aria-current='page'] .nav__subtitle {

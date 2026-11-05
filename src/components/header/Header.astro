@@ -1,11 +1,12 @@
 ---
 import { menuDialog, pinned, t, text } from '../../engine';
-import { LOGIN, REGISTER } from '../../brand';
+import { LOGIN } from '../../brand';
 import Brand from '../Brand.astro';
 import Icon from '../Icon.astro';
 import DesktopNav from './DesktopNav.astro';
 import LangSwitcher from './LangSwitcher.astro';
 import MobileMenu from './MobileMenu.astro';
+import { DEMO } from './navRoutes';
 import ThemeSwitch from './ThemeSwitch.astro';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const { path } = Astro.props;
-const nav = menuDialog('nav', { closeAt: '(min-width: 72rem)' });
+const nav = menuDialog('nav', { closeAt: '(min-width: 80rem)' });
 ---
 
 <header {...pinned()} class="bar">
@@ -26,7 +27,7 @@ const nav = menuDialog('nav', { closeAt: '(min-width: 72rem)' });
         <ThemeSwitch id="theme" />
       </div>
       <a href={LOGIN} class="bar__login"><Icon name="user" /><span {...text('nav.login')}>{t('nav.login')}</span></a>
-      <a href={REGISTER} class="btn btn--line bar__cta"><span {...text('nav.cta')}>{t('nav.cta')}</span></a>
+      <a href={DEMO} class="btn btn--line bar__cta"><span {...text('nav.cta')}>{t('nav.cta')}</span></a>
       <button {...nav.opener()} class="burger"><Icon name="menu" /></button>
     </div>
   </div>
@@ -126,7 +127,7 @@ const nav = menuDialog('nav', { closeAt: '(min-width: 72rem)' });
     }
   }
 
-  @media (min-width: 72rem) {
+  @media (min-width: 80rem) {
     .bar__row {
       gap: 1.25rem;
     }

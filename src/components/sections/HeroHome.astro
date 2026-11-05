@@ -1,6 +1,6 @@
 ---
 import { t, text } from '../../engine';
-import { REGISTER } from '../../brand';
+import { DEMO } from '../header/navRoutes';
 import Aurora from '../Aurora.astro';
 import Icon from '../Icon.astro';
 import StatusPanel from '../StatusPanel.astro';
@@ -10,12 +10,11 @@ import StatusPanel from '../StatusPanel.astro';
   <Aurora intensity={1} scale={11} lean={0.06} fps={45} rise={0.9} />
   <div class="shell hero__grid">
     <div class="hero__copy">
-      <p class="hero__kicker" {...text('home.hero.kicker')}>{t('home.hero.kicker')}</p>
       <h1 class="hero__title" {...text('home.hero.title')}>{t('home.hero.title')}</h1>
       <p class="hero__lede lede" {...text('home.hero.lede')}>{t('home.hero.lede')}</p>
       <div class="hero__actions">
-        <a href={REGISTER} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span><Icon name="out" /></a>
-        <a href="#how" class="btn btn--line"><span {...text('home.hero.secondary')}>{t('home.hero.secondary')}</span></a>
+        <a href="#how" class="btn btn--line hero__learn"><span {...text('common.learn')}>{t('common.learn')}</span><Icon name="arrow" /></a>
+        <a href={DEMO} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span></a>
       </div>
     </div>
     <StatusPanel arrive class="hero__panel" data-lean />
@@ -54,14 +53,9 @@ import StatusPanel from '../StatusPanel.astro';
     max-width: 40rem;
   }
 
-  .hero__kicker {
-    font-weight: 500;
-    color: var(--ink-2);
-  }
-
   .hero__title {
-    font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
-    line-height: 1.02;
+    font-size: clamp(2.3rem, 1.5rem + 3vw, 3.75rem);
+    line-height: 1.04;
     letter-spacing: -0.03em;
   }
 
@@ -74,6 +68,11 @@ import StatusPanel from '../StatusPanel.astro';
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 0.6rem;
+  }
+
+  /* the arrow points on, not out: it moves along the line */
+  .hero__learn:hover :global(svg) {
+    translate: 3px 0;
   }
 
   .hero__panel {

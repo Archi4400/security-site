@@ -1,42 +1,36 @@
 ---
 import { reveal, t, text } from '../../engine';
 import Icon from '../Icon.astro';
-import { solutions } from '../../lib/solutions';
+import type { IconName } from '../../lib/icons';
 
-interface Props {
-  /** 2 where the cards follow the page's h1 directly. */
-  level?: 2 | 3;
-  /** Leaves this one out, for the "other solutions" row. */
-  except?: string;
-  withPortal?: boolean;
+export interface LinkCard {
+  href: string;
+  icon: IconName;
+  titleKey: string;
+  textKey: string;
 }
 
-const { except, withPortal = false, level = 3 } = Astro.props;
+interface Props {
+  items: LinkCard[];
+  /** 2 where the cards follow the page's h1 directly. */
+  level?: 2 | 3;
+}
+
+const { items, level = 3 } = Astro.props;
 const H = level === 2 ? 'h2' : 'h3';
-const list = solutions.filter((s) => s.key !== except);
 ---
 
 <ul class="sol" role="list">
-  {list.map((s, i) => (
+  {items.map((item, i) => (
     <li class="sol__cell" {...reveal()} style={`--d: ${(i % 3) * 0.07}s`}>
-      <a href={`/solutions/${s.slug}`} class="sol__card card">
-        <Icon name={s.icon} class="sol__icon" />
-        <H class="sol__title" {...text(`solutions.${s.key}.title`)}>{t(`solutions.${s.key}.title`)}</H>
-        <p class="sol__text" {...text(`solutions.${s.key}.lede`)}>{t(`solutions.${s.key}.lede`)}</p>
+      <a href={item.href} class="sol__card card">
+        <Icon name={item.icon} class="sol__icon" />
+        <H class="sol__title" {...text(item.titleKey)}>{t(item.titleKey)}</H>
+        <p class="sol__text" {...text(item.textKey)}>{t(item.textKey)}</p>
         <Icon name="arrow" class="sol__go" />
       </a>
     </li>
   ))}
-  {withPortal && (
-    <li class="sol__cell" {...reveal()}>
-      <a href="/portal" class="sol__card sol__card--portal card">
-        <Icon name="panel" class="sol__icon" />
-        <H class="sol__title" {...text('menu.portal.title')}>{t('menu.portal.title')}</H>
-        <p class="sol__text" {...text('portal.head.lede')}>{t('portal.head.lede')}</p>
-        <Icon name="arrow" class="sol__go" />
-      </a>
-    </li>
-  )}
 </ul>
 
 <style>
@@ -80,12 +74,6 @@ const list = solutions.filter((s) => s.key !== except);
 
   .sol__card:hover::after {
     opacity: 1;
-  }
-
-  .sol__card--portal {
-    background:
-      radial-gradient(100% 120% at 100% 100%, rgb(var(--aurora-2) / 0.18), transparent 60%),
-      var(--sheet);
   }
 
   .sol__icon {

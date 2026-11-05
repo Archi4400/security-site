@@ -1,11 +1,11 @@
 ---
 import { label, menuDialog, t, text } from '../../engine';
-import { LOGIN, REGISTER } from '../../brand';
+import { LOGIN } from '../../brand';
 import Brand from '../Brand.astro';
 import Icon from '../Icon.astro';
 import LangSwitcher from './LangSwitcher.astro';
 import ThemeSwitch from './ThemeSwitch.astro';
-import { isCurrent, isGroup, navRoutes, type NavEntry } from './navRoutes';
+import { ATTACK, DEMO, isCurrent, isGroup, navRoutes, type NavEntry } from './navRoutes';
 
 interface Props {
   nav: ReturnType<typeof menuDialog>;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { nav, path } = Astro.props;
-const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, path) || entry.items.some((item) => item.href === path));
+const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, path) || entry.items.some((item) => !item.soon && item.href === path));
 ---
 
 <dialog {...nav.dialog()} class="sheet">
@@ -28,9 +28,13 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
       {navRoutes.map((entry, i) => (
         <li class="sheet__item">
           <div class="sheet__row">
-            <a href={entry.href} id={`sheet-link-${i}`} class="sheet__link" aria-current={isCurrent(entry.href, path) ? 'page' : undefined} {...text(entry.key)}>
-              {t(entry.key)}
-            </a>
+            {entry.href ? (
+              <a href={entry.href} id={`sheet-link-${i}`} class="sheet__link" aria-current={isCurrent(entry.href, path) ? 'page' : undefined} {...text(entry.key)}>
+                {t(entry.key)}
+              </a>
+            ) : (
+              <span id={`sheet-link-${i}`} class="sheet__link" {...text(entry.key)}>{t(entry.key)}</span>
+            )}
             {isGroup(entry) && (
               <button type="button" class="sheet__toggle" aria-expanded={isOpen(entry) ? 'true' : 'false'} aria-controls={`sheet-sub-${i}`} aria-labelledby={`sheet-link-${i}`} data-sheet-toggle>
                 <Icon name="chevron" />
@@ -41,21 +45,34 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
             <ul class="sheet__sub" id={`sheet-sub-${i}`} role="list" hidden={!isOpen(entry)}>
               {entry.items.map((item) => (
                 <li>
-                  <a href={item.href} class="sheet__sublink" aria-current={path === item.href ? 'page' : undefined} {...text(item.key)}>
-                    {t(item.key)}
-                  </a>
+                  {item.soon ? (
+                    <span class="sheet__sublink sheet__sublink--soon">
+                      <span {...text(item.key)}>{t(item.key)}</span>
+                      <span class="sheet__soon" {...text('nav.soon')}>{t('nav.soon')}</span>
+                    </span>
+                  ) : (
+                    <a href={item.href} class="sheet__sublink" aria-current={path === item.href ? 'page' : undefined} {...text(item.key)}>
+                      {t(item.key)}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
           )}
         </li>
       ))}
+      <li class="sheet__item">
+        <a href={ATTACK} class="sheet__link sheet__link--attack">
+          <span class="dot" aria-hidden="true"></span>
+          <span {...text('nav.attack')}>{t('nav.attack')}</span>
+        </a>
+      </li>
     </ul>
   </nav>
 
   <div class="sheet__account">
     <a href={LOGIN} class="btn btn--line"><Icon name="user" /><span {...text('nav.login')}>{t('nav.login')}</span></a>
-    <a href={REGISTER} class="btn btn--solid"><span {...text('nav.register')}>{t('nav.register')}</span></a>
+    <a href={DEMO} class="btn btn--solid"><span {...text('nav.cta')}>{t('nav.cta')}</span></a>
   </div>
 
   <div class="sheet__prefs">
@@ -201,6 +218,29 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
     align-items: center;
     min-height: 40px;
     color: var(--ink-2);
+  }
+
+  .sheet__sublink--soon {
+    gap: 0.5rem;
+    color: var(--mute);
+  }
+
+  .sheet__soon {
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .sheet__link--attack {
+    gap: 0.6rem;
+  }
+
+  .sheet__link--attack .dot {
+    color: var(--bad);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
   }
 
   .sheet__account {

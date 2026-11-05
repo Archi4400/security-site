@@ -10,7 +10,7 @@ Requires Node 22.12 or newer.
 
 | Variable   | When        | What                                                                 |
 | ---------- | ----------- | -------------------------------------------------------------------- |
-| `PLATFORM` | build time  | Where "Log in", "Request access" and the other account buttons lead. |
+| `PLATFORM` | build time  | Where the "Log in" buttons lead.                                     |
 
 Copy `.env.example` to `.env` and set it. Without it the buttons point to the
 placeholder `https://companyname.example`.

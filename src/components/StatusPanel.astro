@@ -26,7 +26,7 @@ const score = countUp(`score-${arrive ? 'hero' : 'page'}`, 82);
   <div class="status__grid">
     <div class="status__score">
       <div class="status__ring" style="--p: 82">
-        <span class="status__num mono"><span {...score.root()}><span {...score.value()}>{score.text}</span><span {...score.digits()} /></span></span>
+        <span class="status__num mono"><span {...score.root()}><span {...score.value()}>{score.text}</span><span {...score.digits()} /></span><span class="status__unit">%</span></span>
       </div>
       <span class="status__label" {...text('panel.score')}>{t('panel.score')}</span>
       <span class="status__formula" {...text('panel.formula')}>{t('panel.formula')}</span>
@@ -43,9 +43,9 @@ const score = countUp(`score-${arrive ? 'hero' : 'page'}`, 82);
     </ul>
   </div>
   <dl class="status__stats">
-    <div><dt {...text('panel.rules')}>{t('panel.rules')}</dt><dd class="mono">34</dd></div>
+    <div><dt {...text('panel.projects')}>{t('panel.projects')}</dt><dd class="mono">3</dd></div>
     <div><dt {...text('panel.open')}>{t('panel.open')}</dt><dd class="mono">3</dd></div>
-    <div><dt {...text('panel.waf')}>{t('panel.waf')}</dt><dd class="mono" {...text('panel.wafValue')}>{t('panel.wafValue')}</dd></div>
+    <div><dt {...text('panel.decoys')}>{t('panel.decoys')}</dt><dd class="mono">12</dd></div>
   </dl>
   <figcaption class="status__cap note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
 </figure>
@@ -105,8 +105,15 @@ const score = countUp(`score-${arrive ? 'hero' : 'page'}`, 82);
   }
 
   .status__num {
+    display: flex;
+    align-items: baseline;
     font-size: 1.75rem;
     font-weight: 500;
+  }
+
+  .status__unit {
+    font-size: 0.55em;
+    color: var(--mute);
   }
 
   .status__num :global([data-count]) {

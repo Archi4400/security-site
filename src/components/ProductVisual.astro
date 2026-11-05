@@ -1,0 +1,362 @@
+---
+import { t, text } from '../engine';
+import { BRAND } from '../brand';
+import Icon from './Icon.astro';
+import type { IconName } from '../lib/icons';
+import type { Product } from '../lib/products';
+
+interface Props {
+  k: Product['key'];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { k, class: cls, ...rest } = Astro.props;
+
+/** Three stops of what the product watches; the names are identifiers, so they stay untranslated. */
+const flows: Record<Product['key'], { name: string; icon: IconName; state?: 'ok' | 'warn' }[]> = {
+  single: [
+    { name: 'my-site.com', icon: 'site', state: 'ok' },
+    { name: 'wp-admin', icon: 'key', state: 'warn' },
+    { name: BRAND, icon: 'shield' },
+  ],
+  manga: [
+    { name: 'CRM', icon: 'database', state: 'ok' },
+    { name: 'export.csv', icon: 'export', state: 'warn' },
+    { name: BRAND, icon: 'pulse' },
+  ],
+  grex: [
+    { name: 'client-a', icon: 'site', state: 'ok' },
+    { name: 'client-b', icon: 'database', state: 'warn' },
+    { name: 'client-c', icon: 'site', state: 'ok' },
+  ],
+  reserve: [
+    { name: 'v12', icon: 'shield', state: 'ok' },
+    { name: '/checkout', icon: 'site', state: 'warn' },
+    { name: 'recovery-01', icon: 'restore' },
+  ],
+};
+const nodes = flows[k];
+---
+
+<figure class:list={['pv panel', cls]} {...rest}>
+  <div class="pv__bar" aria-hidden="true">
+    <Icon name="bolt" class="pv__mark" />
+  </div>
+  <div class="pv__flow">
+    {nodes.map((n, i) => (
+      <div class="pv__node">
+        <span class:list={['pv__ring', n.state && `pv__ring--${n.state}`]}>
+          <Icon name={n.icon} />
+          {n.state && (
+            <span class="pv__badge" aria-hidden="true"><Icon name={n.state === 'ok' ? 'check' : 'alert'} /></span>
+          )}
+        </span>
+        <span class="pv__name mono">{n.name}</span>
+        <span class="pv__sub" {...text(`products.${k}.visual.n${i + 1}`)}>{t(`products.${k}.visual.n${i + 1}`)}</span>
+      </div>
+    ))}
+  </div>
+  <div class="pv__note">
+    <span class="pv__note-icon" aria-hidden="true"><Icon name="alert" /></span>
+    <div class="pv__note-body">
+      <p class="pv__note-title" {...text(`products.${k}.visual.title`)}>{t(`products.${k}.visual.title`)}</p>
+      <p class="pv__note-text" {...text(`products.${k}.visual.text`)}>{t(`products.${k}.visual.text`)}</p>
+    </div>
+  </div>
+  <figcaption class="pv__cap note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+</figure>
+
+<style>
+  .pv {
+    --ring: clamp(3.25rem, 2.4rem + 6cqi, 4.75rem);
+    container-type: inline-size;
+    display: grid;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .pv__bar {
+    display: flex;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .pv__mark {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--accent-ink);
+  }
+
+  /* a dotted floor under the flow, like a canvas */
+  .pv__flow {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: clamp(1.75rem, 1rem + 4cqi, 3rem) clamp(0.75rem, 0.25rem + 3cqi, 2rem);
+    background-image: radial-gradient(circle, var(--edge-strong) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+  }
+
+  /* the line that joins the rings, drawn through their centres */
+  .pv__flow::before {
+    content: '';
+    position: absolute;
+    left: calc(100% / 6);
+    right: calc(100% / 6);
+    top: calc(clamp(1.75rem, 1rem + 4cqi, 3rem) + var(--ring) / 2);
+    height: 2px;
+    background: linear-gradient(90deg, rgb(var(--aurora-3)), rgb(var(--aurora-2)), rgb(var(--aurora-1)));
+    opacity: 0.7;
+  }
+
+  /* a packet of data riding the line from the first ring to the last, under the rings */
+  .pv__flow::after {
+    content: '';
+    position: absolute;
+    left: calc(100% / 6);
+    top: calc(clamp(1.75rem, 1rem + 4cqi, 3rem) + var(--ring) / 2 + 1px);
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 25%, rgb(var(--aurora-2)) 70%);
+    box-shadow: 0 0 12px 3px rgb(var(--aurora-2) / 0.65);
+    animation: pv-packet 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  @keyframes pv-packet {
+    0% {
+      left: calc(100% / 6);
+      opacity: 0;
+    }
+    10%,
+    90% {
+      opacity: 1;
+    }
+    100% {
+      left: calc(500% / 6);
+      opacity: 0;
+    }
+  }
+
+  .pv__node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .pv__ring {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--ring);
+    aspect-ratio: 1;
+    margin-bottom: 0.4rem;
+    border-radius: 50%;
+    border: 2px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--ink);
+  }
+
+  .pv__ring > :global(svg) {
+    width: 42%;
+    height: 42%;
+  }
+
+  .pv__ring--ok {
+    border-color: color-mix(in oklab, var(--ok) 70%, transparent);
+  }
+
+  .pv__ring--warn {
+    border-color: color-mix(in oklab, var(--warn) 80%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--warn) 12%, transparent);
+  }
+
+  /* the ring that needs attention keeps sending out a ripple */
+  .pv__ring--warn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    border-radius: 50%;
+    border: 2px solid var(--warn);
+    opacity: 0;
+    animation: pv-ripple 2.4s ease-out infinite;
+  }
+
+  @keyframes pv-ripple {
+    0% {
+      opacity: 0.7;
+      scale: 1;
+    }
+    70%,
+    100% {
+      opacity: 0;
+      scale: 1.6;
+    }
+  }
+
+  .pv__badge {
+    position: absolute;
+    right: -0.2rem;
+    bottom: -0.2rem;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--sheet);
+    color: var(--ground);
+  }
+
+  .pv__ring--ok .pv__badge {
+    background: var(--ok);
+  }
+
+  .pv__ring--warn .pv__badge {
+    background: var(--warn);
+  }
+
+  .pv__badge :global(svg) {
+    width: 0.8rem;
+    height: 0.8rem;
+    stroke-width: 2.6;
+  }
+
+  .pv__name {
+    max-width: 100%;
+    font-size: clamp(0.74rem, 0.6rem + 1cqi, 0.92rem);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+
+  .pv__sub {
+    font-size: 0.76rem;
+    color: var(--mute);
+    line-height: 1.3;
+  }
+
+  .pv__note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+    margin: 0 clamp(0.75rem, 0.25rem + 3cqi, 1.5rem);
+    padding: 1rem;
+    border-radius: var(--radius-s);
+    border: 1px solid color-mix(in oklab, var(--warn) 35%, var(--edge));
+    background: color-mix(in oklab, var(--warn) 6%, var(--sheet));
+  }
+
+  .pv__note-icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-s);
+    background: color-mix(in oklab, var(--warn) 18%, transparent);
+    color: var(--warn);
+  }
+
+  .pv__note-icon :global(svg) {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .pv__note-body {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .pv__note-title {
+    font-weight: 500;
+  }
+
+  .pv__note-text {
+    color: var(--ink-2);
+    font-size: 0.9rem;
+  }
+
+  .pv__cap {
+    padding: 0.9rem clamp(0.75rem, 0.25rem + 3cqi, 1.5rem) 1rem;
+    font-size: 0.76rem;
+  }
+
+  /* the picture plays in when it is first seen, and again whenever it is shown (a tab picked):
+     the rings pop one after another, the line draws between them, the badges and the note follow */
+  @media (prefers-reduced-motion: no-preference) {
+    .pv:not([data-reveal-wait] .pv) .pv__node {
+      animation: pv-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__node:nth-child(2) {
+      animation-delay: 0.42s;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__node:nth-child(3) {
+      animation-delay: 0.54s;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__flow::before {
+      transform-origin: left;
+      animation: pv-line 0.8s var(--ease) 0.35s both;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__badge {
+      animation: pv-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__note {
+      animation: pv-rise 0.6s var(--ease) 0.85s both;
+    }
+
+    .pv:not([data-reveal-wait] .pv) .pv__cap {
+      animation: pv-fade 0.6s ease 1s both;
+    }
+  }
+
+  @keyframes pv-pop {
+    from {
+      opacity: 0;
+      scale: 0.4;
+    }
+  }
+
+  @keyframes pv-line {
+    from {
+      scale: 0 1;
+    }
+  }
+
+  @keyframes pv-rise {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+      filter: blur(4px);
+    }
+  }
+
+  @keyframes pv-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pv__flow::after,
+    .pv__ring--warn::after {
+      animation: none;
+    }
+
+    .pv__flow::after {
+      display: none;
+    }
+  }
+</style>
