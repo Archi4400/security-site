@@ -1,0 +1,328 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import type { IconName } from '../../lib/icons';
+
+/**
+ * One pass of the pulse is a cycle: the first mark lights, a comet runs to the second, it lights,
+ * a comet runs to the third, it lights, then a rest. `at` is where in the cycle each mark lights;
+ * the comet leaving a mark starts a little after it and takes RUN of the cycle to arrive.
+ */
+const RUN = 0.35;
+const steps: { icon: IconName; tone: number; at: number }[] = [
+  { icon: 'plug', tone: 3, at: 0.06 },
+  { icon: 'eye', tone: 2, at: 0.45 },
+  { icon: 'bolt', tone: 1, at: 0.8 },
+];
+---
+
+<section class="band how" id="how">
+  <div class="shell how__wrap">
+    <div class="head head--centre" {...reveal()}>
+      <h2 {...text('home.how.title')}>{t('home.how.title')}</h2>
+    </div>
+    <ol class="how__steps" role="list" style={`--run: ${RUN}`}>
+      {steps.map((step, i) => {
+        const next = steps[i + 1];
+        return (
+          <li class="how__step" {...reveal()} style={`--d: ${i * 0.1}s; --at: ${step.at}; --tone: var(--aurora-${step.tone})`}>
+            {next && (
+              <span class="how__link" aria-hidden="true" style={`--from: var(--aurora-${step.tone}); --to: var(--aurora-${next.tone}); --go: ${next.at - RUN}`}>
+                <span class="how__comet"></span>
+              </span>
+            )}
+            <span class="how__mark" aria-hidden="true">
+              <Icon name={step.icon} />
+            </span>
+            <span class="how__num mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="how__title" {...text(`home.how.steps.${i}.title`)}>{t(`home.how.steps.${i}.title`)}</h3>
+            <p class="how__text" {...text(`home.how.steps.${i}.text`)}>{t(`home.how.steps.${i}.text`)}</p>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how {
+    scroll-margin-top: var(--header-h);
+  }
+
+  .how__wrap {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  }
+
+  .how__steps {
+    --cycle: 5.5s;
+    --gap: 2rem;
+    --mark: 3.5rem;
+    position: relative;
+    display: grid;
+    gap: var(--gap);
+    margin: 0;
+  }
+
+  .how__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'mark num'
+      'mark title'
+      'mark text';
+    column-gap: 1.25rem;
+    row-gap: 0.35rem;
+    align-content: start;
+  }
+
+  .how__mark {
+    grid-area: mark;
+    align-self: start;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--mark);
+    height: var(--mark);
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--accent-ink);
+    box-shadow:
+      0 0 0 6px var(--ground),
+      0 20px 60px var(--panel-glow);
+    animation: how-lit var(--cycle) var(--ease) infinite;
+    animation-delay: calc(var(--cycle) * var(--at));
+  }
+
+  .how__mark :global(svg) {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  /* the ripple a mark sends out when the pulse reaches it */
+  .how__mark::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 2px solid rgb(var(--tone));
+    opacity: 0;
+    pointer-events: none;
+    animation: how-ping var(--cycle) ease-out infinite;
+    animation-delay: calc(var(--cycle) * var(--at));
+  }
+
+  .how__num {
+    grid-area: num;
+    font-size: 0.8rem;
+    color: var(--mute);
+    animation: how-num var(--cycle) var(--ease) infinite;
+    animation-delay: calc(var(--cycle) * var(--at));
+  }
+
+  .how__title {
+    grid-area: title;
+    font-size: var(--step-2);
+  }
+
+  .how__text {
+    grid-area: text;
+    color: var(--ink-2);
+    max-width: 22rem;
+  }
+
+  /* from this mark's centre to the next one's: down on a phone, across on a wide screen */
+  /* the box is clipped only along the line, where the marks cover its ends; across it, it is wide
+     enough (--glow) that the comet's glow fades out before reaching its edge */
+  .how__link {
+    --glow: 4rem;
+    position: absolute;
+    left: calc(var(--mark) / 2 - var(--glow) / 2);
+    top: calc(var(--mark) / 2);
+    width: var(--glow);
+    height: calc(100% + var(--gap));
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .how__link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(var(--from)), rgb(var(--to))) no-repeat center / 2px 100%;
+    opacity: 0.45;
+  }
+
+  /* the comet: a tail that brightens into a glowing head */
+  .how__comet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 32%;
+    translate: 0 -100%;
+    animation: how-run-y var(--cycle) linear infinite;
+    animation-delay: calc(var(--cycle) * var(--go));
+  }
+
+  .how__comet::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent, rgb(var(--from)) 60%, rgb(var(--to))) no-repeat center / 3px 100%;
+  }
+
+  .how__comet::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    margin: 0 0 -5px -5px;
+    border-radius: 50%;
+    background: rgb(var(--to));
+    box-shadow:
+      0 0 8px 2px rgb(var(--to) / 0.8),
+      0 0 18px 6px rgb(var(--to) / 0.35);
+  }
+
+  /* the comet's head travels from the start of the link to its end in --run of the cycle */
+  @keyframes how-run-y {
+    0% {
+      translate: 0 -100%;
+      opacity: 1;
+    }
+    35% {
+      translate: 0 212.5%;
+      opacity: 1;
+    }
+    40%,
+    100% {
+      translate: 0 212.5%;
+      opacity: 0;
+    }
+  }
+
+  @keyframes how-run-x {
+    0% {
+      translate: -100% 0;
+      opacity: 1;
+    }
+    35% {
+      translate: 212.5% 0;
+      opacity: 1;
+    }
+    40%,
+    100% {
+      translate: 212.5% 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes how-ping {
+    0% {
+      opacity: 0.9;
+      scale: 1;
+    }
+    22%,
+    100% {
+      opacity: 0;
+      scale: 1.75;
+    }
+  }
+
+  @keyframes how-lit {
+    0%,
+    100% {
+      border-color: var(--edge-strong);
+    }
+    4% {
+      border-color: rgb(var(--tone));
+      box-shadow:
+        0 0 0 6px var(--ground),
+        0 0 32px 4px rgb(var(--tone) / 0.45);
+    }
+    30% {
+      border-color: var(--edge-strong);
+      box-shadow:
+        0 0 0 6px var(--ground),
+        0 20px 60px var(--panel-glow);
+    }
+  }
+
+  @keyframes how-num {
+    0%,
+    30%,
+    100% {
+      color: var(--mute);
+    }
+    4% {
+      color: var(--accent-ink);
+    }
+  }
+
+  @media (min-width: 52rem) {
+    .how__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .how__step {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'mark'
+        'num'
+        'title'
+        'text';
+      justify-items: center;
+      text-align: center;
+      row-gap: 0.5rem;
+    }
+
+    .how__mark {
+      margin-bottom: 0.75rem;
+    }
+
+    .how__link {
+      left: 50%;
+      top: calc(var(--mark) / 2 - var(--glow) / 2);
+      width: calc(100% + var(--gap));
+      height: var(--glow);
+    }
+
+    .how__link::before {
+      background: linear-gradient(90deg, rgb(var(--from)), rgb(var(--to))) no-repeat center / 100% 2px;
+    }
+
+    .how__comet {
+      width: 32%;
+      height: 100%;
+      translate: -100% 0;
+      animation-name: how-run-x;
+    }
+
+    .how__comet::before {
+      background: linear-gradient(90deg, transparent, rgb(var(--from)) 60%, rgb(var(--to))) no-repeat center / 100% 3px;
+    }
+
+    .how__comet::after {
+      left: auto;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      margin: -5px -5px 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .how__mark,
+    .how__mark::after,
+    .how__num,
+    .how__comet {
+      animation: none;
+    }
+  }
+</style>

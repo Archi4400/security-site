@@ -1,0 +1,289 @@
+---
+import { label, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import SolutionVisual from '../SolutionVisual.astro';
+import { solutions } from '../../lib/solutions';
+---
+
+<section class="band st" id="solutions">
+  <div class="shell st__wrap">
+    <div class="head" {...reveal()}>
+      <h2 {...text('home.solutions.title')}>{t('home.solutions.title')}</h2>
+      <p {...text('solutions.head.lede')}>{t('solutions.head.lede')}</p>
+    </div>
+
+    <div class="st__stage" data-tabs data-exit="380" {...reveal()}>
+      <div class="st__tabs" role="group" {...label('home.solutions.label')}>
+        {solutions.map((s, i) => (
+          <button type="button" class="st__tab" aria-pressed={i === 0 ? 'true' : 'false'} data-tab={s.key}>
+            <Icon name={s.icon} class="st__tab-icon" />
+            <span {...text(`solutions.${s.key}.title`)}>{t(`solutions.${s.key}.title`)}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="st__frame">
+        {solutions.map((s, i) => (
+          <div class="st__pane" data-pane={s.key} hidden={i !== 0}>
+            <div class="st__copy">
+              <h3 class="st__title" {...text(`solutions.${s.key}.title`)}>{t(`solutions.${s.key}.title`)}</h3>
+              <p class="st__text" {...text(`solutions.${s.key}.text`)}>{t(`solutions.${s.key}.text`)}</p>
+              <a href={`/solutions/${s.slug}`} class="link st__more">
+                <span {...text('common.learn')}>{t('common.learn')}</span>
+                <Icon name="arrow" />
+              </a>
+            </div>
+            <SolutionVisual k={s.key} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .st {
+    border-top: 1px solid var(--edge);
+    background: var(--ground-2);
+  }
+
+  .st__wrap {
+    display: grid;
+    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .st__stage {
+    display: grid;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* a phone scrolls the list sideways; a wide screen stands it up on the left */
+  .st__tabs {
+    display: flex;
+    gap: 0.4rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+  }
+
+  .st__tab {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--sheet);
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 0.25s var(--ease),
+      border-color 0.25s var(--ease),
+      color 0.25s var(--ease);
+  }
+
+  .st__tab:hover {
+    color: var(--ink);
+    border-color: var(--edge-strong);
+  }
+
+  .st__tab[aria-pressed='true'] {
+    color: var(--ink);
+    border-color: color-mix(in oklab, var(--accent) 55%, var(--edge-strong));
+    background: color-mix(in oklab, var(--accent) 14%, var(--sheet));
+  }
+
+  .st__tab-icon {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--mute);
+  }
+
+  .st__tab[aria-pressed='true'] .st__tab-icon {
+    color: var(--accent-ink);
+  }
+
+  .st__frame {
+    display: grid;
+    min-width: 0;
+  }
+
+  /* the panes share one cell, so the one leaving and the one arriving can cross */
+  .st__pane {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+    min-width: 0;
+  }
+
+  /* the list stands upright, so a solution further down comes up from below, one above drops from above */
+  .st__stage {
+    --from: 2.5rem;
+  }
+
+  .st__stage[data-dir='prev'] {
+    --from: -2.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .st__pane[data-leaving] {
+      pointer-events: none;
+      animation: st-out 0.38s var(--ease) both;
+    }
+
+    .st__stage:not([data-reveal-wait]) .st__pane:not([hidden], [data-leaving]) .st__copy > * {
+      animation: st-rise 0.55s var(--ease) both;
+    }
+
+    .st__stage:not([data-reveal-wait]) .st__pane:not([hidden], [data-leaving]) .st__copy > :nth-child(2) {
+      animation-delay: 0.06s;
+    }
+
+    .st__stage:not([data-reveal-wait]) .st__pane:not([hidden], [data-leaving]) .st__copy > :nth-child(3) {
+      animation-delay: 0.12s;
+    }
+
+    .st__stage:not([data-reveal-wait]) .st__pane:not([hidden], [data-leaving]) :global(.sv) {
+      animation: st-visual 0.7s var(--ease) 0.06s both;
+    }
+
+    .st__tab[aria-pressed='true'] .st__tab-icon {
+      animation: st-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  }
+
+  @keyframes st-out {
+    to {
+      opacity: 0;
+      translate: 0 calc(var(--from) * -0.6);
+      filter: blur(6px);
+    }
+  }
+
+  @keyframes st-rise {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+      filter: blur(4px);
+    }
+  }
+
+  @keyframes st-visual {
+    from {
+      opacity: 0;
+      translate: 0 var(--from);
+      scale: 0.97;
+      filter: blur(8px);
+    }
+  }
+
+  @keyframes st-pop {
+    from {
+      scale: 0.4;
+    }
+  }
+
+  @keyframes st-bar {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  .st__copy {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+  }
+
+  .st__title {
+    font-size: var(--step-2);
+  }
+
+  .st__text {
+    color: var(--ink-2);
+    font-size: var(--step-1);
+    max-width: 40rem;
+  }
+
+  .st__more {
+    color: var(--accent-ink);
+  }
+
+  html:not(.js) .st__tabs {
+    display: none;
+  }
+
+  html:not(.js) .st__pane[hidden] {
+    display: grid;
+    padding-top: 2.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .st__stage {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+      gap: clamp(2rem, 1rem + 3vw, 4rem);
+    }
+
+    .st__tabs {
+      position: sticky;
+      top: var(--pinned-offset);
+      flex-direction: column;
+      gap: 0;
+      overflow: visible;
+      padding: 0.4rem;
+      border: 1px solid var(--edge);
+      border-radius: var(--radius);
+      background: var(--sheet);
+    }
+
+    .st__tab {
+      min-height: 3.5rem;
+      padding: 0.75rem 1rem;
+      border: 0;
+      border-radius: var(--radius-s);
+      background: none;
+    }
+
+    .st__tab[aria-pressed='true'] {
+      background: color-mix(in oklab, var(--accent) 14%, var(--sheet));
+    }
+
+    /* the pressed tab carries a bar on its left edge */
+    .st__tab[aria-pressed='true']::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.7rem;
+      bottom: 0.7rem;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgb(var(--aurora-3)), rgb(var(--aurora-2)));
+      animation: st-bar 0.4s var(--ease);
+    }
+
+    .st__frame {
+      min-height: 34rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .st__tab[aria-pressed='true']::before {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { wireTabs } from '../../lib/tabs';
+
+  wireTabs();
+</script>

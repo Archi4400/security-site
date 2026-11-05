@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import PageHead from '../components/sections/PageHead.astro';
 import { t, text } from '../engine';
 import { aboutLinks, solutionLinks, type NavLink } from '../components/header/navRoutes';
+import { products } from '../lib/products';
 import { posts } from '../lib/posts';
 
 const groups: { key: string; links: NavLink[] }[] = [
@@ -13,6 +14,10 @@ const groups: { key: string; links: NavLink[] }[] = [
       { href: '/pricing', key: 'nav.pricing' },
       { href: '/contact', key: 'nav.contact' },
     ],
+  },
+  {
+    key: 'nav.products',
+    links: [{ href: '/products', key: 'nav.productsAll' }, ...products.map((p) => ({ href: `/products/${p.slug}`, key: `products.${p.key}.name` }))],
   },
   { key: 'nav.solutions', links: [{ href: '/solutions', key: 'nav.solutionsAll' }, ...solutionLinks] },
   { key: 'nav.about', links: aboutLinks },

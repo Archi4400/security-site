@@ -1,0 +1,17 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHead from '../../components/sections/PageHead.astro';
+import LinkCards from '../../components/sections/LinkCards.astro';
+import CloseCall from '../../components/sections/CloseCall.astro';
+import { productCards } from '../../lib/products';
+---
+
+<Layout metaKey="meta.products" path="/products">
+  <PageHead titleKey="products.head.title" ledeKey="products.head.lede" kickerKey="nav.products" />
+  <section class="band">
+    <div class="shell">
+      <LinkCards items={productCards()} level={2} />
+    </div>
+  </section>
+  <CloseCall />
+</Layout>

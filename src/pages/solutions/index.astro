@@ -1,15 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PageHead from '../../components/sections/PageHead.astro';
-import SolutionCards from '../../components/sections/SolutionCards.astro';
+import LinkCards from '../../components/sections/LinkCards.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
+import { solutionCards } from '../../lib/solutions';
 ---
 
 <Layout metaKey="meta.solutions" path="/solutions">
   <PageHead titleKey="solutions.head.title" ledeKey="solutions.head.lede" kickerKey="nav.solutions" />
   <section class="band">
     <div class="shell">
-      <SolutionCards withPortal level={2} />
+      <LinkCards items={solutionCards()} level={2} />
     </div>
   </section>
   <CloseCall />

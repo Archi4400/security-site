@@ -2,7 +2,7 @@
 import { select, t, text } from '../../engine';
 import Icon from '../Icon.astro';
 
-const topics = (['access', 'pricing', 'reseller', 'press', 'careers', 'other'] as const).map((v) => ({
+const topics = (['demo', 'attack', 'pricing', 'reseller', 'press', 'careers', 'other'] as const).map((v) => ({
   value: v,
   key: `contact.topics.${v}`,
 }));
@@ -305,6 +305,15 @@ const fields = [
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-form-root]')) {
     const form = root.querySelector<HTMLFormElement>('[data-form]');
+
+    // a link such as /contact?topic=attack arrives with its topic already chosen
+    const asked = new URLSearchParams(location.search).get('topic');
+    const native = form?.querySelector<HTMLSelectElement>('select[name="topic"]');
+    if (asked && native && Array.from(native.options).some((o) => o.value === asked) && native.value !== asked) {
+      native.value = asked;
+      native.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     const status = root.querySelector<HTMLElement>('[data-status]');
     const done = root.querySelector<HTMLElement>('[data-done]');
     const doneTitle = root.querySelector<HTMLElement>('[data-done-title]');

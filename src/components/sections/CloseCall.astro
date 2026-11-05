@@ -1,6 +1,6 @@
 ---
 import { reveal, t, text } from '../../engine';
-import { REGISTER } from '../../brand';
+import { DEMO } from '../header/navRoutes';
 import Aurora from '../Aurora.astro';
 import Icon from '../Icon.astro';
 ---
@@ -11,7 +11,7 @@ import Icon from '../Icon.astro';
     <h2 class="close__title" {...text('close.title')}>{t('close.title')}</h2>
     <p class="close__lede lede" {...text('close.lede')}>{t('close.lede')}</p>
     <div class="close__actions">
-      <a href={REGISTER} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span><Icon name="out" /></a>
+      <a href={DEMO} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span><Icon name="arrow" /></a>
       <a href="/contact" class="btn btn--line"><span {...text('common.contact')}>{t('common.contact')}</span></a>
     </div>
   </div>

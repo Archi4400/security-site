@@ -1,0 +1,739 @@
+---
+import { t, text } from '../engine';
+import Icon from './Icon.astro';
+import type { Solution } from '../lib/solutions';
+
+interface Props {
+  k: Solution['key'];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { k, class: cls, ...rest } = Astro.props;
+const u = (key: string) => `solutions.${k}.ui.${key}`;
+
+/** Who or what the window is about; identifiers, so they stay untranslated. */
+const subjects: Record<Solution['key'], string> = {
+  theft: 'l.moreno@example.com',
+  behavior: 'd.reyes',
+  scanning: 'admin.my-store.com',
+  fingerprint: 'a.kim',
+  codescan: 'feature/checkout · 9f3c2a1',
+  camp: '/checkout',
+  records: 'm.ortega',
+};
+---
+
+<figure class:list={['sv panel', `sv--${k}`, cls]} {...rest}>
+  <div class="sv__bar">
+    <span class="sv__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+    <span class="sv__title" {...text(u('title'))}>{t(u('title'))}</span>
+    <span class="chip sv__subject">{subjects[k]}</span>
+  </div>
+
+  <div class="sv__body">
+    {k === 'theft' && (
+      <>
+        <div class="sv__row sv__row--plain">
+          <span class="sv__avatar" aria-hidden="true">LM</span>
+          <span class="sv__stack">
+            <span class="sv__strong">Laura Moreno</span>
+            <span class="sv__muted" {...text(u('place'))}>{t(u('place'))}</span>
+          </span>
+          <span class="sv__tag sev--mid" {...text(u('state'))}>{t(u('state'))}</span>
+        </div>
+        <ul class="sv__list" role="list">
+          <li class="sv__row">
+            <Icon name="mail" class="sv__icon" />
+            <span {...text(u('e1'))}>{t(u('e1'))}</span>
+            <span class="sv__time mono" {...text(u('t1'))}>{t(u('t1'))}</span>
+          </li>
+          <li class="sv__row">
+            <Icon name="phone" class="sv__icon" />
+            <span {...text(u('e2'))}>{t(u('e2'))}</span>
+            <span class="sv__time mono" {...text(u('t2'))}>{t(u('t2'))}</span>
+          </li>
+        </ul>
+        <p class="sv__verdict sv__verdict--high"><span class="dot" aria-hidden="true"></span><span {...text(u('alert'))}>{t(u('alert'))}</span></p>
+      </>
+    )}
+
+    {k === 'behavior' && (
+      <ol class="sv__timeline" role="list">
+        <li class="sv__row">
+          <span class="sv__time mono">21:58</span>
+          <span {...text(u('e1'))}>{t(u('e1'))}</span>
+        </li>
+        <li class="sv__row sv__row--flag">
+          <span class="sv__time mono">22:04</span>
+          <span {...text(u('e2'))}>{t(u('e2'))}</span>
+        </li>
+        <li class="sv__row sv__row--flag">
+          <span class="sv__time mono">22:11</span>
+          <span {...text(u('e3'))}>{t(u('e3'))}</span>
+        </li>
+        <li class="sv__flag"><span class="dot sev--mid" aria-hidden="true"></span><span {...text(u('flag'))}>{t(u('flag'))}</span></li>
+      </ol>
+    )}
+
+    {k === 'scanning' && (
+      <>
+        <ul class="sv__list" role="list">
+          {[
+            { n: 1, sev: 'high' },
+            { n: 2, sev: 'mid' },
+            { n: 3, sev: 'mid' },
+          ].map((r) => (
+            <li class="sv__row">
+              <span class={`dot sev--${r.sev}`} aria-hidden="true"></span>
+              <span class="sv__stack">
+                <span class="sv__strong" {...text(u(`r${r.n}`))}>{t(u(`r${r.n}`))}</span>
+                <span class="sv__muted" {...text(u(`d${r.n}`))}>{t(u(`d${r.n}`))}</span>
+              </span>
+              <span class={`sv__tag sev--${r.sev}`} {...text(u(r.sev))}>{t(u(r.sev))}</span>
+            </li>
+          ))}
+        </ul>
+        <span class="sv__button" aria-hidden="true"><Icon name="check" /><span {...text(u('fix'))}>{t(u('fix'))}</span></span>
+      </>
+    )}
+
+    {k === 'fingerprint' && (
+      <>
+        <ul class="sv__list" role="list">
+          <li class="sv__row">
+            <span class="sv__state sv__state--ok" aria-hidden="true"><Icon name="check" /></span>
+            <span class="mono" {...text(u('d1'))}>{t(u('d1'))}</span>
+            <span class="sv__tag sev--low" {...text(u('s1'))}>{t(u('s1'))}</span>
+          </li>
+          <li class="sv__row">
+            <span class="sv__state sv__state--bad" aria-hidden="true"><Icon name="close" /></span>
+            <span class="mono" {...text(u('d2'))}>{t(u('d2'))}</span>
+            <span class="sv__tag sev--high" {...text(u('s2'))}>{t(u('s2'))}</span>
+          </li>
+        </ul>
+        <p class="sv__verdict sv__verdict--mid"><Icon name="fingerprint" class="sv__icon" /><span {...text(u('verdict'))}>{t(u('verdict'))}</span></p>
+      </>
+    )}
+
+    {k === 'codescan' && (
+      <>
+        <ul class="sv__list" role="list">
+          <li class="sv__row">
+            <span class="dot sev--high" aria-hidden="true"></span>
+            <span class="sv__stack">
+              <span class="sv__strong" {...text(u('r1'))}>{t(u('r1'))}</span>
+              <span class="sv__muted mono">payment.js:118</span>
+            </span>
+            <span class="sv__tag sev--high" {...text(u('high'))}>{t(u('high'))}</span>
+          </li>
+          <li class="sv__row">
+            <span class="dot sev--mid" aria-hidden="true"></span>
+            <span class="sv__stack">
+              <span class="sv__strong" {...text(u('r2'))}>{t(u('r2'))}</span>
+              <span class="sv__muted mono">config/prod.yml:7</span>
+            </span>
+            <span class="sv__tag sev--mid" {...text(u('mid'))}>{t(u('mid'))}</span>
+          </li>
+        </ul>
+        <pre class="sv__code mono" aria-hidden="true"><span class="sv__ln">117</span>  const total = sum(cart);
+<span class="sv__ln sv__ln--bad">118</span><span class="sv__bad">  eval(atob(cfg.k)); </span>
+<span class="sv__ln">119</span>  return charge(total);</pre>
+        <p class="sv__verdict sv__verdict--mid"><Icon name="branch" class="sv__icon" /><span {...text(u('state'))}>{t(u('state'))}</span></p>
+      </>
+    )}
+
+    {k === 'camp' && (
+      <>
+        <div class="sv__diff">
+          <p class="sv__del"><span class="mono" aria-hidden="true">−</span><span {...text(u('removed'))}>{t(u('removed'))}</span></p>
+          <p class="sv__add"><span class="mono" aria-hidden="true">+</span><span {...text(u('added'))}>{t(u('added'))}</span></p>
+        </div>
+        <div class="sv__foot">
+          <span class="chip" {...text(u('baseline'))}>{t(u('baseline'))}</span>
+          <span class="sv__button" aria-hidden="true"><Icon name="restore" /><span {...text(u('restore'))}>{t(u('restore'))}</span></span>
+        </div>
+      </>
+    )}
+
+    {k === 'records' && (
+      <ul class="sv__list sv__table" role="list">
+        <li class="sv__row">
+          <span class="sv__time mono">08:57</span>
+          <span {...text(u('e1'))}>{t(u('e1'))}</span>
+          <span class="sv__muted mono">81.2.69.142</span>
+        </li>
+        <li class="sv__row sv__row--flag">
+          <span class="sv__time mono">09:03</span>
+          <span {...text(u('e2'))}>{t(u('e2'))}</span>
+          <span class="sv__muted mono">185.220.101.4</span>
+        </li>
+        <li class="sv__row">
+          <span class="sv__time mono">09:05</span>
+          <span {...text(u('e3'))}>{t(u('e3'))}</span>
+          <span class="sv__muted" {...text(u('d3'))}>{t(u('d3'))}</span>
+        </li>
+        <li class="sv__row">
+          <span class="sv__time mono">09:12</span>
+          <span {...text(u('e4'))}>{t(u('e4'))}</span>
+          <span class="sv__muted" {...text(u('d4'))}>{t(u('d4'))}</span>
+        </li>
+      </ul>
+    )}
+  </div>
+
+  <figcaption class="sv__cap note" {...text('common.synthetic')}>{t('common.synthetic')}</figcaption>
+</figure>
+
+<style>
+  .sv {
+    container-type: inline-size;
+    display: grid;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .sv__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--edge);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+
+  .sv__dots {
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .sv__dots span {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--edge-strong);
+  }
+
+  .sv__title {
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .sv__subject {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sv__body {
+    display: grid;
+    gap: 0.8rem;
+    padding: clamp(0.9rem, 0.6rem + 2cqi, 1.4rem);
+  }
+
+  .sv__list,
+  .sv__timeline {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .sv__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-s);
+    background: var(--sheet);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .sv__row--plain {
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .sv__row--flag {
+    border-color: color-mix(in oklab, var(--warn) 45%, var(--edge));
+    background: color-mix(in oklab, var(--warn) 7%, var(--sheet));
+  }
+
+  .sv__timeline .sv__row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .sv__flag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: end;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--warn);
+  }
+
+  .sv__avatar {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgb(var(--aurora-3)), rgb(var(--aurora-2)));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sv__stack {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .sv__strong {
+    font-weight: 500;
+  }
+
+  .sv__muted {
+    color: var(--mute);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  .sv__icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--ink-2);
+  }
+
+  .sv__time {
+    font-size: 0.78rem;
+    color: var(--mute);
+  }
+
+  .sv__tag {
+    font-size: 0.76rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .sv__state {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    color: var(--ground);
+  }
+
+  .sv__state :global(svg) {
+    width: 0.9rem;
+    height: 0.9rem;
+    stroke-width: 2.6;
+  }
+
+  .sv__state--ok {
+    background: var(--ok);
+  }
+
+  .sv__state--bad {
+    background: var(--bad);
+  }
+
+  .sv__verdict {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius-s);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .sv__verdict--high {
+    color: var(--bad);
+    background: color-mix(in oklab, var(--bad) 10%, transparent);
+  }
+
+  .sv__verdict--mid {
+    color: var(--warn);
+    background: color-mix(in oklab, var(--warn) 10%, transparent);
+  }
+
+  .sv__verdict .sv__icon {
+    color: currentColor;
+  }
+
+  .sv__button {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    background: var(--cta);
+    color: var(--cta-ink);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sv__button :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .sv__code {
+    margin: 0;
+    padding: 0.8rem 0.9rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: var(--ground-2);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--ink-2);
+  }
+
+  .sv__ln {
+    display: inline-block;
+    width: 2.2rem;
+    color: var(--mute);
+  }
+
+  .sv__ln--bad,
+  .sv__bad {
+    color: var(--bad);
+  }
+
+  .sv__bad {
+    background: color-mix(in oklab, var(--bad) 14%, transparent);
+  }
+
+  .sv__diff {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .sv__diff p {
+    display: grid;
+    grid-template-columns: 1.2rem minmax(0, 1fr);
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius-s);
+    font-size: 0.92rem;
+  }
+
+  .sv__del {
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    color: color-mix(in oklab, var(--bad) 70%, var(--ink));
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in oklab, var(--bad) 60%, transparent);
+  }
+
+  .sv__add {
+    background: color-mix(in oklab, var(--warn) 12%, transparent);
+    color: color-mix(in oklab, var(--warn) 55%, var(--ink));
+  }
+
+  .sv__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .sv__cap {
+    padding: 0 clamp(0.9rem, 0.6rem + 2cqi, 1.4rem) 1rem;
+    font-size: 0.76rem;
+  }
+
+  @container (max-width: 26rem) {
+    .sv__table .sv__row {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .sv__table .sv__muted {
+      grid-column: 2;
+    }
+  }
+
+  /* the window plays in when it is first seen, and again whenever it is shown (a tab picked): the bar
+     settles, then the blocks of the body and the rows inside them come one after another */
+  .sv__body > :nth-child(1) {
+    --d0: 0.2s;
+  }
+
+  .sv__body > :nth-child(2) {
+    --d0: 0.45s;
+  }
+
+  .sv__body > :nth-child(3) {
+    --d0: 0.7s;
+  }
+
+  .sv__list > :nth-child(2),
+  .sv__timeline > :nth-child(2),
+  .sv__diff > :nth-child(2) {
+    --n: 1;
+  }
+
+  .sv__list > :nth-child(3),
+  .sv__timeline > :nth-child(3) {
+    --n: 2;
+  }
+
+  .sv__list > :nth-child(4),
+  .sv__timeline > :nth-child(4) {
+    --n: 3;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sv:not([data-reveal-wait] .sv) .sv__bar {
+      animation: sv-drop 0.5s var(--ease) 0.08s both;
+    }
+
+    .sv:not([data-reveal-wait] .sv) .sv__body > :not(.sv__list, .sv__timeline, .sv__diff),
+    .sv:not([data-reveal-wait] .sv) .sv__list > *,
+    .sv:not([data-reveal-wait] .sv) .sv__timeline > *,
+    .sv:not([data-reveal-wait] .sv) .sv__diff > * {
+      --at: calc(var(--d0, 0s) + var(--n, 0) * 0.1s);
+      animation: sv-rise 0.55s var(--ease) var(--at) both;
+    }
+
+    .sv:not([data-reveal-wait] .sv) .sv__cap {
+      animation: sv-fade 0.6s ease 1s both;
+    }
+
+    /* and then it stays alive: what needs attention keeps breathing */
+    .sv:not([data-reveal-wait] .sv) .sv__list > .sv__row--flag,
+    .sv:not([data-reveal-wait] .sv) .sv__timeline > .sv__row--flag,
+    .sv:not([data-reveal-wait] .sv) .sv__diff > .sv__add {
+      animation:
+        sv-rise 0.55s var(--ease) var(--at) both,
+        sv-breathe 2.6s ease-in-out calc(var(--at) + 0.6s) infinite;
+    }
+
+    .sv .dot.sev--high,
+    .sv__verdict--high .dot,
+    .sv__flag .dot {
+      animation: sv-beat 1.6s ease-out infinite;
+    }
+
+    /* scanning: a sweep runs down the findings */
+    .sv--scanning .sv__list {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-s);
+    }
+
+    .sv--scanning .sv__list::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -3rem;
+      height: 3rem;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent, rgb(var(--aurora-3) / 0.16) 85%, rgb(var(--aurora-3) / 0.7) 98%, transparent);
+      animation: sv-sweep 2.8s cubic-bezier(0.45, 0, 0.55, 1) 1.2s infinite;
+    }
+
+    /* a button that waits to be pressed catches the light now and then */
+    .sv__button {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sv__button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+      translate: -100% 0;
+      animation: sv-sheen 3.2s ease-in-out 1.4s infinite;
+    }
+
+    /* data theft: the incoming e-mail keeps pinging */
+    .sv--theft .sv__list > :first-child .sv__icon {
+      color: var(--accent-ink);
+      animation: sv-ping 2.4s var(--ease) 1s infinite;
+    }
+
+    /* fingerprint: the unknown device shudders once, the verdict's print keeps pulsing */
+    .sv:not([data-reveal-wait] .sv).sv--fingerprint .sv__list > :nth-child(2) {
+      animation:
+        sv-rise 0.55s var(--ease) var(--at) both,
+        sv-shake 0.5s ease calc(var(--at) + 0.6s);
+    }
+
+    .sv--fingerprint .sv__verdict .sv__icon {
+      animation: sv-throb 1.8s ease-in-out infinite;
+    }
+
+    /* codescan: the suspicious line flashes, a caret blinks after it */
+    .sv__bad {
+      animation: sv-flash 1.6s ease-in-out infinite;
+    }
+
+    .sv__bad::after {
+      content: '';
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      vertical-align: -0.15em;
+      background: currentColor;
+      animation: sv-caret 1s steps(1) infinite;
+    }
+
+    /* reserve camp: the replaced text is struck out before your eyes */
+    .sv__del {
+      text-decoration: none;
+    }
+
+    .sv__del > :last-child {
+      position: relative;
+      justify-self: start;
+    }
+
+    .sv__del > :last-child::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 55%;
+      height: 1.5px;
+      background: currentColor;
+      transform-origin: left;
+      scale: 0 1;
+    }
+
+    .sv:not([data-reveal-wait] .sv) .sv__del > :last-child::after {
+      animation: sv-strike 0.5s var(--ease) calc(var(--at, 0.2s) + 0.55s) forwards;
+    }
+  }
+
+  @keyframes sv-drop {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+
+  @keyframes sv-rise {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+      filter: blur(3px);
+    }
+  }
+
+  @keyframes sv-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes sv-breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--warn) 0%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--warn) 18%, transparent);
+    }
+  }
+
+  @keyframes sv-beat {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 55%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px color-mix(in oklab, currentColor 0%, transparent);
+    }
+  }
+
+  @keyframes sv-sweep {
+    to {
+      top: 100%;
+    }
+  }
+
+  @keyframes sv-sheen {
+    0% {
+      translate: -100% 0;
+    }
+    40%,
+    100% {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes sv-ping {
+    0%,
+    30%,
+    100% {
+      scale: 1;
+      rotate: 0deg;
+    }
+    8% {
+      scale: 1.3;
+      rotate: -10deg;
+    }
+    16% {
+      scale: 1.1;
+      rotate: 8deg;
+    }
+  }
+
+  @keyframes sv-shake {
+    20%,
+    60% {
+      translate: -5px 0;
+    }
+    40%,
+    80% {
+      translate: 5px 0;
+    }
+  }
+
+  @keyframes sv-throb {
+    0%,
+    100% {
+      scale: 1;
+    }
+    50% {
+      scale: 1.18;
+    }
+  }
+
+  @keyframes sv-flash {
+    0%,
+    100% {
+      background: color-mix(in oklab, var(--bad) 12%, transparent);
+    }
+    50% {
+      background: color-mix(in oklab, var(--bad) 28%, transparent);
+    }
+  }
+
+  @keyframes sv-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes sv-strike {
+    to {
+      scale: 1 1;
+    }
+  }
+</style>
