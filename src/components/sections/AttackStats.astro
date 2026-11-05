@@ -1,14 +1,31 @@
 ---
 import { countUp, html, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
 
-/** `note` is the number of the source under the figures; two figures can share one. */
-const figures = [
-  { value: 85, note: 1 },
-  { value: 70, note: 2 },
-  { value: 60, note: 3 },
-  { value: 29, note: 1 },
-].map((f, i) => ({ ...f, i, c: countUp(`attack-${i}`, f.value, { key: `home.stats.items.${i}.value` }) }));
-const notes = [1, 2, 3];
+/** Four figures as tiles, each with a small picture drawn to its own number. */
+const tiles = [
+  { i: 0, value: 85, viz: 'pair' },
+  { i: 1, value: 70, viz: 'extend' },
+  { i: 2, value: 60, viz: 'people' },
+  { i: 3, value: 29, viz: 'spread' },
+] as const;
+
+const counts = tiles.map((f) => countUp(`attack-${f.i}`, f.value, { key: `home.stats.items.${f.i}.value` }));
+
+/**
+ * 29 min: an hour as 60 cells, ten by six. From one cell the breach spreads to its nearest
+ * neighbours, a cell a minute, until 29 are taken; `k` is the order each one falls in.
+ */
+const COLS = 10;
+const ROWS = 6;
+const seed = { r: 2, c: 1 };
+const reach = Array.from({ length: COLS * ROWS }, (_, n) => {
+  const r = Math.floor(n / COLS);
+  const c = n % COLS;
+  // a small fixed jitter breaks the ties, so the front is ragged rather than a perfect circle
+  return { n, d: Math.hypot(r - seed.r, c - seed.c) + ((r * 7 + c * 13) % 5) * 0.08 };
+}).sort((a, b) => a.d - b.d);
+const order = new Map(reach.slice(0, tiles[3].value).map((cell, k) => [cell.n, k]));
 ---
 
 <section class="band stats">
@@ -17,26 +34,51 @@ const notes = [1, 2, 3];
       <h2 {...text('home.stats.title')}>{t('home.stats.title')}</h2>
       <p class="stats__lede" {...html('home.stats.lede')} set:html={t('home.stats.lede')} />
     </div>
-    <dl class="stats__grid">
-      {figures.map((f) => (
-        <div class="stats__item" {...reveal()} style={`--d: ${f.i * 0.08}s`}>
-          <dt class="stats__text">
-            <span {...text(`home.stats.items.${f.i}.text`)}>{t(`home.stats.items.${f.i}.text`)}</span><sup><a href={`#stat-source-${f.note}`} class="stats__ref">{f.note}</a></sup>
-          </dt>
-          <dd class="stats__value mono">
-            <span {...f.c.root()}><span {...f.c.value()}>{f.c.text}</span><span {...f.c.digits()} /></span>
-          </dd>
-        </div>
+
+    <ul class="stats__grid" role="list">
+      {tiles.map((f, n) => (
+        <li class="stats__tile card" data-spot {...reveal()} style={`--d: ${n * 0.08}s`}>
+          <div class={`stats__viz stats__viz--${f.viz}`} aria-hidden="true">
+            {f.viz === 'pair' && (
+              <>
+                <span class="stats__bar stats__bar--was" style={`--h: ${(100 / (100 + f.value)) * 100}%`}></span>
+                <span class="stats__bar stats__bar--now" style="--h: 100%"></span>
+                <Icon name="arrow" class="stats__up" />
+              </>
+            )}
+            {f.viz === 'extend' && (
+              <span class="stats__track-h">
+                <span class="stats__base" style={`--w: ${(100 / (100 + f.value)) * 100}%`}></span>
+                <span class="stats__more" style={`--w: ${(f.value / (100 + f.value)) * 100}%`}></span>
+              </span>
+            )}
+            {f.viz === 'people' && (
+              <span class="stats__people">
+                {Array.from({ length: 10 }, (_, p) => (
+                  <span class:list={['stats__person', p < f.value / 10 && 'stats__person--on']} style={`--p: ${p}`}>
+                    <Icon name="user" />
+                  </span>
+                ))}
+              </span>
+            )}
+            {f.viz === 'spread' && (
+              <span class="stats__cells">
+                {Array.from({ length: COLS * ROWS }, (_, c) => (
+                  <span
+                    class:list={['stats__cell', order.has(c) && 'stats__cell--hit', order.get(c) === 0 && 'stats__cell--seed']}
+                    style={order.has(c) ? `--k: ${order.get(c)}` : undefined}
+                  ></span>
+                ))}
+              </span>
+            )}
+          </div>
+          <p class="stats__value">
+            <span {...counts[n]!.root()}><span {...counts[n]!.value()}>{counts[n]!.text}</span><span {...counts[n]!.digits()} /></span>
+          </p>
+          <p class="stats__text" {...text(`home.stats.items.${f.i}.text`)}>{t(`home.stats.items.${f.i}.text`)}</p>
+        </li>
       ))}
-    </dl>
-    <div class="stats__sources">
-      <h3 class="stats__sources-title" {...text('home.stats.sources')}>{t('home.stats.sources')}</h3>
-      <ol class="stats__notes" role="list">
-        {notes.map((n, i) => (
-          <li id={`stat-source-${n}`}><sup>{n}</sup> <span {...text(`home.stats.notes.${i}`)}>{t(`home.stats.notes.${i}`)}</span></li>
-        ))}
-      </ol>
-    </div>
+    </ul>
   </div>
 </section>
 
@@ -59,29 +101,46 @@ const notes = [1, 2, 3];
     font-weight: 500;
   }
 
+  /* ── the tiles ─────────────────────────────────────────────────────────── */
+
   .stats__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
     margin: 0;
   }
 
-  .stats__item {
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: flex-end;
+  .stats__tile {
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    align-content: start;
     gap: 0.6rem;
-    padding: 1.5rem 1.5rem 1.5rem 0;
-    border-top: 1px solid var(--edge-strong);
-    min-width: 0;
+    padding: 1.5rem;
+  }
+
+  /* a light that follows the pointer, fed by --mx / --my */
+  .stats__tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(20rem circle at var(--mx, 50%) var(--my, -30%), rgb(var(--aurora-2) / 0.14), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .stats__tile:hover::before {
+    opacity: 1;
   }
 
   .stats__value {
-    margin: 0;
-    font-size: clamp(2.4rem, 1.7rem + 2.4vw, 3.6rem);
+    margin-top: 0.4rem;
+    font-size: clamp(2.4rem, 1.8rem + 2vw, 3.2rem);
     font-weight: 500;
     line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
   }
 
   .stats__value :global([data-count]) {
@@ -91,42 +150,257 @@ const notes = [1, 2, 3];
   .stats__text {
     color: var(--ink-2);
     font-size: 0.94rem;
+  }
+
+  .stats__viz {
+    position: relative;
+    height: 5rem;
+  }
+
+  /* +85%: before and now, the taller bar is the share more */
+  .stats__viz--pair {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .stats__bar {
+    width: 1.75rem;
+    height: var(--h);
+    border-radius: 4px 4px 0 0;
+    transform-origin: bottom;
+  }
+
+  .stats__bar--was {
+    background: var(--edge-strong);
+  }
+
+  .stats__bar--now {
+    background: linear-gradient(180deg, rgb(var(--aurora-1)), rgb(var(--aurora-2)) 55%, rgb(var(--aurora-3)));
+  }
+
+  .stats__up {
+    align-self: flex-start;
+    width: 1.1rem;
+    height: 1.1rem;
+    rotate: -90deg;
+    color: rgb(var(--aurora-1));
+  }
+
+  /* +70%: the usual week, and what is added on top of it */
+  .stats__viz--extend {
+    display: grid;
+    align-content: end;
+    padding-bottom: 0.4rem;
+  }
+
+  .stats__track-h {
+    display: flex;
+    gap: 2px;
+    height: 0.75rem;
+  }
+
+  .stats__base,
+  .stats__more {
+    width: var(--w);
+    height: 100%;
+    transform-origin: left;
+  }
+
+  .stats__base {
+    border-radius: 4px 0 0 4px;
+    background: var(--edge-strong);
+  }
+
+  .stats__more {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(90deg, rgb(var(--aurora-3)), rgb(var(--aurora-2)), rgb(var(--aurora-1)));
+  }
+
+  /* 60%: six people in ten */
+  .stats__viz--people {
+    display: grid;
+    align-content: end;
+  }
+
+  .stats__people {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 0.15rem;
     max-width: 16rem;
   }
 
-  .stats__ref {
-    margin-left: 0.15rem;
-    color: var(--accent-ink);
-    font-size: 0.8em;
+  .stats__person {
+    display: grid;
+    place-items: center;
+    color: var(--edge-strong);
   }
 
-  .stats__sources {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 1rem;
-    color: var(--mute);
-    font-size: 0.8rem;
+  .stats__person :global(svg) {
+    width: 100%;
+    height: auto;
+    max-width: 1.6rem;
+    stroke-width: 2;
   }
 
-  .stats__sources-title {
-    font-size: inherit;
-    font-weight: 500;
-    letter-spacing: 0;
+  .stats__person--on {
+    color: rgb(var(--aurora-2));
   }
 
-  .stats__notes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1.25rem;
-    margin: 0;
+  /* 29 min: an hour of cells, the breach taking one a minute */
+  .stats__viz--spread {
+    display: grid;
+    align-content: end;
   }
 
-  .stats__notes li {
-    scroll-margin-top: var(--pinned-offset);
+  .stats__cells {
+    display: grid;
+    grid-template-columns: repeat(10, 0.6rem);
+    gap: 3px;
   }
 
-  .stats__notes li:target {
-    color: var(--ink);
+  .stats__cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--edge-strong);
+  }
+
+  .stats__cell--hit {
+    background: rgb(var(--aurora-1) / 0.85);
+  }
+
+  .stats__cell--seed {
+    background: rgb(var(--aurora-2));
+  }
+
+  /* ── motion: each picture draws itself once it is in view, then keeps a little life ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stats__tile:not([data-reveal-wait]) .stats__bar {
+      animation: stats-grow-y 0.8s var(--ease) 0.25s both;
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__bar--now {
+      animation-delay: 0.45s;
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__up {
+      animation:
+        stats-fade 0.4s ease 1s both,
+        stats-nudge 1.8s ease-in-out 1.4s infinite;
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__base {
+      animation: stats-grow-x 0.7s var(--ease) 0.25s both;
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__more {
+      animation: stats-grow-x 0.7s var(--ease) 0.9s both;
+    }
+
+    .stats__more::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+      translate: -100% 0;
+      animation: stats-sheen 2.6s ease-in-out 1.8s infinite;
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__person--on {
+      animation: stats-light 0.5s var(--ease) both;
+      animation-delay: calc(0.3s + var(--p) * 0.12s);
+    }
+
+    /* the breach spreads cell by cell from the first one, holds, then clears in the same order and starts again */
+    .stats__tile:not([data-reveal-wait]) .stats__cell--hit {
+      animation: stats-spread 6s linear infinite backwards;
+      animation-delay: calc(0.4s + var(--k) * 0.09s);
+    }
+
+    .stats__tile:not([data-reveal-wait]) .stats__cell--seed {
+      animation-name: stats-seed;
+    }
+  }
+
+  @keyframes stats-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes stats-grow-y {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  @keyframes stats-grow-x {
+    from {
+      scale: 0 1;
+    }
+  }
+
+  @keyframes stats-nudge {
+    50% {
+      translate: 0 -4px;
+    }
+  }
+
+  @keyframes stats-sheen {
+    0% {
+      translate: -100% 0;
+    }
+    50%,
+    100% {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes stats-spread {
+    0% {
+      background: var(--edge-strong);
+    }
+    3% {
+      background: rgb(var(--aurora-1));
+      box-shadow: 0 0 8px rgb(var(--aurora-1) / 0.8);
+    }
+    10%,
+    72% {
+      background: rgb(var(--aurora-1) / 0.85);
+      box-shadow: none;
+    }
+    80%,
+    100% {
+      background: var(--edge-strong);
+    }
+  }
+
+  @keyframes stats-seed {
+    0% {
+      background: var(--edge-strong);
+    }
+    3% {
+      background: rgb(var(--aurora-2));
+      box-shadow: 0 0 10px rgb(var(--aurora-2) / 0.9);
+    }
+    10%,
+    72% {
+      background: rgb(var(--aurora-2));
+      box-shadow: 0 0 6px rgb(var(--aurora-2) / 0.6);
+    }
+    80%,
+    100% {
+      background: var(--edge-strong);
+    }
+  }
+
+  @keyframes stats-light {
+    from {
+      color: var(--edge-strong);
+      scale: 0.8;
+    }
   }
 </style>

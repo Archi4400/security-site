@@ -266,8 +266,6 @@ export const en = {
         { value: '{n}%', text: 'Of breaches involved the human element' },
         { value: '{n} min', text: 'Average time attackers take to spread' },
       ],
-      sources: 'Sources',
-      notes: ['Source to be added', 'Source to be added', 'Source to be added'],
     },
     within: {
       title: `${BRAND} protects your business from within`,

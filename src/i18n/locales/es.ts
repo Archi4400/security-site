@@ -266,8 +266,6 @@ export const es = {
         { value: '{n} %', text: 'De las brechas involucraron el factor humano' },
         { value: '{n} min', text: 'Tiempo medio que tardan los atacantes en propagarse' },
       ],
-      sources: 'Fuentes',
-      notes: ['Fuente pendiente', 'Fuente pendiente', 'Fuente pendiente'],
     },
     within: {
       title: `${BRAND} protege su negocio desde dentro`,
