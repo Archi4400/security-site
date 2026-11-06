@@ -1,9 +1,10 @@
 /**
  * What every interactive walk-through shares: steps that show and hide their parts, decisions that
- * wait for a click and make it themselves if no one does, and a start the first time the stage is seen.
+ * wait for a click and make it themselves if no one does, a start the first time the stage is seen,
+ * and parts held at the tallest any step makes them, so the stage keeps its size as the steps change.
  * A step's parts name it in data-show; a decision is a button with data-act.
  */
-import { reducedMotion } from '../engine/client';
+import { onLang, reducedMotion } from '../engine/client';
 
 /** How long a decision waits for a click before the scene makes it itself. */
 const PATIENCE = 7000;
@@ -45,6 +46,43 @@ export function scene(root: HTMLElement, options: Options) {
     }, ms);
     timers.add(id);
   };
+
+  /*
+   * Parts whose height changes from step to step, each held at the tallest it gets in any of them.
+   * Where the script, not data-show, picks what a part shows, `variants` set up each possibility in
+   * turn and `restore` puts back what is showing now.
+   */
+  const held: { box: HTMLElement; variants: (() => void)[]; restore?: () => void }[] = [];
+
+  const measure = () => {
+    const shown = parts.map((part) => part.hidden);
+    const tallest = held.map(({ box }) => {
+      box.style.minHeight = '0px';
+      return 0;
+    });
+    // all in one go, before anything is painted: each step's parts in turn, every held part read in each variant
+    for (const each of Object.keys(options.stages)) {
+      for (const part of parts) part.hidden = !part.dataset.show!.split(' ').includes(each);
+      held.forEach(({ box, variants }, i) => {
+        for (const variant of variants) {
+          variant();
+          tallest[i] = Math.max(tallest[i]!, box.offsetHeight);
+        }
+      });
+    }
+    parts.forEach((part, i) => (part.hidden = shown[i]!));
+    held.forEach(({ box, restore }, i) => {
+      restore?.();
+      box.style.minHeight = `${tallest[i]}px`;
+    });
+  };
+
+  /** Holds a part at the tallest any step (and any of its variants) makes it. */
+  const hold = (box: HTMLElement, variants: (() => void)[] = [() => {}], restore?: () => void) =>
+    held.push({ box, variants, restore });
+
+  // the alert's place over the panel: one line on a wide stage, it can take two on a phone
+  hold(root.querySelector<HTMLElement>('.demo__slot')!);
 
   const usable = (el: Element | null) =>
     el instanceof HTMLElement &&
@@ -143,6 +181,17 @@ export function scene(root: HTMLElement, options: Options) {
       run(button);
     });
 
+    // the held parts are measured now, and again whenever the text or the stage's width changes
+    onLang(() => measure());
+    let width = root.offsetWidth;
+    let settle = 0;
+    new ResizeObserver(() => {
+      if (root.offsetWidth === width) return;
+      width = root.offsetWidth;
+      window.clearTimeout(settle);
+      settle = window.setTimeout(measure, 150);
+    }).observe(root);
+
     // a waiting decision only clicks itself while the stage is on screen
     let begun = false;
     new IntersectionObserver(
@@ -164,6 +213,7 @@ export function scene(root: HTMLElement, options: Options) {
     go,
     later,
     wait,
+    hold,
     start,
   };
 }

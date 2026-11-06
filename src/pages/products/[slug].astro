@@ -8,6 +8,7 @@ import Icon from '../../components/Icon.astro';
 import ProductVisual from '../../components/ProductVisual.astro';
 import NightExport from '../../components/sections/NightExport.astro';
 import AttackPath from '../../components/sections/AttackPath.astro';
+import CheckoutRestore from '../../components/sections/CheckoutRestore.astro';
 import { reveal, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
 import { DEMO } from '../../components/header/navRoutes';
@@ -74,6 +75,9 @@ const points = en.products[k].points;
 
   {/* single is the scanning product: how small findings add up to an attack path, and fixing them */}
   {k === 'single' && <AttackPath />}
+
+  {/* reserve watches the live site: a defaced checkout, compared and put back from the recovery server */}
+  {k === 'reserve' && <CheckoutRestore />}
 
   <Related titleKey="common.relatedProducts">
     <LinkCards items={productCards(k)} />

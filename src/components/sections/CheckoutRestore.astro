@@ -1,0 +1,1261 @@
+---
+import { label, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import DemoStage from '../demo/DemoStage.astro';
+import DemoDone from '../demo/DemoDone.astro';
+
+/**
+ * Scenario C, "under attack": a live checkout page is changed while the visitor watches. They compare it
+ * with the approved version, sliding from one to the other, and restore the approved page from a separate
+ * recovery server. Parts that belong to some steps name them in data-show; the page itself follows the
+ * stage's marks (data-defaced, data-restoring, data-restored) and two properties on the view: --cr-cut,
+ * where the current version starts from the left, and --cr-rise, how much of it has been rebuilt from the foot.
+ */
+const steps = [0, 1, 2, 3].map((i) => `demo.camp.steps.${i}`);
+const watched = ['/', '/products', '/checkout', '/account'];
+const versions = ['approved', 'current'] as const;
+const p = (key: string) => `demo.camp.page.${key}`;
+---
+
+<section class="band" id="under-attack">
+  <div class="shell stack">
+    <div class="head" {...reveal()}>
+      <h2 {...text('demo.camp.title')}>{t('demo.camp.title')}</h2>
+      <p {...text('demo.camp.lede')}>{t('demo.camp.lede')}</p>
+    </div>
+
+    <DemoStage class="cr" data-cr steps={steps} labelKey="demo.camp.label">
+      <span slot="backdrop" class="cr__alarm" aria-hidden="true"></span>
+
+      <p slot="alert" class="demo__alert" hidden data-show="1 2 3 4">
+        <span class="demo__alert-dot" aria-hidden="true"></span>
+        <span hidden data-show="1 2" {...text('demo.camp.alertChange')}>{t('demo.camp.alertChange')}</span>
+        <span hidden data-show="3" {...text('demo.camp.alertRestore')}>{t('demo.camp.alertRestore')}</span>
+        <span hidden data-show="4" {...text('demo.camp.alertDone')}>{t('demo.camp.alertDone')}</span>
+        <span class="demo__sev" hidden data-show="1 2" {...text('demo.camp.high')}>{t('demo.camp.high')}</span>
+        <span class="demo__sev" hidden data-show="4" {...text('demo.camp.ok')}>{t('demo.camp.ok')}</span>
+      </p>
+
+      <span slot="aside" class="cr__down mono" hidden data-show="1 2 3 4" aria-hidden="true">
+        <Icon name="timer" />
+        <span class="cr__down-value" data-cr-down>00:00</span>
+        <span {...text('demo.camp.downtime')}>{t('demo.camp.downtime')}</span>
+      </span>
+
+      <div class="cr__panel panel">
+        <div class="demo__head">
+          <span class="demo__app">
+            <span class="demo__live" aria-hidden="true"></span>
+            <span {...text('demo.camp.panel')}>{t('demo.camp.panel')}</span>
+          </span>
+          <span class="demo__eye">
+            <Icon name="eye" />
+            <span {...text('demo.camp.watching')}>{t('demo.camp.watching')}</span>
+          </span>
+        </div>
+
+        <div class="cr__body">
+          <div class="cr__stagebox">
+            {/* the live page, in a browser: the approved version underneath, the current one laid over it */}
+            <div class="cr__browser">
+              <div class="cr__chrome">
+                <span class="cr__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="cr__url mono"><Icon name="lock" />shop.example.com/checkout</span>
+                <span class="cr__badge">
+                  <span hidden data-show="0" {...text('demo.camp.badgeApproved')}>{t('demo.camp.badgeApproved')}</span>
+                  <span hidden data-show="1 2" {...text('demo.camp.badgeChanged')}>{t('demo.camp.badgeChanged')}</span>
+                  <span hidden data-show="3" {...text('demo.camp.badgeRestoring')}>{t('demo.camp.badgeRestoring')}</span>
+                  <span hidden data-show="4">
+                    <span {...text('demo.camp.badgeRestored')}>{t('demo.camp.badgeRestored')}</span>
+                    · <span class="mono" data-cr-down>00:00</span>
+                    <span {...text('demo.camp.downtime')}>{t('demo.camp.downtime')}</span>
+                  </span>
+                </span>
+              </div>
+
+              <div class="cr__view" data-cr-view>
+                <div class="cr__pages" aria-hidden="true">
+                  {versions.map((version) => (
+                    <div class:list={['cr__page', `cr__page--${version}`]}>
+                      <div class="cr__site">
+                        <span class="cr__logo"></span>
+                        <span class="cr__nav"><i></i><i></i><i></i></span>
+                      </div>
+                      <p class="cr__title" {...text(p('checkout'))}>{t(p('checkout'))}</p>
+                      <div class="cr__cols">
+                        <div class="cr__order">
+                          <p class="cr__label" {...text(p('order'))}>{t(p('order'))}</p>
+                          <p class="cr__item"><span {...text(p('shoes'))}>{t(p('shoes'))}</span><span class="mono">$112.00</span></p>
+                          <p class="cr__item"><span {...text(p('socks'))}>{t(p('socks'))}</span><span class="mono">$17.00</span></p>
+                          <p class="cr__item cr__item--total"><span {...text(p('total'))}>{t(p('total'))}</span><span class="mono">$129.00</span></p>
+                        </div>
+
+                        <div class="cr__pay">
+                          <span class="cr__diff-tag mono">
+                            {version === 'approved' ? '− ' : '+ '}
+                            <span {...text(`demo.camp.${version === 'approved' ? 'removed' : 'added'}`)}>{t(`demo.camp.${version === 'approved' ? 'removed' : 'added'}`)}</span>
+                          </span>
+                          {version === 'approved' ? (
+                            <>
+                              <p class="cr__label" {...text(p('card'))}>{t(p('card'))}</p>
+                              <span class="cr__field mono">•••• •••• •••• 4242</span>
+                              <span class="cr__fields">
+                                <span class="cr__field mono">MM / YY</span>
+                                <span class="cr__field mono">CVC</span>
+                              </span>
+                              <span class="cr__button" {...text(p('pay'))}>{t(p('pay'))}</span>
+                              <span class="cr__note"><Icon name="lock" /><span {...text(p('secure'))}>{t(p('secure'))}</span></span>
+                            </>
+                          ) : (
+                            <>
+                              <p class="cr__label" {...text(p('bank'))}>{t(p('bank'))}</p>
+                              <span class="cr__iban mono">
+                                <span>IBAN LT62 7300 0101 2345 6789</span>
+                                <span>SHOP EXAMPLE LTD</span>
+                              </span>
+                              <span class="cr__button" {...text(p('confirm'))}>{t(p('confirm'))}</span>
+                              <span class="cr__note cr__note--away"><Icon name="alert" /><span {...text(p('away'))}>{t(p('away'))}</span></span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <span class="cr__seam"><span class="cr__grip"><Icon name="split" /></span></span>
+                  <span class="cr__rise"></span>
+                </div>
+
+                <span class="cr__side cr__side--approved mono" hidden data-show="2">
+                  <button type="button" data-cr-show="100" {...text('demo.camp.approvedSide')}>{t('demo.camp.approvedSide')}</button>
+                </span>
+                <span class="cr__side cr__side--current mono" hidden data-show="2">
+                  <button type="button" data-cr-show="0" {...text('demo.camp.currentSide')}>{t('demo.camp.currentSide')}</button>
+                </span>
+                <input type="range" class="cr__range" hidden data-show="2" min="0" max="100" value="50" data-cr-range {...label('demo.camp.slider')} />
+              </div>
+            </div>
+          </div>
+
+          <div class="cr__desk">
+            <div class="cr__watch" data-show="0 1 3 4">
+              <p class="cr__watch-head">
+                <span class="demo__live" aria-hidden="true"></span>
+                <span {...text('demo.camp.watchNote')}>{t('demo.camp.watchNote')}</span>
+              </p>
+              <ul class="cr__rows mono" role="list">
+                {watched.map((page) => (
+                  <li class="cr__row" data-cr-row={page}>
+                    <span>{page}</span>
+                    <span class="cr__row-state">
+                      <Icon name="check" class="cr__row-ok" />
+                      <span class="cr__row-bad" {...text('demo.camp.changed')}>{t('demo.camp.changed')}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p class="cr__baseline mono" {...text('demo.camp.baseline')}>{t('demo.camp.baseline')}</p>
+            </div>
+
+            <div class="cr__card" hidden data-show="1">
+              <p class="cr__card-title" {...text('demo.camp.found')}>{t('demo.camp.found')}</p>
+              <p class="cr__card-note" {...text('demo.camp.foundNote')}>{t('demo.camp.foundNote')}</p>
+              <div class="demo__ask">
+                <button type="button" class="demo__go" data-act="compare">
+                  <Icon name="split" />
+                  <span {...text('demo.camp.compare')}>{t('demo.camp.compare')}</span>
+                </button>
+                <span class="demo__hint mono" {...text('demo.camp.hintCompare')}>{t('demo.camp.hintCompare')}</span>
+              </div>
+            </div>
+
+            <div class="cr__card" hidden data-show="2">
+              <ul class="cr__diff" role="list">
+                <li class="cr__diff-line cr__diff-line--removed">
+                  <span class="mono" aria-hidden="true">−</span>
+                  <span {...text('demo.camp.diffRemoved')}>{t('demo.camp.diffRemoved')}</span>
+                </li>
+                <li class="cr__diff-line cr__diff-line--added">
+                  <span class="mono" aria-hidden="true">+</span>
+                  <span {...text('demo.camp.diffAdded')}>{t('demo.camp.diffAdded')}</span>
+                </li>
+              </ul>
+              <p class="cr__drag mono" {...text('demo.camp.drag')}>{t('demo.camp.drag')}</p>
+              <div class="demo__ask">
+                <button type="button" class="demo__go" data-act="restore">
+                  <Icon name="restore" />
+                  <span {...text('demo.camp.restore')}>{t('demo.camp.restore')}</span>
+                </button>
+                <span class="demo__hint mono" {...text('demo.camp.hintRestore')}>{t('demo.camp.hintRestore')}</span>
+              </div>
+            </div>
+
+            <div class="cr__card" hidden data-show="3">
+              <p class="demo__busy mono" {...text('demo.camp.restoring')}>{t('demo.camp.restoring')}</p>
+              <span class="cr__progress" aria-hidden="true"><span></span></span>
+            </div>
+
+            <DemoDone items={[0, 1, 2].map((i) => `demo.camp.summary.${i}`)} data-show="4" />
+
+            {/* the recovery server, apart from the live site: the approved version comes back from here */}
+            <div class="cr__server" data-cr-server>
+              <span class="cr__server-icon"><Icon name="server" /></span>
+              <span class="cr__server-copy">
+                <span class="mono">recovery-01</span>
+                <span class="cr__server-note">
+                  <span {...text('demo.camp.server')}>{t('demo.camp.server')}</span> ·
+                  <span {...text('demo.camp.serverNote')}>{t('demo.camp.serverNote')}</span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <span class="cr__flow" aria-hidden="true" data-cr-flow></span>
+      </div>
+    </DemoStage>
+  </div>
+</section>
+
+<style>
+  /* where the current version begins from the left, and how much of it has been rebuilt from the foot */
+  @property --cr-cut {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 100%;
+  }
+
+  @property --cr-rise {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  /*
+   * The alert and every severity in the scene: red while the page is changed, blue while it comes back,
+   * green once it is restored. --frame is the browser's own colour, which follows the page.
+   */
+  .cr {
+    --frame: var(--edge-strong);
+  }
+
+  .cr[data-step='1'],
+  .cr[data-step='2'] {
+    --tone: var(--bad);
+  }
+
+  .cr[data-step='3'] {
+    --tone: var(--accent);
+  }
+
+  .cr[data-step='4'] {
+    --tone: var(--ok);
+  }
+
+  .cr[data-defaced] {
+    --frame: var(--bad);
+  }
+
+  .cr[data-restoring] {
+    --frame: var(--accent);
+  }
+
+  .cr[data-restored] {
+    --frame: var(--ok);
+  }
+
+  /* the stage takes on a red edge while the page is changed */
+  .cr__alarm {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: inset 0 0 90px rgb(255 60 80 / 0.28);
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+    pointer-events: none;
+  }
+
+  .cr[data-defaced] .cr__alarm {
+    opacity: 1;
+  }
+
+  :global(html[data-theme='light']) .cr__alarm {
+    box-shadow: inset 0 0 80px rgb(196 37 54 / 0.16);
+  }
+
+  .cr__down {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-2);
+    font-size: 0.85rem;
+  }
+
+  .cr__down :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--tone);
+  }
+
+  .cr__down-value {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 40rem) {
+    .cr__down {
+      display: none;
+    }
+  }
+
+  .cr__panel {
+    overflow: hidden;
+  }
+
+  .cr__body {
+    display: grid;
+  }
+
+  /* ── the browser and the page in it ── */
+
+  .cr__stagebox {
+    padding: 1.1rem;
+    background-image: radial-gradient(circle, color-mix(in oklab, var(--ink) 8%, transparent) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+  }
+
+  .cr__browser {
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--frame);
+    background: var(--sheet-2);
+    box-shadow: 0 0 0 0 transparent;
+    transition:
+      border-color 0.5s var(--ease),
+      box-shadow 0.5s var(--ease);
+  }
+
+  .cr[data-defaced] .cr__browser {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
+  }
+
+  .cr[data-restored] .cr__browser {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 20%, transparent);
+  }
+
+  .cr__chrome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--edge);
+    background: var(--sheet);
+  }
+
+  .cr__dots {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .cr__dots i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--edge-strong);
+  }
+
+  .cr__url {
+    display: inline-flex;
+    flex: 1 1 12rem;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--sheet-2);
+    color: var(--ink-2);
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  .cr__url :global(svg) {
+    flex: none;
+    width: 0.8rem;
+    height: 0.8rem;
+    color: var(--ok);
+  }
+
+  .cr__badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--frame) 16%, transparent);
+    color: var(--frame);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* a quiet first state: the badge is the approved version's green */
+  .cr:not([data-defaced]):not([data-restoring]) .cr__badge {
+    background: color-mix(in oklab, var(--ok) 16%, transparent);
+    color: var(--ok);
+  }
+
+  .cr__view {
+    --cr-cut: 100%;
+    --cr-rise: 0%;
+    position: relative;
+    container-type: inline-size;
+    transition:
+      --cr-cut 0.8s var(--ease),
+      --cr-rise 1.6s cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  .cr__view[data-sliding] {
+    transition: none;
+  }
+
+  /* the line moving on its own goes at a hand's pace, easing in and out of each stop */
+  .cr__view[data-sweeping] {
+    transition:
+      --cr-cut 1.3s cubic-bezier(0.45, 0, 0.55, 1),
+      --cr-rise 1.6s cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  /* both versions in one place; the taller sets the height */
+  .cr__pages {
+    position: relative;
+    display: grid;
+  }
+
+  .cr__page {
+    grid-area: 1 / 1;
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem 1.1rem;
+    background: var(--sheet-2);
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
+  .cr__page--current {
+    clip-path: inset(0 0 var(--cr-rise) var(--cr-cut));
+  }
+
+  .cr__site {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .cr__logo {
+    width: 4.5rem;
+    height: 0.7rem;
+    border-radius: 4px;
+    background: var(--edge-strong);
+  }
+
+  .cr__nav {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+
+  .cr__nav i {
+    width: 2rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--edge);
+  }
+
+  .cr__title {
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .cr__cols {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  @container (min-width: 30rem) {
+    .cr__cols {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: start;
+    }
+  }
+
+  .cr__order,
+  .cr__pay {
+    position: relative;
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+  }
+
+  .cr__label {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .cr__item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    color: var(--ink-2);
+  }
+
+  .cr__item--total {
+    padding-top: 0.45rem;
+    border-top: 1px solid var(--edge);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .cr__pay {
+    min-height: 11rem;
+    align-content: start;
+  }
+
+  .cr__field {
+    padding: 0.35rem 0.5rem;
+    border-radius: 5px;
+    border: 1px solid var(--edge-strong);
+    color: var(--mute);
+    font-size: 0.7rem;
+  }
+
+  .cr__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .cr__iban {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 5px;
+    border: 1px dashed var(--edge-strong);
+    color: var(--ink);
+    font-size: 0.7rem;
+  }
+
+  .cr__button {
+    justify-self: stretch;
+    padding: 0.45rem;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--ground);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .cr__note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--mute);
+    font-size: 0.68rem;
+  }
+
+  .cr__note :global(svg) {
+    flex: none;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .cr__note--away {
+    color: var(--ink-2);
+  }
+
+  /* while the two versions are compared, what differs is outlined: green what was removed, red what was added */
+  .cr__diff-tag {
+    position: absolute;
+    top: -0.6rem;
+    right: 0.5rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--diff);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+  }
+
+  .cr__page--approved .cr__pay {
+    --diff: var(--ok);
+  }
+
+  /* each tag sits on its own version's side of the line */
+  .cr__page--approved .cr__diff-tag {
+    right: auto;
+    left: 0.5rem;
+  }
+
+  .cr__page--current .cr__pay {
+    --diff: var(--bad);
+  }
+
+  .cr[data-step='2'] .cr__pay {
+    outline: 2px solid var(--diff);
+    outline-offset: 2px;
+  }
+
+  .cr[data-step='2'] .cr__diff-tag {
+    opacity: 1;
+  }
+
+  /* the line between the two versions, with a grip to take it by */
+  .cr__seam {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--cr-cut);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+    pointer-events: none;
+  }
+
+  .cr[data-step='2'] .cr__seam {
+    opacity: 1;
+  }
+
+  .cr__grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border-radius: 50%;
+    border: 2px solid var(--sheet);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.3);
+  }
+
+  .cr__grip :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* the edge of the approved page coming back, from the foot up */
+  .cr__rise {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--cr-rise);
+    height: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 14px 2px color-mix(in oklab, var(--accent) 60%, transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cr[data-restoring] .cr__rise {
+    opacity: 1;
+  }
+
+  /* the side labels double as a way to show one version whole, for a tap rather than a drag */
+  .cr__side {
+    position: absolute;
+    top: 0.5rem;
+    z-index: 2;
+  }
+
+  .cr__side--approved {
+    left: 0.5rem;
+  }
+
+  .cr__side--current {
+    right: 0.5rem;
+  }
+
+  .cr__side button {
+    min-height: 1.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 0;
+    color: #fff;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .cr__side--approved button {
+    background: var(--ok);
+  }
+
+  .cr__side--current button {
+    background: var(--bad);
+  }
+
+  /* the slider itself is invisible and covers the page, so the page can be dragged anywhere */
+  .cr__range {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+
+  .cr__view:has(.cr__range:focus-visible) .cr__grip {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+  }
+
+  /* ── the desk beside the page: what the product sees and asks ── */
+
+  .cr__desk {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .cr__watch {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .cr__watch-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .cr__rows {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.35rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: color-mix(in oklab, var(--sheet-2) 60%, transparent);
+    font-size: 0.76rem;
+  }
+
+  .cr__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 6px;
+    color: var(--ink-2);
+    transition:
+      background-color 0.4s var(--ease),
+      color 0.4s var(--ease);
+  }
+
+  .cr__row-state {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .cr__row-state :global(.cr__row-ok) {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--ok);
+    opacity: 0;
+    scale: 0.5;
+    transition:
+      opacity 0.3s var(--ease),
+      scale 0.4s var(--ease);
+  }
+
+  .cr__row[data-checked] .cr__row-state :global(.cr__row-ok) {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .cr__row-bad {
+    display: none;
+    color: var(--bad);
+    font-weight: 600;
+  }
+
+  .cr__row[data-changed] {
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    color: var(--ink);
+  }
+
+  .cr__row[data-changed] .cr__row-state :global(.cr__row-ok) {
+    display: none;
+  }
+
+  .cr__row[data-changed] .cr__row-bad {
+    display: inline;
+  }
+
+  .cr__baseline {
+    color: var(--mute);
+    font-size: 0.72rem;
+  }
+
+  .cr__card {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .cr__card-title {
+    font-weight: 500;
+  }
+
+  .cr__card-note {
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .cr__diff {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.84rem;
+  }
+
+  .cr__diff-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.6rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--radius-s);
+  }
+
+  .cr__diff-line--removed {
+    background: color-mix(in oklab, var(--ok) 12%, transparent);
+    color: var(--ok);
+  }
+
+  .cr__diff-line--added {
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    color: var(--bad);
+  }
+
+  .cr__drag {
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .cr__progress {
+    overflow: hidden;
+    display: block;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--edge);
+  }
+
+  .cr__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-ink));
+    scale: 0 1;
+    transform-origin: left;
+  }
+
+  .cr__server {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--radius-s);
+    border: 1px dashed var(--edge-strong);
+  }
+
+  .cr__server-icon {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent-ink);
+  }
+
+  .cr__server-icon :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .cr__server-copy {
+    display: grid;
+    gap: 0.05rem;
+    font-size: 0.82rem;
+  }
+
+  .cr__server-note {
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .cr[data-restoring] .cr__server {
+    border-color: var(--accent);
+  }
+
+  /* the approved version on its way from the recovery server to the page */
+  .cr__flow {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .cr__flow :global(i) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: var(--accent-ink);
+    box-shadow: 0 0 10px 2px color-mix(in oklab, var(--accent) 70%, transparent);
+  }
+
+  @media (min-width: 56rem) {
+    .cr__body {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    .cr__stagebox {
+      display: grid;
+      align-content: center;
+      padding: 1.4rem;
+    }
+
+    .cr__desk {
+      border-top: 0;
+      border-left: 1px solid var(--edge);
+      grid-template-rows: auto 1fr auto;
+      min-height: 25rem;
+    }
+
+    /* the recovery server keeps its place at the foot of the desk */
+    .cr__server {
+      grid-row: -2;
+    }
+  }
+
+  /* ── motion ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cr[data-defaced] .cr__alarm {
+      animation: cr-flicker 2.4s ease-in-out infinite;
+    }
+
+    /* the moment the page is swapped, the changed part tears and shifts colour */
+    .cr__view[data-glitch] .cr__page--current .cr__pay {
+      animation: cr-glitch 0.6s steps(1) both;
+    }
+
+    .cr__view[data-glitch] .cr__page--current {
+      animation: cr-shake 0.6s steps(2) both;
+    }
+
+    .cr__card:not([hidden]) {
+      animation: cr-in 0.45s var(--ease) both;
+    }
+
+    .cr[data-restoring] .cr__progress span {
+      animation: cr-fill 2.4s var(--ease) both;
+    }
+
+    .cr[data-restoring] .cr__server-icon::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      animation: cr-ring 1.1s ease-out infinite;
+    }
+
+    .cr__row[data-changed] {
+      animation: cr-in 0.4s var(--ease) both;
+    }
+  }
+
+  @keyframes cr-flicker {
+    0%,
+    100% {
+      opacity: 0.75;
+    }
+    50% {
+      opacity: 1;
+    }
+    52% {
+      opacity: 0.6;
+    }
+    54% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cr-glitch {
+    0% {
+      translate: -4px 0;
+      clip-path: inset(8% 0 58% 0);
+      text-shadow:
+        2px 0 rgb(255 0 80 / 0.85),
+        -2px 0 rgb(0 220 255 / 0.85);
+    }
+    20% {
+      translate: 4px 0;
+      clip-path: inset(55% 0 8% 0);
+    }
+    40% {
+      translate: -2px 0;
+      clip-path: inset(28% 0 34% 0);
+      text-shadow:
+        -2px 0 rgb(255 0 80 / 0.85),
+        2px 0 rgb(0 220 255 / 0.85);
+    }
+    60% {
+      translate: 3px 0;
+      clip-path: none;
+    }
+    80% {
+      translate: 0;
+      text-shadow: none;
+    }
+  }
+
+  @keyframes cr-shake {
+    50% {
+      translate: 2px 0;
+    }
+  }
+
+  @keyframes cr-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  @keyframes cr-fill {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  @keyframes cr-ring {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../../engine/client';
+  import { scene } from '../../lib/demoScene';
+
+  /** When the checkout is changed, how fast the downtime runs (simulated seconds per real one), the stream and the rebuild. */
+  const CHANGE_AT = 3400;
+  const PACE = 3;
+  const FLOW = 900;
+  const REBUILD = 1600;
+  /** The downtime shown when no time is allowed to pass (reduced motion). */
+  const STILL_DOWNTIME = 41;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-cr]')) {
+    const view = root.querySelector<HTMLElement>('[data-cr-view]')!;
+    const range = root.querySelector<HTMLInputElement>('[data-cr-range]')!;
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-cr-row]')];
+    const changedRow = root.querySelector<HTMLElement>('[data-cr-row="/checkout"]')!;
+    const panel = root.querySelector<HTMLElement>('.cr__panel')!;
+    const server = root.querySelector<HTMLElement>('.cr__server-icon')!;
+    const flow = root.querySelector<HTMLElement>('[data-cr-flow]')!;
+    const downs = [...root.querySelectorAll<HTMLElement>('[data-cr-down]')];
+
+    const stage = scene(root, { stages: { '0': 0, '1': 1, '2': 2, '3': 3, '4': 5 }, last: '4' });
+    const { go, later, wait } = stage;
+    // the desk, and the browser bar whose badge can wrap on a phone, keep their tallest height through the steps
+    stage.hold(root.querySelector<HTMLElement>('.cr__desk')!);
+    stage.hold(root.querySelector<HTMLElement>('.cr__chrome')!);
+
+    const mark = (el: Element, name: string, on = true) => el.toggleAttribute(`data-${name}`, on);
+
+    /** Where the current version begins, from the left; `glide` lets it travel there rather than jump. */
+    const cut = (percent: number, glide = true) => {
+      view.toggleAttribute('data-sliding', !glide);
+      view.style.setProperty('--cr-cut', `${percent}%`);
+    };
+
+    /* ── the downtime, counted from the change ── */
+
+    let downFrom = 0;
+    let downTimer = 0;
+    const showDown = (seconds: number) => {
+      const time = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+      downs.forEach((el) => (el.textContent = time));
+    };
+    const downtime = (on: boolean) => {
+      window.clearInterval(downTimer);
+      if (!on) return;
+      downFrom = performance.now();
+      downTimer = window.setInterval(() => showDown(Math.floor(((performance.now() - downFrom) / 1000) * PACE)), 200);
+    };
+
+    /** The approved version streams from the recovery server to the page. */
+    const stream = () => {
+      if (reducedMotion()) return;
+      const box = panel.getBoundingClientRect();
+      const from = server.getBoundingClientRect();
+      const to = view.getBoundingClientRect();
+      const start = `${from.left - box.left + from.width / 2}px ${from.top - box.top + from.height / 2}px`;
+      for (let i = 0; i < 18; i++) {
+        const dot = document.createElement('i');
+        flow.append(dot);
+        const x = to.left - box.left + to.width * (0.08 + Math.random() * 0.84);
+        const y = to.top - box.top + to.height * (0.5 + Math.random() * 0.45);
+        const travel = dot.animate(
+          [
+            { translate: start, opacity: 0, scale: 0.5 },
+            { opacity: 1, offset: 0.2 },
+            { translate: `${x}px ${y}px`, opacity: 0, scale: 1 },
+          ],
+          { duration: FLOW, delay: i * 35, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' },
+        );
+        travel.finished.then(
+          () => dot.remove(),
+          () => dot.remove(),
+        );
+      }
+    };
+
+    /** Step 0 to the first decision: every page checked against the approved version, then the checkout changes. */
+    const play = () => {
+      const quick = reducedMotion();
+      go('0');
+      rows.forEach((row, i) => later(quick ? 0 : 500 + i * 650, () => mark(row, 'checked')));
+      later(quick ? 0 : CHANGE_AT, () => {
+        mark(changedRow, 'changed');
+        root.dataset.defaced = '';
+        cut(0, false);
+        if (!quick) {
+          view.dataset.glitch = '';
+          later(650, () => delete view.dataset.glitch);
+        }
+        downtime(!quick);
+        go('1');
+        wait('compare');
+      });
+    };
+
+    const reset = () => {
+      downtime(false);
+      showDown(0);
+      flow.getAnimations({ subtree: true }).forEach((travel) => travel.cancel());
+      flow.replaceChildren();
+      for (const name of ['defaced', 'restoring', 'restored']) delete root.dataset[name];
+      rows.forEach((row) => {
+        mark(row, 'checked', false);
+        mark(row, 'changed', false);
+      });
+      delete view.dataset.glitch;
+      cut(100, false);
+      view.style.setProperty('--cr-rise', '0%');
+      range.value = '50';
+    };
+
+    // dragging or stepping the slider moves the line between the versions at once
+    // someone who takes the line themselves keeps it: the scene stops moving it for them
+    let touched = false;
+    range.addEventListener('pointerdown', () => (touched = true));
+    range.addEventListener('keydown', () => (touched = true));
+    range.addEventListener('input', () => {
+      touched = true;
+      cut(Number(range.value), false);
+    });
+    root.querySelectorAll<HTMLElement>('[data-cr-show]').forEach((button) =>
+      button.addEventListener('click', () => {
+        touched = true;
+        range.value = button.dataset.crShow!;
+        cut(Number(range.value));
+      }),
+    );
+
+    /** Left alone, the line sweeps across by itself: the approved page almost whole, the changed one, then back. */
+    const sweep = (middle: number) => {
+      if (reducedMotion()) return;
+      const stops: [number, number][] = [
+        [1300, 96],
+        [2900, 6],
+        [4500, middle],
+      ];
+      for (const [ms, at] of stops) {
+        later(ms, () => {
+          if (touched || stage.step !== '2') return;
+          view.dataset.sweeping = '';
+          range.value = String(at);
+          cut(at);
+        });
+      }
+      later(5800, () => delete view.dataset.sweeping);
+    };
+
+    stage.start({
+      play,
+      reset,
+      acts: {
+        compare: () => {
+          go('2');
+          // the line opens through the middle of the payment block, so half of each version shows at once
+          const box = view.getBoundingClientRect();
+          const pay = view.querySelector('.cr__page--approved .cr__pay')!.getBoundingClientRect();
+          const middle = Math.round(((pay.left + pay.width / 2 - box.left) / box.width) * 100);
+          range.value = String(middle);
+          cut(middle);
+          touched = false;
+          sweep(middle);
+          wait('restore');
+        },
+        restore: () => {
+          const quick = reducedMotion();
+          go('3');
+          root.dataset.restoring = '';
+          // the whole changed page is shown again, then the approved one comes back over it from the foot up
+          cut(0);
+          later(quick ? 0 : 450, stream);
+          later(quick ? 0 : 450 + FLOW * 0.6, () => view.style.setProperty('--cr-rise', '100%'));
+          later(quick ? 0 : 450 + FLOW * 0.6 + REBUILD + 350, () => {
+            downtime(false);
+            if (quick) showDown(STILL_DOWNTIME);
+            delete root.dataset.defaced;
+            delete root.dataset.restoring;
+            root.dataset.restored = '';
+            mark(changedRow, 'changed', false);
+            go('4');
+          });
+        },
+      },
+    });
+  }
+</script>

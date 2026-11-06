@@ -1,0 +1,1045 @@
+---
+import { reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import DemoStage from '../demo/DemoStage.astro';
+import DemoDone from '../demo/DemoDone.astro';
+
+/**
+ * Scenario D, "code before merge": a pull request adds a password reset, and one of its lines reads the
+ * reset token from the URL. CodeScan reviews the change, explains what that line would lead to, writes the
+ * fix and tests it; the merge stays with the visitor. Parts that belong to some steps name them in data-show
+ * (3: the fix being written and tested, 3b: ready for the merge); each line's marks are set by the script.
+ */
+const steps = [0, 1, 2, 3].map((i) => `demo.code.steps.${i}`);
+
+/** The file the pull request adds; one line reads the reset token from the URL, and this is what it becomes. */
+const code = [
+  "import { Router } from 'express';",
+  "import { users, tokens } from '../db';",
+  "import { sendMail } from '../mail';",
+  '',
+  'export const reset = Router();',
+  '',
+  "reset.post('/reset/request', async (req, res) => {",
+  '  const user = await users.byEmail(req.body.email);',
+  '  if (user) await sendMail(user, tokens.issue(user));',
+  '  res.sendStatus(202);',
+  '});',
+  '',
+  "reset.post('/reset/confirm', async (req, res) => {",
+  '  const token = req.query.token;',
+  '  const user = await tokens.redeem(token);',
+  '  if (!user) return res.sendStatus(410);',
+  '  await users.setPassword(user, req.body.password);',
+  '  res.sendStatus(204);',
+  '});',
+];
+const risky = 13;
+const fixed = '  const token = req.body.token;';
+
+/** A light colouring for the code: strings, keywords and numbers; everything else as it is. */
+const TOKEN = /('[^']*')|\b(import|from|export|const|async|await|if|return)\b|\b(\d+)\b/g;
+const escape = (line: string) => line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const paint = (line: string) =>
+  escape(line).replace(TOKEN, (_, string, word, number) =>
+    string ? `<span class="dc__s">${string}</span>` : word ? `<span class="dc__k">${word}</span>` : `<span class="dc__n">${number}</span>`,
+  );
+
+/** The score ring: its radius, inside a 104-unit box, and the length of its arc. */
+const R = 46;
+const RING = 2 * Math.PI * R;
+---
+
+<section class="band" id="code-review">
+  <div class="shell stack">
+    <div class="head" {...reveal()}>
+      <h2 {...text('demo.code.title')}>{t('demo.code.title')}</h2>
+      <p {...text('demo.code.lede')}>{t('demo.code.lede')}</p>
+    </div>
+
+    <DemoStage class="dc" data-dc steps={steps} labelKey="demo.code.label">
+      <p slot="alert" class="demo__alert" hidden data-show="1 2 3 3b 4">
+        <span class="demo__alert-dot" aria-hidden="true"></span>
+        <span hidden data-show="1 2" {...text('demo.code.alertRisk')}>{t('demo.code.alertRisk')}</span>
+        <span hidden data-show="3" {...text('demo.code.alertFixing')}>{t('demo.code.alertFixing')}</span>
+        <span hidden data-show="3b" {...text('demo.code.alertReady')}>{t('demo.code.alertReady')}</span>
+        <span hidden data-show="4" {...text('demo.code.alertDone')}>{t('demo.code.alertDone')}</span>
+        <span class="demo__sev" hidden data-show="1 2" {...text('demo.code.mid')}>{t('demo.code.mid')}</span>
+        <span class="demo__sev" hidden data-show="4" {...text('demo.code.ok')}>{t('demo.code.ok')}</span>
+      </p>
+
+      <span slot="aside" class="dc__branch mono" aria-hidden="true">
+        <Icon name="branch" />
+        client-b → main
+      </span>
+
+      <div class="dc__panel panel">
+        <div class="demo__head">
+          <span class="demo__app">
+            <Icon name="branch" class="dc__pr-icon" />
+            <span class="mono" {...text('demo.code.pr')}>{t('demo.code.pr')}</span>
+            <span class="dc__pr mono">#486</span>
+          </span>
+          <span class="dc__head-end">
+            <span class="dc__state" hidden data-show="0 1 2 3 3b" {...text('demo.code.open')}>{t('demo.code.open')}</span>
+            <span class="dc__state dc__state--merged" hidden data-show="4" {...text('demo.code.merged')}>{t('demo.code.merged')}</span>
+            <span class="demo__eye">
+              <Icon name="scan" />
+              <span {...text('demo.code.reviewing')}>{t('demo.code.reviewing')}</span>
+            </span>
+          </span>
+        </div>
+
+        <div class="dc__body">
+          {/* the change: one new file, every line of it reviewed; the fixed line joins it at step 3 */}
+          <div class="dc__code">
+            <p class="dc__file mono">
+              <Icon name="code" />
+              <span>src/routes/reset.ts</span>
+              <span class="dc__stat"><span class="dc__plus">+{code.length}</span> <span class="dc__minus">−0</span></span>
+              <span class="dc__commit">a41f9c2</span>
+            </p>
+            <div class="dc__lines mono" data-dc-lines>
+              <span class="dc__beam" aria-hidden="true"></span>
+              <ol role="list">
+                {code.map((line, i) => (
+                  <>
+                    <li class="dc__line" data-dc-line={i} data-blank={line ? undefined : ''} data-risky={i === risky ? '' : undefined}>
+                      <span class="dc__no" aria-hidden="true">{i + 1}</span>
+                      <span class="dc__mark" aria-hidden="true">
+                        <Icon name="check" class="dc__ok" />
+                        <Icon name="alert" class="dc__warn" />
+                        <span class="dc__cut">−</span>
+                      </span>
+                      <code class="dc__text" set:html={paint(line) || ' '} />
+                      {i === risky && (
+                        <span class="dc__flag" hidden data-show="1 2">
+                          <Icon name="alert" />
+                          <span {...text('demo.code.inline')}>{t('demo.code.inline')}</span>
+                        </span>
+                      )}
+                    </li>
+                    {i === risky && (
+                      <li class="dc__line dc__line--new" hidden data-show="3 3b 4" data-dc-fixed={fixed}>
+                        <span class="dc__no" aria-hidden="true">{i + 1}</span>
+                        <span class="dc__mark" aria-hidden="true"><span class="dc__add">+</span></span>
+                        <code class="dc__text" data-dc-typed set:html={paint(fixed)} />
+                      </li>
+                    )}
+                  </>
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          <div class="dc__desk">
+            <div class="dc__score">
+              <span class="dc__ring" data-dc-ring>
+                <svg viewBox="0 0 104 104" aria-hidden="true">
+                  <circle class="dc__track" cx="52" cy="52" r={R} />
+                  <circle class="dc__fill" cx="52" cy="52" r={R} stroke-dasharray={RING.toFixed(2)} stroke-dashoffset={RING.toFixed(2)} data-dc-fill />
+                </svg>
+                <span class="dc__value mono" data-dc-score>0</span>
+              </span>
+              <span class="dc__score-copy">
+                <span class="dc__score-label" {...text('demo.code.score')}>{t('demo.code.score')}</span>
+                <span class="dc__score-sub mono">
+                  <span data-dc-checks>0</span>
+                  <span {...text('demo.code.checks')}>{t('demo.code.checks')}</span>
+                </span>
+              </span>
+            </div>
+
+            <p class="dc__scan" data-show="0">
+              <span class="demo__live" aria-hidden="true"></span>
+              <span {...text('demo.code.scanning')}>{t('demo.code.scanning')}</span>
+            </p>
+
+            <div class="dc__card" hidden data-show="1">
+              <p class="dc__find">
+                <span class="demo__sev" {...text('demo.code.mid')}>{t('demo.code.mid')}</span>
+                <span class="dc__find-title" {...text('demo.code.findTitle')}>{t('demo.code.findTitle')}</span>
+              </p>
+              <p class="dc__rule mono">cs.token_in_url · reset.ts:{risky + 1}</p>
+              <p class="dc__note" {...text('demo.code.findNote')}>{t('demo.code.findNote')}</p>
+              <div class="demo__ask">
+                <button type="button" class="demo__go" data-act="why">
+                  <Icon name="eye" />
+                  <span {...text('demo.code.why')}>{t('demo.code.why')}</span>
+                </button>
+                <span class="demo__hint mono" {...text('demo.code.hintWhy')}>{t('demo.code.hintWhy')}</span>
+              </div>
+            </div>
+
+            {/* what the line would lead to: the token in a URL, the URL in a log, the log in someone else's hands */}
+            <div class="dc__card" hidden data-show="2">
+              <ol class="dc__flow" role="list">
+                <li style="--i: 0">
+                  <span class="dc__node"><Icon name="link" /></span>
+                  <span class="dc__chip mono">?token=8f3a…</span>
+                  <span class="dc__say" {...text('demo.code.flow.0')}>{t('demo.code.flow.0')}</span>
+                </li>
+                <li style="--i: 1">
+                  <span class="dc__node"><Icon name="list" /></span>
+                  <span class="dc__chip mono">access.log</span>
+                  <span class="dc__say" {...text('demo.code.flow.1')}>{t('demo.code.flow.1')}</span>
+                </li>
+                <li style="--i: 2">
+                  <span class="dc__node dc__node--bad"><Icon name="user" /></span>
+                  <span class="dc__chip" {...text('demo.code.someone')}>{t('demo.code.someone')}</span>
+                  <span class="dc__say" {...text('demo.code.flow.2')}>{t('demo.code.flow.2')}</span>
+                </li>
+              </ol>
+              <div class="demo__ask">
+                <button type="button" class="demo__go" data-act="fix">
+                  <Icon name="bolt" />
+                  <span {...text('demo.code.fix')}>{t('demo.code.fix')}</span>
+                </button>
+                <span class="demo__hint mono" {...text('demo.code.hintFix')}>{t('demo.code.hintFix')}</span>
+              </div>
+            </div>
+
+            <div class="dc__card" hidden data-show="3 3b">
+              <p class="demo__busy mono" hidden data-show="3" {...text('demo.code.applying')}>{t('demo.code.applying')}</p>
+              <ul class="dc__statuses" role="list">
+                {[0, 1, 2].map((i) => (
+                  <li data-dc-status={i}>
+                    <Icon name="check" />
+                    <span {...text(`demo.code.statuses.${i}`)}>{t(`demo.code.statuses.${i}`)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div class="demo__ask" hidden data-show="3b">
+                <button type="button" class="demo__go" data-act="merge">
+                  <Icon name="branch" />
+                  <span {...text('demo.code.merge')}>{t('demo.code.merge')}</span>
+                </button>
+                <span class="demo__hint mono" {...text('demo.code.hintMerge')}>{t('demo.code.hintMerge')}</span>
+              </div>
+            </div>
+
+            <DemoDone items={[0, 1, 2].map((i) => `demo.code.summary.${i}`)} data-show="4" />
+
+            {/* where CodeScan reviews changes; this pull request comes from the connected one */}
+            <div class="dc__platforms">
+              <p class="dc__platforms-label" {...text('demo.code.platforms')}>{t('demo.code.platforms')}</p>
+              <ul class="dc__hosts" role="list">
+                <li class="dc__host dc__host--on">
+                  <Icon name="github" />
+                  <span>GitHub</span>
+                  <span class="dc__connected mono">
+                    <span class="demo__live" aria-hidden="true"></span>
+                    <span {...text('demo.code.connected')}>{t('demo.code.connected')}</span>
+                  </span>
+                </li>
+                <li class="dc__host">
+                  <Icon name="gitlab" />
+                  <span>GitLab</span>
+                </li>
+                <li class="dc__host">
+                  <Icon name="bitbucket" />
+                  <span>Bitbucket</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DemoStage>
+  </div>
+</section>
+
+<style>
+  /* the alert and every severity: orange while the risky line is open, blue while the fix is made, green once merged */
+  .dc[data-step='3'],
+  .dc[data-step='3b'] {
+    --tone: var(--accent);
+  }
+
+  .dc[data-step='4'] {
+    --tone: var(--ok);
+  }
+
+  .dc__branch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-2);
+    font-size: 0.82rem;
+  }
+
+  .dc__branch :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--accent-ink);
+  }
+
+  @media (max-width: 40rem) {
+    .dc__branch {
+      display: none;
+    }
+  }
+
+  .dc__panel {
+    overflow: hidden;
+  }
+
+  .dc__panel :global(.dc__pr-icon) {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    color: var(--accent-ink);
+  }
+
+  .dc__pr {
+    color: var(--mute);
+  }
+
+  .dc__head-end {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dc__state {
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--ok) 16%, transparent);
+    color: var(--ok);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .dc__state--merged {
+    background: color-mix(in oklab, rgb(var(--aurora-2)) 22%, transparent);
+    color: color-mix(in oklab, rgb(var(--aurora-2)) 70%, var(--ink));
+  }
+
+  .dc__body {
+    display: grid;
+  }
+
+  /* ── the change ── */
+
+  .dc__code {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+  }
+
+  .dc__file {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--edge);
+    color: var(--ink-2);
+    font-size: 0.74rem;
+  }
+
+  .dc__file :global(svg) {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--mute);
+  }
+
+  .dc__plus,
+  .dc__add {
+    color: var(--ok);
+  }
+
+  .dc__minus,
+  .dc__cut {
+    color: var(--bad);
+  }
+
+  .dc__commit {
+    margin-left: auto;
+    color: var(--mute);
+  }
+
+  .dc__lines {
+    position: relative;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    font-size: 0.76rem;
+    line-height: 1.65;
+    scrollbar-width: thin;
+  }
+
+  .dc__lines ol {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+  }
+
+  .dc__line {
+    display: grid;
+    grid-template-columns: 2.4rem 1.3rem max-content auto;
+    align-items: center;
+    padding-right: 1rem;
+    color: var(--ink-2);
+    transition:
+      opacity 0.25s var(--ease),
+      background-color 0.4s var(--ease);
+  }
+
+  .dc__no {
+    padding-right: 0.7rem;
+    color: var(--mute);
+    text-align: right;
+    opacity: 0.7;
+  }
+
+  .dc__text {
+    font: inherit;
+    white-space: pre;
+  }
+
+  .dc__lines :global(.dc__k) {
+    color: var(--accent-ink);
+  }
+
+  .dc__lines :global(.dc__s) {
+    color: color-mix(in oklab, var(--ok) 80%, var(--ink));
+  }
+
+  .dc__lines :global(.dc__n) {
+    color: rgb(var(--aurora-1));
+  }
+
+  /* the gutter mark: a tick once a line is reviewed, a warning on the risky one, a minus once it is replaced */
+  .dc__mark {
+    display: grid;
+    place-items: center;
+  }
+
+  .dc__mark > :global(*) {
+    grid-area: 1 / 1;
+  }
+
+  .dc__mark :global(svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+    opacity: 0;
+    scale: 0.4;
+    transition:
+      opacity 0.25s var(--ease),
+      scale 0.35s var(--ease);
+  }
+
+  .dc__mark :global(.dc__ok) {
+    color: var(--ok);
+  }
+
+  .dc__mark :global(.dc__warn) {
+    color: var(--warn);
+  }
+
+  .dc__cut {
+    display: none;
+    font-weight: 600;
+  }
+
+  .dc__line[data-ok] .dc__mark :global(.dc__ok),
+  .dc__line[data-risk] .dc__mark :global(.dc__warn) {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* the lines come in one after another as the change opens */
+  :global(html.js) .dc__line:not([data-in]):not(.dc__line--new) {
+    opacity: 0;
+  }
+
+  .dc__line[data-risk] {
+    background: color-mix(in oklab, var(--warn) 14%, transparent);
+    box-shadow: inset 2px 0 0 var(--warn);
+    color: var(--ink);
+  }
+
+  .dc__line[data-removed] {
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    box-shadow: inset 2px 0 0 var(--bad);
+  }
+
+  .dc__line[data-removed] .dc__text {
+    opacity: 0.55;
+    text-decoration: line-through;
+    text-decoration-color: var(--bad);
+  }
+
+  .dc__line[data-removed] .dc__cut {
+    display: block;
+  }
+
+  .dc__line--new {
+    background: color-mix(in oklab, var(--ok) 13%, transparent);
+    box-shadow: inset 2px 0 0 var(--ok);
+    color: var(--ink);
+  }
+
+  .dc__add {
+    font-weight: 600;
+  }
+
+  .dc__flag {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.9rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--warn) 20%, transparent);
+    color: var(--warn);
+    font-family: var(--font);
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .dc__flag :global(svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  /* the sweep down the file */
+  .dc__beam {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3rem;
+    translate: 0 -100%;
+    border-bottom: 2px solid var(--accent);
+    background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--accent) 18%, transparent));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── the desk: the score, and what the review says and asks ── */
+
+  /* a column, so the platforms can keep to its foot whatever the step puts above them */
+  .dc__desk {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .dc__platforms {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--edge-strong);
+  }
+
+  .dc__platforms-label {
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .dc__hosts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .dc__host {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem 0.35rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    color: var(--mute);
+    font-size: 0.8rem;
+  }
+
+  .dc__host :global(svg) {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .dc__host--on {
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--edge));
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    color: var(--ink);
+  }
+
+  .dc__connected {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0.15rem;
+    color: var(--ok);
+    font-size: 0.68rem;
+  }
+
+  .dc__score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .dc__ring {
+    --grade: var(--warn);
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 4.75rem;
+    height: 4.75rem;
+    border-radius: 50%;
+  }
+
+  .dc__ring[data-good] {
+    --grade: var(--ok);
+  }
+
+  .dc__ring svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    rotate: -90deg;
+  }
+
+  .dc__track {
+    fill: none;
+    stroke: var(--edge);
+    stroke-width: 8;
+  }
+
+  .dc__fill {
+    fill: none;
+    stroke: var(--grade);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke 0.5s var(--ease);
+  }
+
+  .dc__value {
+    color: var(--ink);
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dc__score-copy {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .dc__score-label {
+    font-weight: 500;
+  }
+
+  .dc__score-sub {
+    display: flex;
+    gap: 0.35rem;
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .dc__score-sub [data-dc-checks] {
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dc__scan {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .dc__card {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .dc__find {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+  }
+
+  .dc__find-title {
+    font-weight: 500;
+  }
+
+  .dc__rule {
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .dc__note {
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  /* three steps joined by arrows: what happens to a token that travels in a URL */
+  .dc__flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .dc__flow li {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 0.4rem;
+  }
+
+  /*
+   * An arrow from each step to the next, in the attacker's orange: it runs from the icon of the step before
+   * (a column and the gap back, plus the icon) to just short of this one, where its head sits.
+   */
+  .dc__flow li + li::before,
+  .dc__flow li + li::after {
+    content: '';
+    position: absolute;
+    top: calc(1.1rem - 1px);
+    right: calc(100% + 0.4rem);
+  }
+
+  .dc__flow li + li::before {
+    left: calc(2.6rem - 100% - 0.9rem);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgb(var(--aurora-1) / 0.4), rgb(var(--aurora-1)));
+  }
+
+  .dc__flow li + li::after {
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-top: calc(1px - 0.225rem);
+    border-top: 2px solid rgb(var(--aurora-1));
+    border-right: 2px solid rgb(var(--aurora-1));
+    rotate: 45deg;
+  }
+
+  .dc__node {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--ink-2);
+  }
+
+  .dc__node :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .dc__node--bad {
+    border-color: rgb(var(--aurora-1));
+    background: rgb(var(--aurora-1) / 0.14);
+    color: rgb(var(--aurora-1));
+  }
+
+  .dc__chip {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    background: var(--sheet-2);
+    color: var(--ink);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dc__say {
+    color: var(--ink-2);
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+
+  .dc__statuses {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    font-size: 0.86rem;
+  }
+
+  .dc__statuses li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 0.35s var(--ease),
+      translate 0.35s var(--ease);
+  }
+
+  .dc__statuses li[data-on] {
+    opacity: 1;
+    translate: none;
+  }
+
+  .dc__statuses :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--ok);
+  }
+
+  @media (min-width: 56rem) {
+    .dc__body {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+
+    .dc__desk {
+      border-top: 0;
+      border-left: 1px solid var(--edge);
+    }
+  }
+
+  /* ── motion ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dc__lines[data-scanning] .dc__beam {
+      opacity: 1;
+      animation: dc-sweep var(--scan, 1.8s) linear both;
+    }
+
+    .dc__line--new:not([hidden]) {
+      animation: dc-open 0.4s var(--ease) both;
+    }
+
+    .dc__card:not([hidden]) {
+      animation: dc-in 0.45s var(--ease) both;
+    }
+
+    .dc__flow li {
+      animation: dc-in 0.45s var(--ease) both;
+      animation-delay: calc(0.15s + var(--i) * 0.45s);
+    }
+
+    .dc__flow li + li::before {
+      transform-origin: left;
+      animation: dc-draw 0.35s var(--ease) both;
+      animation-delay: calc(var(--i) * 0.45s - 0.15s);
+    }
+
+    .dc__flow li + li::after {
+      animation: dc-in 0.2s var(--ease) both;
+      animation-delay: calc(var(--i) * 0.45s + 0.15s);
+    }
+
+    /* once merged, the ring gives one soft green breath */
+    .dc[data-step='4'] .dc__ring {
+      animation: dc-flash 1.2s ease-out 0.2s both;
+    }
+  }
+
+  @keyframes dc-sweep {
+    from {
+      top: 0;
+    }
+    to {
+      top: calc(100% + 3rem);
+    }
+  }
+
+  @keyframes dc-open {
+    from {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+
+  @keyframes dc-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  @keyframes dc-draw {
+    from {
+      scale: 0 1;
+    }
+  }
+
+  @keyframes dc-flash {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 55%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 18px transparent;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../../engine/client';
+  import { scene } from '../../lib/demoScene';
+
+  /** The pace: a line coming in, the sweep down the file (--scan in the CSS), a typed character, the score rolling. */
+  const LINE = 45;
+  const SCAN = 1800;
+  const KEY = 28;
+  const ROLL = 1100;
+  /** Where the score lands with the finding open, and once the fix is in; how many checks the review runs. */
+  const FOUND = 61;
+  const FIXED = 92;
+  const CHECKS = 142;
+  /** At this score the ring turns green. */
+  const GOOD = 85;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-dc]')) {
+    const lines = [...root.querySelectorAll<HTMLElement>('[data-dc-line]')];
+    const risky = root.querySelector<HTMLElement>('[data-risky]')!;
+    const fresh = root.querySelector<HTMLElement>('[data-dc-fixed]')!;
+    const typed = fresh.querySelector<HTMLElement>('[data-dc-typed]')!;
+    const written = fresh.dataset.dcFixed!;
+    // the line as it is coloured once written; while it is typed it is plain text
+    const painted = typed.innerHTML;
+    const box = root.querySelector<HTMLElement>('[data-dc-lines]')!;
+    const ring = root.querySelector<HTMLElement>('[data-dc-ring]')!;
+    const fill = root.querySelector<SVGCircleElement>('[data-dc-fill]')!;
+    const score = root.querySelector<HTMLElement>('[data-dc-score]')!;
+    const checks = root.querySelector<HTMLElement>('[data-dc-checks]')!;
+    const statuses = [...root.querySelectorAll<HTMLElement>('[data-dc-status]')];
+    const arc = Number(fill.getAttribute('stroke-dasharray'));
+
+    const stage = scene(root, { stages: { '0': 1, '1': 1, '2': 2, '3': 3, '3b': 4, '4': 5 }, last: '4' });
+    const { go, later, wait } = stage;
+    // the desk through its steps, and the file, which gains the fixed line at step 3
+    stage.hold(root.querySelector<HTMLElement>('.dc__desk')!);
+    stage.hold(box);
+
+    const mark = (el: Element, name: string, on = true) => el.toggleAttribute(`data-${name}`, on);
+    let frame = 0;
+    let typer = 0;
+    let value = 0;
+    let counted = 0;
+
+    /** Shows a score on the ring: its arc, its number, its colour. */
+    const show = (next: number) => {
+      value = next;
+      fill.style.strokeDashoffset = String(arc * (1 - next / 100));
+      score.textContent = String(Math.round(next));
+      ring.toggleAttribute('data-good', next >= GOOD);
+    };
+
+    /** Runs the score to `to` over `ms`, and the checks count with it when given. */
+    const roll = (to: number, ms: number, checksTo?: number) => {
+      cancelAnimationFrame(frame);
+      const from = value;
+      const fromChecks = counted;
+      const step = (k: number) => {
+        show(from + (to - from) * (1 - (1 - k) ** 3));
+        if (checksTo !== undefined) {
+          counted = Math.round(fromChecks + (checksTo - fromChecks) * k);
+          checks.textContent = String(counted);
+        }
+      };
+      if (reducedMotion()) return step(1);
+      const begin = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - begin) / ms);
+        step(k);
+        if (k < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    /** Writes the fixed line out character by character. */
+    const type = () => {
+      cancelAnimationFrame(typer);
+      if (reducedMotion()) {
+        typed.innerHTML = painted;
+        return;
+      }
+      typed.textContent = '';
+      const begin = performance.now();
+      const tick = (now: number) => {
+        const shown = Math.min(written.length, Math.ceil((now - begin) / KEY));
+        typed.textContent = written.slice(0, shown);
+        if (shown < written.length) typer = requestAnimationFrame(tick);
+        else typed.innerHTML = painted;
+      };
+      typer = requestAnimationFrame(tick);
+    };
+
+    /** Step 0 to the first decision: the change opens line by line, the review sweeps down it, one line is flagged. */
+    const play = () => {
+      const quick = reducedMotion();
+      go('0');
+      lines.forEach((line, i) => later(quick ? 0 : 200 + i * LINE, () => mark(line, 'in')));
+      const sweep = quick ? 0 : 200 + lines.length * LINE + 300;
+      later(sweep, () => {
+        if (!quick) box.dataset.scanning = '';
+        roll(FOUND, SCAN, CHECKS);
+        // each line is marked as the sweep passes it; blank lines have nothing to mark
+        lines.forEach((line, i) => {
+          if (line.hasAttribute('data-blank')) return;
+          later(quick ? 0 : (SCAN * (i + 0.5)) / lines.length, () => mark(line, line === risky ? 'risk' : 'ok'));
+        });
+      });
+      later(quick ? 0 : sweep + SCAN + 300, () => {
+        delete box.dataset.scanning;
+        go('1');
+        wait('why');
+      });
+    };
+
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(typer);
+      delete box.dataset.scanning;
+      for (const line of lines) for (const name of ['in', 'ok', 'risk', 'removed']) line.removeAttribute(`data-${name}`);
+      statuses.forEach((status) => status.removeAttribute('data-on'));
+      typed.innerHTML = painted;
+      counted = 0;
+      checks.textContent = '0';
+      show(0);
+    };
+
+    stage.start({
+      play,
+      reset,
+      acts: {
+        why: () => {
+          go('2');
+          wait('fix');
+        },
+        fix: () => {
+          const quick = reducedMotion();
+          go('3');
+          // the risky line is struck out and the fixed one written in under it
+          mark(risky, 'risk', false);
+          mark(risky, 'removed');
+          type();
+          // once the line is written, the statuses come in one by one and the score rolls up with the tests
+          const after = quick ? 0 : written.length * KEY + 350;
+          statuses.forEach((status, i) => later(quick ? 0 : after + i * 750, () => mark(status, 'on')));
+          later(quick ? 0 : after + 750, () => roll(FIXED, ROLL));
+          later(quick ? 0 : after + 3 * 750, () => {
+            go('3b');
+            wait('merge');
+          });
+        },
+        merge: () => go('4'),
+      },
+    });
+  }
+</script>
