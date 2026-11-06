@@ -7,6 +7,7 @@ import CloseCall from '../../components/sections/CloseCall.astro';
 import SolutionVisual from '../../components/SolutionVisual.astro';
 import NightExport from '../../components/sections/NightExport.astro';
 import AttackPath from '../../components/sections/AttackPath.astro';
+import CheckoutRestore from '../../components/sections/CheckoutRestore.astro';
 import { reveal, t, text } from '../../engine';
 import { solutionCards, solutions, type Solution } from '../../lib/solutions';
 
@@ -51,6 +52,9 @@ const notes = [
 
   {/* vulnerability scanning shows how small findings add up: the attack path, and where to cut it */}
   {k === 'scanning' && <AttackPath />}
+
+  {/* reserve camp shows a defaced checkout being compared and put back from the recovery server */}
+  {k === 'camp' && <CheckoutRestore />}
 
   <Related titleKey="common.related">
     <LinkCards items={solutionCards(k)} />

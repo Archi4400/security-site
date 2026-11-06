@@ -246,6 +246,13 @@ const [peakX, peakY] = edgeOf(calm);
     color: var(--warn);
   }
 
+  /* a phone has no room beside the steps once a step shows its name; the feed's times tell the hour there */
+  @media (max-width: 40rem) {
+    .nx__clock {
+      display: none;
+    }
+  }
+
   /* the alert, and every severity in the scene, turns red once the decoy is hit and green once it is over */
   .nx[data-step='2b'],
   .nx[data-step='3'] {
@@ -837,7 +844,7 @@ const [peakX, peakY] = edgeOf(calm);
       border-right: 1px solid var(--edge);
     }
 
-    /* as tall as the tallest step, so the panel keeps its size from the first step to the last */
+    /* about as tall as the tallest step until the script measures it and holds it there */
     .nx__case {
       min-height: 23.5rem;
     }
@@ -1024,6 +1031,7 @@ const [peakX, peakY] = edgeOf(calm);
       aside: ['notify'],
     });
     const { go, later, wait } = stage;
+    stage.hold(root.querySelector<HTMLElement>('.nx__case')!);
 
     const feed = root.querySelector<HTMLElement>('[data-nx-feed]')!;
     const clock = root.querySelector<HTMLElement>('[data-nx-clock]')!;

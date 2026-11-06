@@ -1249,7 +1249,7 @@ const steps = [0, 1, 2, 3].map((i) => `demo.path.steps.${i}`);
       background: linear-gradient(90deg, transparent, rgb(var(--aurora-1) / 0.9));
     }
 
-    /* the three fixes side by side, and under them the fix in hand next to its change */
+    /* the three fixes side by side, and under them the fix in hand next to its change; the height is a first guess the script refines */
     .ap__desk {
       min-height: 15.25rem;
     }
@@ -1533,6 +1533,12 @@ const steps = [0, 1, 2, 3].map((i) => `demo.path.steps.${i}`);
       enter: (step) => pickable(step === '2b' || fixing.includes(step)),
     });
     const { go, later, wait } = stage;
+    // the desk is held at its tallest, measured with each of the three fix cards in it
+    stage.hold(
+      root.querySelector<HTMLElement>('.ap__desk')!,
+      fixes.map((fix) => () => fixes.forEach((other) => (other.hidden = other !== fix))),
+      () => fixes.forEach((fix) => (fix.hidden = fix.dataset.apFix !== current)),
+    );
 
     const mark = (el: Element, name: string, on = true) => el.toggleAttribute(`data-${name}`, on);
     const wide = () => matchMedia('(min-width: 56rem)').matches;
