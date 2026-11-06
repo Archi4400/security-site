@@ -557,6 +557,7 @@ export const en = {
     minutes: '{n} min read',
     latest: 'Latest posts',
     all: 'All posts',
+    brief: 'Field notes from the team: how attacks unfold inside real products, and what gives them away.',
     posts: {
       offboarding: {
         tag: 'Detection',

@@ -4,8 +4,7 @@ import '../styles/global.css';
 import { BRAND, SITE } from '../brand';
 import Header from '../components/header/Header.astro';
 import Footer from '../components/footer/Footer.astro';
-import Related from '../components/sections/Related.astro';
-import PostCards from '../components/sections/PostCards.astro';
+import BlogBrief from '../components/sections/BlogBrief.astro';
 import Newsletter from '../components/sections/Newsletter.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 
@@ -46,11 +45,7 @@ const jsonLd = JSON.stringify({
     <Header path={path} />
     <main id="main">
       <slot />
-      {!onBlog && (
-        <Related titleKey="blog.latest" more={{ href: '/blog', key: 'blog.all' }}>
-          <PostCards limit={3} />
-        </Related>
-      )}
+      {!onBlog && <BlogBrief />}
       <Newsletter />
     </main>
     <Footer />

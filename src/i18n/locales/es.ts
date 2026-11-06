@@ -557,6 +557,7 @@ export const es = {
     minutes: '{n} min de lectura',
     latest: 'Últimas publicaciones',
     all: 'Todas las publicaciones',
+    brief: 'Notas de campo del equipo: cómo se desarrollan los ataques dentro de productos reales y qué los delata.',
     posts: {
       offboarding: {
         tag: 'Detección',

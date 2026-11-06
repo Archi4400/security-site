@@ -1,0 +1,270 @@
+---
+import { Image } from 'astro:assets';
+import { countUp, reveal, t, text } from '../../engine';
+import { posts } from '../../lib/posts';
+import Icon from '../Icon.astro';
+
+/**
+ * Under every page but the blog's own: the newest three, each a picture with its words on a dark
+ * fall at the foot. The newest is large and tells more; the two before it share the column beside it.
+ */
+const cards = posts.slice(0, 3).map((post, i) => ({
+  post,
+  lead: i === 0,
+  read: countUp(`brief-${post.key}`, post.minutes, { key: 'blog.minutes' }),
+}));
+---
+
+<section class="band band--alt">
+  <div class="shell stack">
+    <div class="brief__head" {...reveal()}>
+      <div class="brief__intro">
+        <h2 class="brief__title" {...text('blog.latest')}>{t('blog.latest')}</h2>
+        <p class="brief__lede" {...text('blog.brief')}>{t('blog.brief')}</p>
+      </div>
+      <a href="/blog" class="btn btn--line">
+        <span {...text('blog.all')}>{t('blog.all')}</span>
+        <Icon name="arrow" />
+      </a>
+    </div>
+
+    <div class="brief__grid">
+      {cards.map(({ post: p, lead, read }, i) => (
+        <article class:list={['brief__post', lead && 'brief__post--lead']} {...reveal()} style={`--d: ${i * 0.1}s`}>
+          <a href={`/blog/${p.slug}`} class="brief__link">
+            <Image
+              src={p.cover}
+              alt=""
+              widths={lead ? [640, 960, 1400] : [480, 800]}
+              sizes={lead ? '(min-width: 80rem) 44rem, (min-width: 64rem) 56vw, 100vw' : '(min-width: 80rem) 34rem, (min-width: 64rem) 42vw, 100vw'}
+              class="brief__img"
+            />
+            <span class="brief__tag mono" {...text(`blog.posts.${p.key}.tag`)}>{t(`blog.posts.${p.key}.tag`)}</span>
+            {!lead && (
+              <span class="brief__go" aria-hidden="true">
+                <Icon name="arrow" />
+              </span>
+            )}
+            <div class="brief__body">
+              <span class="brief__meta">
+                <time datetime={p.date} {...text(`blog.posts.${p.key}.date`)}>{t(`blog.posts.${p.key}.date`)}</time>
+                <span aria-hidden="true">·</span>
+                <span {...read.root()}><span {...read.value()}>{read.text}</span><span {...read.digits()} /></span>
+              </span>
+              <h3 class="brief__name" {...text(`blog.posts.${p.key}.title`)}>{t(`blog.posts.${p.key}.title`)}</h3>
+              {lead && (
+                <>
+                  <p class="brief__text" {...text(`blog.posts.${p.key}.lede`)}>{t(`blog.posts.${p.key}.lede`)}</p>
+                  <span class="brief__more">
+                    <span {...text('common.read')}>{t('common.read')}</span>
+                    <Icon name="arrow" />
+                  </span>
+                </>
+              )}
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .brief__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+  }
+
+  .brief__intro {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 40rem;
+  }
+
+  .brief__title {
+    font-size: var(--step-4);
+  }
+
+  .brief__lede {
+    color: var(--ink-2);
+    font-size: var(--step-1);
+  }
+
+  .brief__grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  /* ── a post: its picture fills the card, the words sit on a dark fall at the foot ── */
+
+  .brief__post {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    min-height: 15rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background: var(--sheet-2);
+  }
+
+  .brief__post--lead {
+    min-height: clamp(24rem, 18rem + 14vw, 32rem);
+  }
+
+  .brief__link {
+    position: relative;
+    display: grid;
+    align-content: end;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    color: #fff;
+  }
+
+  .brief__post--lead .brief__link {
+    padding: clamp(1.25rem, 0.9rem + 1.5vw, 2rem);
+  }
+
+  .brief__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(6 7 10 / 0.05), rgb(6 7 10 / 0.35) 35%, rgb(6 7 10 / 0.8) 60%, rgb(6 7 10 / 0.94));
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .brief__img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 1.2s var(--ease);
+  }
+
+  .brief__post:hover .brief__img {
+    scale: 1.05;
+  }
+
+  .brief__tag {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: var(--panel-bg);
+    color: var(--ink);
+    font-size: 0.78rem;
+  }
+
+  .brief__post--lead .brief__tag {
+    top: clamp(1.25rem, 0.9rem + 1.5vw, 2rem);
+    left: clamp(1.25rem, 0.9rem + 1.5vw, 2rem);
+  }
+
+  /* the smaller posts carry a round arrow in the corner that fills in when pointed at */
+  .brief__go {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--panel-bg);
+    color: var(--ink);
+    backdrop-filter: blur(6px);
+    transition:
+      background-color 0.3s var(--ease),
+      color 0.3s var(--ease);
+  }
+
+  .brief__go :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    rotate: -45deg;
+    transition: rotate 0.35s var(--ease);
+  }
+
+  .brief__post:hover .brief__go {
+    background: var(--cta);
+    color: var(--cta-ink);
+  }
+
+  .brief__post:hover .brief__go :global(svg) {
+    rotate: 0deg;
+  }
+
+  .brief__body {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 38rem;
+  }
+
+  .brief__post--lead .brief__body {
+    gap: 0.75rem;
+  }
+
+  .brief__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.6rem;
+    color: rgb(255 255 255 / 0.72);
+    font-size: 0.86rem;
+  }
+
+  .brief__meta :global([data-count]) {
+    justify-items: start;
+  }
+
+  .brief__name {
+    font-size: var(--step-2);
+    line-height: 1.15;
+  }
+
+  .brief__post--lead .brief__name {
+    font-size: var(--step-3);
+    line-height: 1.1;
+  }
+
+  .brief__text {
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .brief__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+
+  .brief__more :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    transition: translate 0.25s var(--ease);
+  }
+
+  .brief__post:hover .brief__more :global(svg) {
+    translate: 4px 0;
+  }
+
+  /* the newest takes the left two rows, the two before it stack in the right column */
+  @media (min-width: 64rem) {
+    .brief__grid {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .brief__post--lead {
+      grid-row: 1 / span 2;
+    }
+  }
+</style>

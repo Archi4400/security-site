@@ -1,41 +1,22 @@
 ---
 import { t, text } from '../../engine';
-import Icon from '../Icon.astro';
 
-/** A band of a few cards under a title: other products, other solutions, the latest posts. */
+/** The band at the foot of a product, solution or post: a title, then the cards it is given. */
 interface Props {
   titleKey: string;
-  /** A link beside the title to the whole list the cards are a few of. */
-  more?: { href: string; key: string };
 }
 
-const { titleKey, more } = Astro.props;
+const { titleKey } = Astro.props;
 ---
 
 <section class="band band--alt">
   <div class="shell stack">
-    <div class="related__head">
-      <h2 class="related__title" {...text(titleKey)}>{t(titleKey)}</h2>
-      {more && (
-        <a href={more.href} class="link">
-          <span {...text(more.key)}>{t(more.key)}</span>
-          <Icon name="arrow" />
-        </a>
-      )}
-    </div>
+    <h2 class="related__title" {...text(titleKey)}>{t(titleKey)}</h2>
     <slot />
   </div>
 </section>
 
 <style>
-  .related__head {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.5rem 2rem;
-  }
-
   .related__title {
     font-size: var(--step-3);
   }
