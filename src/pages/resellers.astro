@@ -19,7 +19,7 @@ const steps = en.resellers.steps.items;
     <div class="shell rs__wrap">
       <div class="rs__who">
         <h2 class="rs__title" {...reveal()} {...text('resellers.who.title')}>{t('resellers.who.title')}</h2>
-        <ul class="rs__cards" role="list">
+        <ul class="tiles" role="list" style="--tile: 20rem">
           {who.map((_, i) => (
             <li class="rs__card panel" data-lean {...reveal()} style={`--d: ${i * 0.08}s`}>
               <h3 {...text(`resellers.who.items.${i}.title`)}>{t(`resellers.who.items.${i}.title`)}</h3>
@@ -29,7 +29,7 @@ const steps = en.resellers.steps.items;
         </ul>
       </div>
 
-      <div class="rs__split">
+      <div class="split">
         <div class="rs__gets" {...reveal()}>
           <h2 class="rs__title" {...text('resellers.gets.title')}>{t('resellers.gets.title')}</h2>
           <ul role="list">
@@ -74,13 +74,6 @@ const steps = en.resellers.steps.items;
     font-size: var(--step-3);
   }
 
-  .rs__cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-    gap: 1rem;
-    margin: 0;
-  }
-
   .rs__card {
     display: grid;
     align-content: start;
@@ -94,11 +87,6 @@ const steps = en.resellers.steps.items;
 
   .rs__card p {
     color: var(--ink-2);
-  }
-
-  .rs__split {
-    display: grid;
-    gap: 3rem;
   }
 
   .rs__gets,
@@ -167,11 +155,5 @@ const steps = en.resellers.steps.items;
 
   .rs__step p {
     color: var(--ink-2);
-  }
-
-  @media (min-width: 64rem) {
-    .rs__split {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 </style>

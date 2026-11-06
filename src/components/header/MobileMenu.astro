@@ -3,7 +3,6 @@ import { label, menuDialog, t, text } from '../../engine';
 import { LOGIN } from '../../brand';
 import Brand from '../Brand.astro';
 import Icon from '../Icon.astro';
-import LangSwitcher from './LangSwitcher.astro';
 import ThemeSwitch from './ThemeSwitch.astro';
 import { ATTACK, DEMO, isCurrent, isGroup, navRoutes, type NavEntry } from './navRoutes';
 
@@ -63,7 +62,7 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
       ))}
       <li class="sheet__item">
         <a href={ATTACK} class="sheet__link sheet__link--attack">
-          <span class="dot" aria-hidden="true"></span>
+          <span class="dot dot--alarm" aria-hidden="true"></span>
           <span {...text('nav.attack')}>{t('nav.attack')}</span>
         </a>
       </li>
@@ -76,8 +75,7 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
   </div>
 
   <div class="sheet__prefs">
-    <LangSwitcher id="lang-sheet" up />
-    <ThemeSwitch id="theme-sheet" />
+    <ThemeSwitch />
   </div>
 </dialog>
 
@@ -236,11 +234,6 @@ const isOpen = (entry: NavEntry) => isGroup(entry) && (isCurrent(entry.href, pat
 
   .sheet__link--attack {
     gap: 0.6rem;
-  }
-
-  .sheet__link--attack .dot {
-    color: var(--bad);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
   }
 
   .sheet__account {

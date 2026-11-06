@@ -4,6 +4,9 @@ import '../styles/global.css';
 import { BRAND, SITE } from '../brand';
 import Header from '../components/header/Header.astro';
 import Footer from '../components/footer/Footer.astro';
+import BlogBrief from '../components/sections/BlogBrief.astro';
+import Newsletter from '../components/sections/Newsletter.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 
 interface Props {
   metaKey: string;
@@ -12,6 +15,8 @@ interface Props {
 }
 
 const { metaKey, path, noindex } = Astro.props;
+// the blog shows its own posts, so the latest few are left off its pages
+const onBlog = path === '/blog' || path.startsWith('/blog/');
 
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
@@ -40,8 +45,11 @@ const jsonLd = JSON.stringify({
     <Header path={path} />
     <main id="main">
       <slot />
+      {!onBlog && <BlogBrief />}
+      <Newsletter />
     </main>
     <Footer />
+    <CookieBanner />
     <Runtime />
     <script>
       import { reducedMotion, start } from '../engine/client';

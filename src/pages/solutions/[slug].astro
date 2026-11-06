@@ -2,8 +2,11 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHead from '../../components/sections/PageHead.astro';
 import LinkCards from '../../components/sections/LinkCards.astro';
+import Related from '../../components/sections/Related.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
 import SolutionVisual from '../../components/SolutionVisual.astro';
+import NightExport from '../../components/sections/NightExport.astro';
+import AttackPath from '../../components/sections/AttackPath.astro';
 import { reveal, t, text } from '../../engine';
 import { solutionCards, solutions, type Solution } from '../../lib/solutions';
 
@@ -27,8 +30,8 @@ const notes = [
 <Layout metaKey={`meta.${k}`} path={`/solutions/${solution.slug}`}>
   <PageHead titleKey={`solutions.${k}.title`} ledeKey={`solutions.${k}.text`} kickerKey="nav.solutions" />
 
-  <section class="band sd">
-    <div class="shell sd__grid">
+  <section class="band">
+    <div class="shell split" style="--split: 1fr 1.1fr">
       <div class="sd__notes">
         {notes.map((n, i) => (
           <article class:list={['sd__note', i === 2 && 'sd__note--limit']} {...reveal()} style={`--d: ${i * 0.08}s`}>
@@ -37,29 +40,26 @@ const notes = [
           </article>
         ))}
       </div>
-      <div class="sd__visual" {...reveal()}>
+      <div class="pin" {...reveal()}>
         <SolutionVisual k={k} data-lean style="--lean-amount: 0.5" />
       </div>
     </div>
   </section>
 
-  <section class="band sd-more">
-    <div class="shell sd-more__wrap">
-      <h2 class="sd-more__title" {...text('common.related')}>{t('common.related')}</h2>
-      <LinkCards items={solutionCards(k)} />
-    </div>
-  </section>
+  {/* behavior analytics shows itself at work: the night export, played through */}
+  {k === 'behavior' && <NightExport />}
+
+  {/* vulnerability scanning shows how small findings add up: the attack path, and where to cut it */}
+  {k === 'scanning' && <AttackPath />}
+
+  <Related titleKey="common.related">
+    <LinkCards items={solutionCards(k)} />
+  </Related>
 
   <CloseCall />
 </Layout>
 
 <style>
-  .sd__grid {
-    display: grid;
-    gap: 2rem;
-    align-items: start;
-  }
-
   .sd__notes {
     display: grid;
     gap: 1rem;
@@ -86,35 +86,5 @@ const notes = [
 
   .sd__head {
     font-size: var(--step-1);
-  }
-
-  .sd__visual {
-    min-width: 0;
-  }
-
-  .sd-more {
-    background: var(--ground-2);
-    border-top: 1px solid var(--edge);
-  }
-
-  .sd-more__wrap {
-    display: grid;
-    gap: 2rem;
-  }
-
-  .sd-more__title {
-    font-size: var(--step-3);
-  }
-
-  @media (min-width: 64rem) {
-    .sd__grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      gap: clamp(2rem, 1rem + 3vw, 4rem);
-    }
-
-    .sd__visual {
-      position: sticky;
-      top: calc(var(--pinned-offset) + 2rem);
-    }
   }
 </style>

@@ -66,7 +66,10 @@ const socials: { icon: IconName; key: string; href: string }[] = [
   </div>
   <div class="shell foot__base">
     <p {...text('footer.rights')}>{t('footer.rights')}</p>
-    <a href="/site-map" class="foot__map" {...text('footer.siteMap')}>{t('footer.siteMap')}</a>
+    <div class="foot__base-links">
+      <button type="button" class="foot__map" data-cookie-open {...text('consent.settings')}>{t('consent.settings')}</button>
+      <a href="/site-map" class="foot__map" {...text('footer.siteMap')}>{t('footer.siteMap')}</a>
+    </div>
   </div>
 </footer>
 
@@ -150,16 +153,26 @@ const socials: { icon: IconName; key: string; href: string }[] = [
     justify-content: space-between;
     gap: 0.5rem 1.5rem;
     margin-top: clamp(2.5rem, 2rem + 3vw, 4rem);
-    padding-block: 1.5rem 2rem;
+    padding-block: 0.5rem 0.5rem;
     border-top: 1px solid var(--edge);
     color: var(--mute);
     font-size: 0.86rem;
+  }
+
+  .foot__base-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
   }
 
   .foot__map {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
     transition: color 0.2s var(--ease);
   }
 

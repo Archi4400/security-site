@@ -15,8 +15,8 @@ const direct = [
 
 <Layout metaKey="meta.contact" path="/contact">
   <PageHead titleKey="contact.head.title" ledeKey="contact.head.lede" />
-  <section class="band ct">
-    <div class="shell ct__grid">
+  <section class="band">
+    <div class="shell split" style="--split: 1.6fr 1fr">
       <div class="ct__form panel" {...reveal()}>
         <RequestForm />
       </div>
@@ -36,15 +36,8 @@ const direct = [
 </Layout>
 
 <style>
-  .ct__grid {
-    display: grid;
-    gap: 2.5rem;
-    align-items: start;
-  }
-
   .ct__form {
     padding: clamp(1.25rem, 0.8rem + 2vw, 2.25rem);
-    min-width: 0;
   }
 
   .ct__side {
@@ -93,11 +86,5 @@ const direct = [
 
   .ct__mail:hover svg {
     translate: 3px 0;
-  }
-
-  @media (min-width: 64rem) {
-    .ct__grid {
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    }
   }
 </style>

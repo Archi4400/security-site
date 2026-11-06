@@ -63,7 +63,7 @@ const { path } = Astro.props;
     ))}
     <li class="nav__item">
       <a href={ATTACK} class="nav__link nav__link--attack">
-        <span class="dot" aria-hidden="true"></span>
+        <span class="dot dot--alarm" aria-hidden="true"></span>
         <span {...text('nav.attack')}>{t('nav.attack')}</span>
       </a>
     </li>
@@ -104,8 +104,6 @@ const { path } = Astro.props;
   .nav__link--attack .dot {
     width: 0.45rem;
     height: 0.45rem;
-    color: var(--bad);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
   }
 
   .nav__link:hover,

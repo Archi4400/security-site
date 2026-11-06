@@ -12,8 +12,8 @@ const facts = en.press.facts;
 <Layout metaKey="meta.press" path="/press">
   <PageHead titleKey="press.head.title" ledeKey="press.head.lede" kickerKey="nav.about" />
 
-  <section class="band ps">
-    <div class="shell ps__grid">
+  <section class="band">
+    <div class="shell split" style="--split: 1.5fr 1fr">
       <div class="ps__main">
         <article class="ps__block" {...reveal()}>
           <h2 {...text('press.about.title')}>{t('press.about.title')}</h2>
@@ -52,12 +52,6 @@ const facts = en.press.facts;
 </Layout>
 
 <style>
-  .ps__grid {
-    display: grid;
-    gap: 2.5rem;
-    align-items: start;
-  }
-
   .ps__main {
     display: grid;
     gap: 2.5rem;
@@ -144,11 +138,5 @@ const facts = en.press.facts;
   .ps__mail {
     overflow-wrap: anywhere;
     min-height: 44px;
-  }
-
-  @media (min-width: 64rem) {
-    .ps__grid {
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    }
   }
 </style>

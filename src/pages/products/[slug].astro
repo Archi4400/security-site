@@ -2,9 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHead from '../../components/sections/PageHead.astro';
 import LinkCards from '../../components/sections/LinkCards.astro';
+import Related from '../../components/sections/Related.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
 import Icon from '../../components/Icon.astro';
 import ProductVisual from '../../components/ProductVisual.astro';
+import NightExport from '../../components/sections/NightExport.astro';
+import AttackPath from '../../components/sections/AttackPath.astro';
 import { reveal, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
 import { DEMO } from '../../components/header/navRoutes';
@@ -32,8 +35,8 @@ const points = en.products[k].points;
     </div>
   </PageHead>
 
-  <section class="band pd">
-    <div class="shell pd__grid">
+  <section class="band">
+    <div class="shell split" style="--split: 1fr 1.1fr">
       <div class="pd__copy">
         <div class="pd__built" {...reveal()}>
           <h2 class="pd__label" {...text('products.built')}>{t('products.built')}</h2>
@@ -60,18 +63,21 @@ const points = en.products[k].points;
         </div>
       </div>
 
-      <div class="pd__visual" {...reveal()}>
+      <div class="pin" {...reveal()}>
         <ProductVisual k={k} data-lean style="--lean-amount: 0.5" />
       </div>
     </div>
   </section>
 
-  <section class="band pd-more">
-    <div class="shell pd-more__wrap">
-      <h2 class="pd-more__title" {...text('common.relatedProducts')}>{t('common.relatedProducts')}</h2>
-      <LinkCards items={productCards(k)} />
-    </div>
-  </section>
+  {/* manga watches the same CRM activity: the night export, played through */}
+  {k === 'manga' && <NightExport />}
+
+  {/* single is the scanning product: how small findings add up to an attack path, and fixing them */}
+  {k === 'single' && <AttackPath />}
+
+  <Related titleKey="common.relatedProducts">
+    <LinkCards items={productCards(k)} />
+  </Related>
 
   <CloseCall />
 </Layout>
@@ -82,12 +88,6 @@ const points = en.products[k].points;
     flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 0.75rem;
-  }
-
-  .pd__grid {
-    display: grid;
-    gap: 3rem;
-    align-items: start;
   }
 
   .pd__copy {
@@ -151,35 +151,5 @@ const points = en.products[k].points;
 
   .pd__point-text {
     color: var(--ink-2);
-  }
-
-  .pd__visual {
-    min-width: 0;
-  }
-
-  .pd-more {
-    background: var(--ground-2);
-    border-top: 1px solid var(--edge);
-  }
-
-  .pd-more__wrap {
-    display: grid;
-    gap: 2rem;
-  }
-
-  .pd-more__title {
-    font-size: var(--step-3);
-  }
-
-  @media (min-width: 64rem) {
-    .pd__grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      gap: clamp(2rem, 1rem + 3vw, 4rem);
-    }
-
-    .pd__visual {
-      position: sticky;
-      top: calc(var(--pinned-offset) + 2rem);
-    }
   }
 </style>

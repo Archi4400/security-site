@@ -21,7 +21,7 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
   <PageHead titleKey="about.head.title" ledeKey="about.head.lede" kickerKey="nav.about" />
 
   <section class="band ab">
-    <div class="shell ab__grid">
+    <div class="shell split" style="--split: 1.5fr 1fr">
       <div class="ab__story" {...reveal()}>
         <h2 {...text('about.story.title')}>{t('about.story.title')}</h2>
         {story.map((_, i) => <p {...text(`about.story.text.${i}`)}>{t(`about.story.text.${i}`)}</p>)}
@@ -37,8 +37,8 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
     </div>
   </section>
 
-  <section class="band ap">
-    <div class="shell ap__wrap">
+  <section class="band band--alt ap">
+    <div class="shell split" style="--split: 1.5fr 1fr">
       <div class="ap__main">
       <h2 class="ap__title" {...reveal()} {...text('about.principles.title')}>{t('about.principles.title')}</h2>
       <ul class="ap__list" role="list">
@@ -50,7 +50,7 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
         ))}
       </ul>
       </div>
-      <div class="ap__status panel" data-lean {...reveal()}>
+      <div class="ap__status panel pin" data-lean {...reveal()}>
         <span class="ap__live mono"><span class="dot sev--low" aria-hidden="true"></span>34 / 34</span>
         <h2 {...text('about.status.title')}>{t('about.status.title')}</h2>
         <p {...text('about.status.text')}>{t('about.status.text')}</p>
@@ -59,7 +59,7 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
   </section>
 
   <section class="band an">
-    <div class="shell an__wrap">
+    <div class="shell stack">
       <h2 class="an__title" {...text('about.next')}>{t('about.next')}</h2>
       <ul class="an__list" role="list">
         {next.map((l) => (
@@ -94,12 +94,6 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
     background:
       radial-gradient(35% 70% at 90% 0%, rgb(var(--aurora-1) / 0.14), transparent 70%),
       radial-gradient(30% 60% at 60% 0%, rgb(var(--aurora-2) / 0.1), transparent 70%);
-  }
-
-  .ab__grid {
-    display: grid;
-    gap: 3rem;
-    align-items: start;
   }
 
   .ab__story {
@@ -150,14 +144,7 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
   }
 
   .ap {
-    background: var(--ground-2);
-    border-block: 1px solid var(--edge);
-  }
-
-  .ap__wrap {
-    display: grid;
-    gap: 2.5rem;
-    align-items: start;
+    border-bottom: 1px solid var(--edge);
   }
 
   .ap__main {
@@ -229,11 +216,6 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
     color: var(--ink-2);
   }
 
-  .an__wrap {
-    display: grid;
-    gap: 1.5rem;
-  }
-
   .an__title {
     font-size: var(--step-3);
   }
@@ -282,21 +264,8 @@ const next = aboutLinks.filter((l) => l.href !== '/about');
   }
 
   @media (min-width: 64rem) {
-    .ab__grid {
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    }
-
-    .ap__wrap {
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    }
-
     .ap__item {
       grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    }
-
-    .ap__status {
-      position: sticky;
-      top: calc(var(--pinned-offset) + 2rem);
     }
   }
 </style>

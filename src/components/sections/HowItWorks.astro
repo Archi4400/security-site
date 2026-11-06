@@ -17,7 +17,7 @@ const steps: { icon: IconName; tone: number; at: number }[] = [
 ---
 
 <section class="band how" id="how">
-  <div class="shell how__wrap">
+  <div class="shell stack">
     <div class="head head--centre" {...reveal()}>
       <h2 {...text('home.how.title')}>{t('home.how.title')}</h2>
     </div>
@@ -47,11 +47,6 @@ const steps: { icon: IconName; tone: number; at: number }[] = [
 <style>
   .how {
     scroll-margin-top: var(--header-h);
-  }
-
-  .how__wrap {
-    display: grid;
-    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
   }
 
   .how__steps {

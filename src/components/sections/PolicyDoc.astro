@@ -17,8 +17,8 @@ const anchor = (i: number) => `${doc}-${i + 1}`;
   <p class="lg__updated" {...text('legal.updated')}>{t('legal.updated')}</p>
 </PageHead>
 
-<div class="shell band lg">
-  <nav class="lg__toc" aria-labelledby={`${doc}-toc`}>
+<div class="shell band split" style="--split: 16rem 1fr">
+  <nav class="lg__toc pin" aria-labelledby={`${doc}-toc`}>
     <h2 id={`${doc}-toc`} class="lg__toc-title" {...text('legal.contents')}>{t('legal.contents')}</h2>
     <ol class="lg__toc-list">
       {sections.map((_, i) => (
@@ -40,12 +40,6 @@ const anchor = (i: number) => `${doc}-${i + 1}`;
   .lg__updated {
     color: var(--mute);
     font-size: 0.9rem;
-  }
-
-  .lg {
-    display: grid;
-    gap: 2.5rem;
-    align-items: start;
   }
 
   .lg__toc {
@@ -97,17 +91,5 @@ const anchor = (i: number) => `${doc}-${i + 1}`;
 
   .lg__sec p {
     color: var(--ink-2);
-  }
-
-  @media (min-width: 64rem) {
-    .lg {
-      grid-template-columns: 16rem minmax(0, 1fr);
-      gap: 4rem;
-    }
-
-    .lg__toc {
-      position: sticky;
-      top: calc(var(--pinned-offset) + 2rem);
-    }
   }
 </style>

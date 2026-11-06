@@ -13,8 +13,8 @@ import { products } from '../lib/products';
 <Layout metaKey="meta.pricing" path="/pricing">
   <PageHead titleKey="pricing.head.title" ledeKey="pricing.head.lede" />
 
-  <section class="band pr">
-    <div class="shell pr__stage" data-tabs data-hash {...reveal()}>
+  <section class="band">
+    <div class="shell stack" data-tabs data-hash {...reveal()}>
       <div class="pr__tabs" role="group" {...label('pricing.label')}>
         {products.map((p, i) => (
           <button type="button" class="pr__tab" aria-pressed={i === 0 ? 'true' : 'false'} data-tab={p.key}>
@@ -80,11 +80,6 @@ import { products } from '../lib/products';
 </Layout>
 
 <style>
-  .pr__stage {
-    display: grid;
-    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
-  }
-
   /* one pill of products, centred; on a phone it scrolls sideways */
   .pr__tabs {
     justify-self: center;

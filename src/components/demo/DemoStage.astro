@@ -1,0 +1,559 @@
+---
+import { label, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+
+/**
+ * The stage every interactive walk-through plays on: the step bar, a slot for the alert beside it
+ * and one for whatever sits at the end of that row, the scene itself, the synthetic-data note and the
+ * cursor that clicks when no one does. The parts a scene is built from (its panel head, alert,
+ * decisions, a line that says it is working) are styled here too, so each scene only brings its own.
+ */
+interface Props {
+  /** The names along the step bar, as dictionary keys. */
+  steps: string[];
+  /** The stage's accessible name, as a dictionary key. */
+  labelKey: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { steps, labelKey, class: cls, ...rest } = Astro.props;
+---
+
+<div class:list={['demo', cls]} role="group" tabindex="-1" data-step="0" {...label(labelKey)} {...rest}>
+  <span class="demo__glow" aria-hidden="true"></span>
+  <slot name="backdrop" />
+
+  <div class="demo__top">
+    <ol class="demo__steps" role="list">
+      {steps.map((key, i) => (
+        <li class="demo__stage" data-demo-stage={i + 1}>
+          <span class="demo__num mono" aria-hidden="true">
+            <span class="demo__digit">{i + 1}</span>
+            <Icon name="check" class="demo__tick" />
+          </span>
+          <span class="demo__label" {...text(key)}>{t(key)}</span>
+        </li>
+      ))}
+    </ol>
+
+    <div class="demo__slot" role="status">
+      <slot name="alert" />
+    </div>
+
+    <slot name="aside" />
+  </div>
+
+  <slot />
+
+  <p class="demo__synthetic mono" {...text('common.synthetic')}>{t('common.synthetic')}</p>
+
+  <span class="demo__cursor" hidden aria-hidden="true" data-demo-cursor>
+    <svg viewBox="0 0 24 24"><path d="M5 3.5v15.2l4.1-3.9 2.6 6 2.7-1.2-2.6-5.9H18L5 3.5Z" /></svg>
+  </span>
+</div>
+
+<style>
+  /* ── the stage ── */
+
+  /* clip, not hidden: nothing, not even focus or a script, can scroll the stage inside itself */
+  .demo {
+    --tone: var(--warn);
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    display: grid;
+    gap: 0.75rem;
+    padding: clamp(1rem, 0.6rem + 2vw, 2rem);
+    border-radius: calc(var(--radius) + 8px);
+    border: 1px solid var(--edge);
+    background: var(--ground-2);
+    outline: none;
+  }
+
+  /* an aurora behind everything that breathes slowly */
+  .demo__glow {
+    position: absolute;
+    inset: -20%;
+    z-index: -2;
+    background:
+      radial-gradient(35% 45% at 22% 30%, rgb(var(--aurora-1) / 0.16), transparent 70%),
+      radial-gradient(35% 45% at 72% 35%, rgb(var(--aurora-2) / 0.16), transparent 70%),
+      radial-gradient(50% 55% at 50% 95%, rgb(var(--aurora-3) / 0.22), transparent 70%);
+    filter: blur(30px);
+    opacity: var(--glow, 1);
+  }
+
+  /* on a light page the stage stays clean: near-white, the aurora only a faint wash, a soft shadow under the panel */
+  :global(html[data-theme='light']) .demo {
+    background: linear-gradient(180deg, #fff, var(--sheet-2));
+  }
+
+  :global(html[data-theme='light']) .demo__glow {
+    --glow: 0.45;
+  }
+
+  :global(html[data-theme='light']) .demo :global(.panel) {
+    box-shadow:
+      0 24px 60px -24px rgb(36 66 230 / 0.18),
+      0 1px 2px rgb(11 13 18 / 0.04);
+  }
+
+  /* the top row: the steps, the alert, whatever ends the row; on a narrower stage the alert drops under the other two */
+  .demo__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+  }
+
+  /* the steps: numbered marks joined by lines, in one glass pill */
+  .demo__steps {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+  }
+
+  .demo__stage {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--mute);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: color 0.4s var(--ease);
+  }
+
+  /* the line from one step to the next fills in once the step before it is done */
+  .demo__stage + .demo__stage::before {
+    content: '';
+    width: 1.6rem;
+    height: 2px;
+    margin: 0 0.15rem 0 0.35rem;
+    border-radius: 999px;
+    background: var(--edge-strong);
+    transition: background-color 0.5s var(--ease);
+  }
+
+  .demo__stage[data-state='done'] + .demo__stage::before {
+    background: var(--ok);
+  }
+
+  .demo__stage[data-state='done'] + .demo__stage[data-state='now']::before {
+    background: linear-gradient(90deg, var(--ok), var(--accent));
+  }
+
+  .demo__num {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    font-size: 0.72rem;
+    transition:
+      background-color 0.4s var(--ease),
+      border-color 0.4s var(--ease),
+      color 0.4s var(--ease);
+  }
+
+  .demo__digit,
+  .demo__tick {
+    grid-area: 1 / 1;
+    transition:
+      opacity 0.3s var(--ease),
+      scale 0.4s var(--ease);
+  }
+
+  .demo__tick {
+    width: 0.85rem;
+    height: 0.85rem;
+    opacity: 0;
+    scale: 0.4;
+  }
+
+  .demo__stage[data-state='now'] {
+    color: var(--ink);
+  }
+
+  .demo__stage[data-state='now'] .demo__num {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .demo__stage[data-state='done'] {
+    color: var(--ink-2);
+  }
+
+  .demo__stage[data-state='done'] .demo__num {
+    border-color: color-mix(in oklab, var(--ok) 60%, transparent);
+    background: color-mix(in oklab, var(--ok) 16%, transparent);
+    color: var(--ok);
+  }
+
+  .demo__stage[data-state='done'] .demo__digit {
+    opacity: 0;
+  }
+
+  .demo__stage[data-state='done'] .demo__tick {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* on a phone only the step in hand keeps its name */
+  @media (max-width: 40rem) {
+    .demo__stage:not([data-state='now']) .demo__label {
+      display: none;
+    }
+
+    .demo__stage + .demo__stage::before {
+      width: 1rem;
+    }
+  }
+
+  /* ── the alert over the panel: its colour is the scene's severity, --tone ── */
+
+  .demo__slot {
+    order: 1;
+    flex: 1 0 100%;
+    display: flex;
+    justify-content: center;
+    min-height: 2.4rem;
+  }
+
+  /* a wide stage has room for the alert between the steps and the end of the row */
+  @media (min-width: 64rem) {
+    .demo__slot {
+      order: 0;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .demo :global(.demo__alert) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.6rem;
+    padding: 0.45rem 0.6rem 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--tone) 50%, var(--edge));
+    background: color-mix(in oklab, var(--tone) 12%, var(--sheet));
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition:
+      border-color 0.4s var(--ease),
+      background-color 0.4s var(--ease);
+  }
+
+  .demo :global(.demo__alert-dot) {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--tone) 25%, transparent);
+  }
+
+  .demo :global(.demo__sev) {
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--tone) 22%, transparent);
+    color: var(--tone);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* ── a panel's head: what it shows, and that the product is at work on it ── */
+
+  .demo :global(.demo__head) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.8rem 1.1rem;
+    border-bottom: 1px solid var(--edge);
+    font-size: 0.86rem;
+  }
+
+  .demo :global(.demo__app),
+  .demo :global(.demo__eye) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .demo :global(.demo__app) {
+    font-weight: 500;
+  }
+
+  .demo :global(.demo__eye) {
+    padding: 0.2rem 0.65rem 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent-ink);
+    font-size: 0.8rem;
+  }
+
+  .demo :global(.demo__eye svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .demo :global(.demo__live) {
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 22%, transparent);
+  }
+
+  /* ── decisions: the button breathes a blue ring until it is pressed, a hint beside it ── */
+
+  .demo :global(.demo__ask) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+
+  .demo :global(.demo__hint) {
+    color: var(--accent-ink);
+    font-size: 0.78rem;
+  }
+
+  .demo :global(.demo__go),
+  .demo :global(.demo__alt) {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 1.15rem;
+    border-radius: 999px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s var(--ease),
+      background-color 0.25s var(--ease);
+  }
+
+  .demo :global(.demo__go) {
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .demo :global(.demo__go svg),
+  .demo :global(.demo__alt svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .demo :global(.demo__go:hover),
+  .demo :global(.demo__go:focus-visible) {
+    box-shadow: 0 0 24px color-mix(in oklab, var(--accent) 60%, transparent);
+  }
+
+  .demo :global(.demo__alt) {
+    border: 1px solid var(--edge-strong);
+    background: none;
+    color: var(--ink);
+  }
+
+  .demo :global(.demo__alt:hover) {
+    border-color: var(--accent);
+  }
+
+  /* a side choice that stays chosen: what it says before, and after */
+  .demo :global(.demo__alt-on) {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ok);
+  }
+
+  .demo :global(.demo__alt[aria-pressed='true'] .demo__alt-off) {
+    display: none;
+  }
+
+  .demo :global(.demo__alt[aria-pressed='true'] .demo__alt-on) {
+    display: inline-flex;
+  }
+
+  /* the product at work after a decision */
+  .demo :global(.demo__busy) {
+    color: var(--accent-ink);
+    font-size: 0.82rem;
+  }
+
+  .demo__synthetic {
+    justify-self: end;
+    color: var(--mute);
+    font-size: 0.72rem;
+  }
+
+  /* ── the cursor that clicks when no one does ── */
+
+  .demo__cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 4;
+    width: 1.6rem;
+    height: 1.6rem;
+    pointer-events: none;
+    transition: translate 0.9s var(--ease);
+  }
+
+  .demo__cursor svg {
+    width: 100%;
+    height: 100%;
+    fill: #fff;
+    stroke: #06070a;
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.4));
+    transition: scale 0.15s ease;
+    transform-origin: 20% 15%;
+  }
+
+  .demo__cursor[data-press] svg {
+    scale: 0.82;
+  }
+
+  :global(html:not(.js)) .demo :global(.demo__ask) {
+    display: none;
+  }
+
+  /* ── motion ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .demo__glow {
+      animation: demo-breathe 14s ease-in-out infinite;
+    }
+
+    .demo :global(.demo__alert:not([hidden])) {
+      animation: demo-drop 0.5s var(--ease) both;
+    }
+
+    .demo :global(.demo__ask:not([hidden])),
+    .demo :global(.demo__busy:not([hidden])) {
+      animation: demo-in 0.45s var(--ease) both;
+    }
+
+    .demo :global(.demo__go) {
+      animation: demo-beat 1.6s ease-in-out infinite;
+    }
+
+    .demo :global(.demo__go::after) {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+      animation: demo-ring 1.6s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .demo :global(.demo__go[data-ripple]::before) {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgb(255 255 255 / 0.35);
+      animation: demo-ripple 0.3s ease-out both;
+    }
+
+    .demo :global(.demo__busy:not([hidden])::after) {
+      content: '';
+      display: inline-block;
+      width: 0.6rem;
+      height: 0.6rem;
+      margin-left: 0.5rem;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      vertical-align: -0.05rem;
+      animation: demo-spin 0.7s linear infinite;
+    }
+
+    /* the step in hand sends out a ring, like the decision it is waiting on */
+    .demo__stage[data-state='now'] .demo__num::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 50%;
+      animation: demo-ring 1.6s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .demo__stage[data-state='done'] .demo__tick {
+      transition-delay: 0.1s;
+    }
+  }
+
+  @keyframes demo-breathe {
+    50% {
+      opacity: calc(var(--glow, 1) * 0.7);
+      scale: 1.08;
+    }
+  }
+
+  @keyframes demo-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  @keyframes demo-drop {
+    from {
+      opacity: 0;
+      translate: 0 -10px;
+    }
+  }
+
+  @keyframes demo-ring {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+
+  @keyframes demo-beat {
+    50% {
+      scale: 1.06;
+    }
+  }
+
+  @keyframes demo-ripple {
+    from {
+      opacity: 1;
+      scale: 0.6;
+    }
+    to {
+      opacity: 0;
+      scale: 1.15;
+    }
+  }
+
+  @keyframes demo-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+</style>

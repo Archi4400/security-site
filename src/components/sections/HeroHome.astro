@@ -8,7 +8,7 @@ import StatusPanel from '../StatusPanel.astro';
 
 <section class="hero">
   <Aurora intensity={1} scale={11} lean={0.06} fps={45} rise={0.9} />
-  <div class="shell hero__grid">
+  <div class="shell split split--middle hero__grid" style="--split: 1.05fr 1fr">
     <div class="hero__copy">
       <h1 class="hero__title" {...text('home.hero.title')}>{t('home.hero.title')}</h1>
       <p class="hero__lede lede" {...text('home.hero.lede')}>{t('home.hero.lede')}</p>
@@ -41,8 +41,6 @@ import StatusPanel from '../StatusPanel.astro';
   }
 
   .hero__grid {
-    display: grid;
-    gap: clamp(2.5rem, 1.5rem + 3vw, 4rem);
     padding-block: clamp(3rem, 2rem + 5vw, 6rem);
   }
 
@@ -88,11 +86,6 @@ import StatusPanel from '../StatusPanel.astro';
   }
 
   @media (min-width: 64rem) {
-    .hero__grid {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-      align-items: center;
-    }
-
     .hero__panel {
       justify-self: end;
     }

@@ -13,7 +13,7 @@ const { cycle = 6 } = Astro.props;
 ---
 
 <section class="band pt" id="products">
-  <div class="shell pt__wrap">
+  <div class="shell stack">
     <div class="head" {...reveal()}>
       <h2 {...text('home.products.title')}>{t('home.products.title')}</h2>
     </div>
@@ -59,11 +59,6 @@ const { cycle = 6 } = Astro.props;
 <style>
   .pt {
     overflow: clip;
-  }
-
-  .pt__wrap {
-    display: grid;
-    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
   }
 
   .pt__stage {

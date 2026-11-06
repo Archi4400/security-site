@@ -20,7 +20,7 @@ const { items, level = 3 } = Astro.props;
 const H = level === 2 ? 'h2' : 'h3';
 ---
 
-<ul class="sol" role="list">
+<ul class="tiles sol" role="list" style="--tile: 19rem">
   {items.map((item, i) => (
     <li class="sol__cell" {...reveal()} style={`--d: ${(i % 3) * 0.07}s`}>
       <a href={item.href} class="sol__card card">
@@ -34,13 +34,6 @@ const H = level === 2 ? 'h2' : 'h3';
 </ul>
 
 <style>
-  .sol {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
-    gap: 1rem;
-    margin: 0;
-  }
-
   .sol__cell {
     display: grid;
     min-width: 0;

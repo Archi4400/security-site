@@ -1,0 +1,1181 @@
+---
+import { label, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import DemoStage from '../demo/DemoStage.astro';
+import DemoDone from '../demo/DemoDone.astro';
+import { GRAPH, accounts, analysed, areaPath, calm, edgeOf, linePath, opening, zoneOf } from '../../lib/nightExport';
+
+/**
+ * Scenario A, "the night export": the visitor is the analyst on duty. The scene plays on its own
+ * up to each decision, waits there for a click, and clicks for itself if no one does.
+ * Every part that belongs to some steps only names them in data-show; the script shows and hides them.
+ */
+const steps = [0, 1, 2, 3].map((i) => `demo.export.steps.${i}`);
+const timeline = [
+  { time: '23:41', key: 'demo.export.login' },
+  { time: '23:49', key: 'demo.export.search' },
+  { time: '23:58', key: 'demo.export.export' },
+];
+const [peakX, peakY] = edgeOf(calm);
+---
+
+<section class="band" id="demo">
+  <div class="shell stack">
+    <div class="head" {...reveal()}>
+      <h2 {...text('demo.export.title')}>{t('demo.export.title')}</h2>
+      <p {...text('demo.export.lede')}>{t('demo.export.lede')}</p>
+    </div>
+
+    <DemoStage class="nx" data-nx steps={steps} labelKey="demo.export.label">
+      <span slot="backdrop" class="nx__night" aria-hidden="true"></span>
+
+      <p slot="alert" class="demo__alert" hidden data-show="1 2 2b 3 4">
+        <span class="demo__alert-dot" aria-hidden="true"></span>
+        <span hidden data-show="1 2" {...text('demo.export.alertExport')}>{t('demo.export.alertExport')}</span>
+        <span hidden data-show="2b 3" {...text('demo.export.alertDecoy')}>{t('demo.export.alertDecoy')}</span>
+        <span hidden data-show="4" {...text('demo.export.alertDone')}>{t('demo.export.alertDone')}</span>
+        <span class="demo__sev" hidden data-show="1 2" {...text('demo.export.mid')}>{t('demo.export.mid')}</span>
+        <span class="demo__sev" hidden data-show="2b 3" {...text('demo.export.high')}>{t('demo.export.high')}</span>
+        <span class="demo__sev" hidden data-show="4" {...text('demo.export.ok')}>{t('demo.export.ok')}</span>
+      </p>
+
+      <span slot="aside" class="nx__clock mono" aria-hidden="true">
+        <Icon name="moon" />
+        <span data-nx-clock>22:47</span>
+      </span>
+
+      <div class="nx__panel panel">
+        <div class="demo__head">
+          <span class="demo__app">
+            <span class="demo__live" aria-hidden="true"></span>
+            <span {...text('demo.export.panel')}>{t('demo.export.panel')}</span>
+          </span>
+          <span class="demo__eye">
+            <Icon name="eye" />
+            <span {...text('demo.export.watching')}>{t('demo.export.watching')}</span>
+          </span>
+        </div>
+
+        <div class="nx__body">
+          <div class="nx__feed-wrap">
+            <ul class="nx__feed mono" role="list" tabindex="0" data-nx-feed {...label('demo.export.feed')}>
+              {opening.map(([time, who, did, what]) => (
+                <li class="nx__row">
+                  <span class="nx__time">{time}</span>
+                  <span class="nx__who">{who}</span>
+                  <span class="nx__did">{did}</span>
+                  <span class="nx__what">{what}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="nx__side">
+            <figure class="nx__graph">
+              <figcaption {...text('demo.export.graph')}>{t('demo.export.graph')}</figcaption>
+              <div class="nx__plot">
+                <svg viewBox={`0 0 ${GRAPH.width} ${GRAPH.height}`} preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    {/* coloured by height, not by place: high hours are orange wherever they have slid to */}
+                    <linearGradient id="nx-stroke" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="0" y2={GRAPH.height}>
+                      <stop offset="0.55" class="nx__hot" />
+                      <stop offset="0.78" class="nx__cool" />
+                    </linearGradient>
+                  </defs>
+                  <path class="nx__area" d={areaPath(calm)} data-nx-area />
+                  <path class="nx__line" d={linePath(calm)} stroke="url(#nx-stroke)" data-nx-line />
+                </svg>
+                <span class="nx__peak" style={`--x: ${(peakX / GRAPH.width) * 100}%; --y: ${(peakY / GRAPH.height) * 100}%`} data-nx-peak></span>
+              </div>
+              <span class="nx__usual mono" hidden data-show="1 2 2b" {...text('demo.export.usual')}>{t('demo.export.usual')}</span>
+            </figure>
+
+            <div class="nx__case">
+              <div class="nx__scan" data-show="0 1">
+                <p class="nx__scan-head">
+                  <span class="demo__live" aria-hidden="true"></span>
+                  <span {...text('demo.export.idle')}>{t('demo.export.idle')}</span>
+                </p>
+                <p class="nx__scan-sub mono">
+                  <span data-nx-count>{analysed.toLocaleString('en-US')}</span>
+                  <span {...text('demo.export.events')}>{t('demo.export.events')}</span>
+                </p>
+                <ul class="nx__accounts" role="list" aria-hidden="true">
+                  {accounts.map((a, i) => (
+                    <li class="nx__acc" data-acc={a.id} data-zone={zoneOf(a.at)} style={`--at: ${a.at}; --i: ${i}`}>
+                      <span class="nx__acc-id mono">{a.id}</span>
+                      <span class="nx__band">
+                        <span class="nx__band-dot"></span>
+                      </span>
+                      <span class="nx__acc-state">
+                        <Icon name="check" class="nx__acc-ok" />
+                        <span class="nx__acc-up mono">×4</span>
+                        <span class="nx__acc-off mono">×10</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p class="nx__legend mono" aria-hidden="true">
+                  {(['ok', 'warn', 'bad'] as const).map((zone) => (
+                    <span class={`nx__legend-item nx__legend-item--${zone}`} {...text(`demo.export.zones.${zone}`)}>{t(`demo.export.zones.${zone}`)}</span>
+                  ))}
+                </p>
+              </div>
+
+              <div class="demo__ask" hidden data-show="1">
+                <button type="button" class="demo__go" data-act="investigate">
+                  <span {...text('demo.export.investigate')}>{t('demo.export.investigate')}</span>
+                  <Icon name="arrow" />
+                </button>
+                <span class="demo__hint mono" {...text('demo.export.hintInvestigate')}>{t('demo.export.hintInvestigate')}</span>
+              </div>
+
+              <div class="nx__user" hidden data-show="2 2b 3 4">
+                <div class="nx__card-head">
+                  <span class="nx__avatar" data-nx-avatar>
+                    MR
+                    <span class="nx__lock" hidden data-show="3 4"><Icon name="lock" /></span>
+                  </span>
+                  <span class="nx__name">
+                    <span class="mono">max.r</span>
+                    <span class="nx__role" {...text('demo.export.role')}>{t('demo.export.role')}</span>
+                  </span>
+                  <span class="nx__state nx__state--live" hidden data-show="2 2b" {...text('demo.export.active')}>{t('demo.export.active')}</span>
+                  <span class="nx__state nx__state--paused" hidden data-show="3 4" {...text('demo.export.paused')}>{t('demo.export.paused')}</span>
+                </div>
+
+                <dl class="nx__facts">
+                  <div>
+                    <dt {...text('demo.export.hours')}>{t('demo.export.hours')}</dt>
+                    <dd class="mono">09:00–18:00</dd>
+                  </div>
+                  <div>
+                    <dt {...text('demo.export.volume')}>{t('demo.export.volume')}</dt>
+                    <dd class="mono" {...text('demo.export.volumeValue')}>{t('demo.export.volumeValue')}</dd>
+                  </div>
+                  <div>
+                    <dt {...text('demo.export.device')}>{t('demo.export.device')}</dt>
+                    <dd class="nx__device">
+                      <span class="nx__ring" aria-hidden="true"><Icon name="fingerprint" /></span>
+                      <span {...text('demo.export.deviceNew')}>{t('demo.export.deviceNew')}</span>
+                    </dd>
+                  </div>
+                </dl>
+
+                <ol class="nx__trail" role="list" hidden data-show="2 2b 3">
+                  {timeline.map((e, i) => (
+                    <li style={`--i: ${i}`}>
+                      <span class="nx__node" aria-hidden="true"></span>
+                      <span class="mono">{e.time}</span>
+                      <span {...text(e.key)}>{t(e.key)}</span>
+                    </li>
+                  ))}
+                </ol>
+
+                <p class="nx__decoy" hidden data-show="2b 3 4">
+                  <span class="nx__decoy-dot" aria-hidden="true"></span>
+                  <span class="nx__decoy-copy">
+                    <strong {...text('demo.export.alertDecoy')}>{t('demo.export.alertDecoy')}</strong>
+                    <span {...text('demo.export.decoyNote')}>{t('demo.export.decoyNote')}</span>
+                  </span>
+                  <span class="demo__sev" hidden data-show="2b 3" {...text('demo.export.high')}>{t('demo.export.high')}</span>
+                  <span class="demo__sev" hidden data-show="4" {...text('demo.export.ok')}>{t('demo.export.ok')}</span>
+                </p>
+
+                <div class="demo__ask" hidden data-show="2b">
+                  <button type="button" class="demo__go" data-act="pause">
+                    <Icon name="lock" />
+                    <span {...text('demo.export.pause')}>{t('demo.export.pause')}</span>
+                  </button>
+                  <button type="button" class="demo__alt" aria-pressed="false" data-act="notify">
+                    <span class="demo__alt-off" {...text('demo.export.notify')}>{t('demo.export.notify')}</span>
+                    <span class="demo__alt-on"><Icon name="check" /><span {...text('demo.export.notified')}>{t('demo.export.notified')}</span></span>
+                  </button>
+                  <span class="demo__hint mono" {...text('demo.export.hintAct')}>{t('demo.export.hintAct')}</span>
+                </div>
+
+                <p class="demo__busy mono" hidden data-show="3" {...text('demo.export.pausing')}>{t('demo.export.pausing')}</p>
+
+                <DemoDone items={[0, 1, 2].map((i) => `demo.export.summary.${i}`)} data-show="4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DemoStage>
+  </div>
+</section>
+
+<style>
+  /* the room darkens as the clock passes eleven */
+  .nx__night {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: #0a1030;
+    mix-blend-mode: multiply;
+    opacity: 0;
+    transition: opacity 1.4s var(--ease);
+  }
+
+  .nx[data-night] .nx__night {
+    opacity: 0.3;
+  }
+
+  /* on a light page the room does not darken: the moon on the clock is the night there */
+  :global(html[data-theme='light']) .nx[data-night] .nx__night {
+    opacity: 0;
+  }
+
+  .nx__clock {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-2);
+    font-size: 0.85rem;
+  }
+
+  .nx__clock :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--mute);
+    transition: color 0.6s var(--ease);
+  }
+
+  .nx[data-night] .nx__clock :global(svg) {
+    color: var(--warn);
+  }
+
+  /* the alert, and every severity in the scene, turns red once the decoy is hit and green once it is over */
+  .nx[data-step='2b'],
+  .nx[data-step='3'] {
+    --tone: var(--bad);
+  }
+
+  .nx[data-step='4'] {
+    --tone: var(--ok);
+  }
+
+  /* ── the panel ── */
+
+  .nx__panel {
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  .nx__body {
+    display: grid;
+  }
+
+  /* the feed: full from the start, the newest row comes in at the foot, and the night can be scrolled back */
+  .nx__feed-wrap {
+    position: relative;
+    min-height: 14rem;
+  }
+
+  .nx__feed {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.6rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--edge-strong) transparent;
+    mask-image: linear-gradient(180deg, transparent, #000 2rem);
+    font-size: 0.78rem;
+    outline: none;
+  }
+
+  .nx__feed:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent-ink);
+  }
+
+  .nx__row {
+    display: grid;
+    grid-template-columns: 2.6rem 3.6rem 4.6rem minmax(0, 1fr);
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: var(--radius-s);
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .nx__time {
+    color: var(--mute);
+  }
+
+  .nx__what {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ink);
+  }
+
+  .nx__row--warn {
+    background: color-mix(in oklab, var(--warn) 14%, transparent);
+    box-shadow: inset 2px 0 0 var(--warn);
+  }
+
+  .nx__row--warn .nx__what,
+  .nx__row--warn .nx__did {
+    color: var(--warn);
+  }
+
+  .nx__row--blocked .nx__did {
+    color: var(--mute);
+    text-decoration: line-through;
+  }
+
+  .nx__row--blocked .nx__what {
+    color: var(--bad);
+  }
+
+  .nx__side {
+    display: grid;
+    align-content: start;
+  }
+
+  /* ── the graph ── */
+
+  .nx__graph {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 1rem 1.1rem 0.9rem;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .nx__graph figcaption {
+    color: var(--mute);
+    font-size: 0.8rem;
+  }
+
+  .nx__plot {
+    position: relative;
+    height: 4.5rem;
+  }
+
+  .nx__plot svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .nx__cool {
+    stop-color: rgb(var(--aurora-3));
+  }
+
+  .nx__hot {
+    stop-color: rgb(var(--aurora-1));
+  }
+
+  .nx__line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .nx__area {
+    fill: rgb(var(--aurora-3) / 0.12);
+  }
+
+  /* the newest hour, as a dot laid over the graph so it stays round however the graph is stretched */
+  .nx__peak {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 0.6rem;
+    height: 0.6rem;
+    margin: -0.3rem 0 0 -0.3rem;
+    border-radius: 50%;
+    background: rgb(var(--aurora-3));
+    transition: background-color 0.5s var(--ease);
+  }
+
+  .nx__peak[data-high] {
+    background: rgb(var(--aurora-1));
+    box-shadow: 0 0 0 4px rgb(var(--aurora-1) / 0.25);
+  }
+
+  .nx__usual {
+    position: absolute;
+    top: 0.8rem;
+    right: 1.1rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: rgb(var(--aurora-1) / 0.16);
+    color: rgb(var(--aurora-1));
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  /* ── the case: what the analyst is looking at, step by step ── */
+
+  .nx__case {
+    display: grid;
+    align-content: start;
+    padding: 1rem 1.1rem 1.1rem;
+  }
+
+  /* the check: every account against its own usual range, a sweep running down the list */
+  .nx__scan {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .nx__scan-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink-2);
+    font-size: 0.88rem;
+  }
+
+  .nx__scan-sub {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: -0.4rem;
+    padding-left: 1.05rem;
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .nx__scan-sub [data-nx-count] {
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nx__accounts {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.35rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: color-mix(in oklab, var(--sheet-2) 60%, transparent);
+  }
+
+  .nx__acc {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr) 2rem;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.42rem 0.55rem;
+    border-radius: 6px;
+    color: var(--ink-2);
+    font-size: 0.76rem;
+    transition:
+      background-color 0.4s var(--ease),
+      color 0.4s var(--ease);
+  }
+
+  /*
+   * The track runs from usual to far outside it: the first half green, a quarter orange, then red,
+   * each blending into the next. The dot is tonight, coloured by the zone it is in (data-zone).
+   */
+  .nx {
+    --zone-ok: var(--ok);
+    --zone-warn: rgb(var(--aurora-1));
+    --zone-bad: var(--bad);
+  }
+
+  .nx__band {
+    position: relative;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--zone-ok) 38%, transparent) 0% 42%,
+      color-mix(in oklab, var(--zone-warn) 45%, transparent) 56% 68%,
+      color-mix(in oklab, var(--zone-bad) 55%, transparent) 82% 100%
+    );
+  }
+
+  .nx__acc {
+    --tint: var(--zone-ok);
+  }
+
+  .nx__acc[data-zone='warn'] {
+    --tint: var(--zone-warn);
+  }
+
+  .nx__acc[data-zone='bad'] {
+    --tint: var(--zone-bad);
+  }
+
+  .nx__band-dot {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--at) * 100%);
+    width: 0.65rem;
+    height: 0.65rem;
+    margin: -0.325rem 0 0 -0.325rem;
+    border-radius: 50%;
+    background: var(--tint);
+    box-shadow: 0 0 0 2px var(--sheet-2);
+    transition:
+      left 0.9s var(--ease),
+      background-color 0.5s var(--ease),
+      box-shadow 0.5s var(--ease);
+  }
+
+  .nx__acc[data-zone='bad'] {
+    background: color-mix(in oklab, var(--zone-bad) 12%, transparent);
+    color: var(--ink);
+  }
+
+  .nx__acc[data-zone='bad'] .nx__band-dot {
+    box-shadow:
+      0 0 0 2px var(--sheet-2),
+      0 0 12px var(--zone-bad);
+  }
+
+  .nx__acc-state {
+    display: grid;
+    justify-items: end;
+  }
+
+  .nx__acc-ok {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--zone-ok);
+  }
+
+  .nx__acc-up,
+  .nx__acc-off {
+    display: none;
+    font-weight: 600;
+  }
+
+  .nx__acc-up {
+    color: var(--zone-warn);
+  }
+
+  .nx__acc-off {
+    color: var(--zone-bad);
+  }
+
+  .nx__acc:not([data-zone='ok']) .nx__acc-ok {
+    display: none;
+  }
+
+  .nx__acc[data-zone='warn'] .nx__acc-up,
+  .nx__acc[data-zone='bad'] .nx__acc-off {
+    display: block;
+  }
+
+  .nx__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    color: var(--mute);
+    font-size: 0.7rem;
+  }
+
+  .nx__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .nx__legend-item::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--swatch);
+  }
+
+  .nx__legend-item--ok {
+    --swatch: var(--zone-ok);
+  }
+
+  .nx__legend-item--warn {
+    --swatch: var(--zone-warn);
+  }
+
+  .nx__legend-item--bad {
+    --swatch: var(--zone-bad);
+  }
+
+  .nx__user {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .nx__card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* a paused account dims under a veil; the lock sits above it */
+  .nx__avatar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgb(6 7 10 / 0.5);
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+
+  .nx[data-step='3'] .nx__avatar::before,
+  .nx[data-step='4'] .nx__avatar::before {
+    opacity: 1;
+  }
+
+  .nx__avatar {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgb(var(--aurora-1)), rgb(var(--aurora-2)));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .nx__lock {
+    position: absolute;
+    right: -0.35rem;
+    bottom: -0.35rem;
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    border: 2px solid var(--sheet);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .nx[data-step='4'] .nx__lock {
+    background: var(--ok);
+  }
+
+  .nx__lock :global(svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .nx__name {
+    display: grid;
+    margin-right: auto;
+    font-size: 0.92rem;
+  }
+
+  .nx__role {
+    color: var(--mute);
+    font-size: 0.8rem;
+  }
+
+  .nx__state {
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .nx__state--live {
+    background: color-mix(in oklab, var(--warn) 18%, transparent);
+    color: var(--warn);
+  }
+
+  .nx__state--paused {
+    background: color-mix(in oklab, var(--accent) 18%, transparent);
+    color: var(--accent-ink);
+  }
+
+  .nx[data-step='4'] .nx__state--paused {
+    background: color-mix(in oklab, var(--ok) 18%, transparent);
+    color: var(--ok);
+  }
+
+  .nx__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .nx__facts dt {
+    color: var(--mute);
+    font-size: 0.74rem;
+  }
+
+  .nx__facts dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.82rem;
+  }
+
+  .nx__device {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgb(var(--aurora-1));
+  }
+
+  .nx__ring {
+    display: grid;
+    place-items: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgb(var(--aurora-1));
+  }
+
+  .nx__ring :global(svg) {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+
+  /* the night's three moves, joined by a line */
+  .nx__trail {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding-top: 0.2rem;
+  }
+
+  /* from the first node to the third: the third column starts a column and a gap in from the right */
+  .nx__trail::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    left: 0.35rem;
+    right: calc((100% - 1rem) / 3 - 0.35rem);
+    height: 2px;
+    background: linear-gradient(90deg, var(--edge-strong), rgb(var(--aurora-1)));
+    transform-origin: left;
+  }
+
+  .nx__trail li {
+    position: relative;
+    display: grid;
+    gap: 0.15rem;
+    font-size: 0.78rem;
+    color: var(--ink-2);
+  }
+
+  .nx__trail .mono {
+    color: var(--mute);
+    font-size: 0.72rem;
+  }
+
+  .nx__node {
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-bottom: 0.3rem;
+    border-radius: 50%;
+    border: 2px solid var(--sheet);
+    background: var(--mute);
+  }
+
+  .nx__trail li:last-child .nx__node {
+    background: rgb(var(--aurora-1));
+  }
+
+  .nx__decoy {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--radius-s);
+    border: 1px solid color-mix(in oklab, var(--tone) 45%, var(--edge));
+    background: color-mix(in oklab, var(--tone) 10%, transparent);
+  }
+
+  .nx__decoy-dot {
+    flex: none;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--tone);
+  }
+
+  .nx__decoy-copy {
+    display: grid;
+    gap: 0.1rem;
+    margin-right: auto;
+    font-size: 0.82rem;
+  }
+
+  .nx__decoy-copy strong {
+    font-weight: 500;
+  }
+
+  .nx__decoy-copy span {
+    color: var(--ink-2);
+    font-size: 0.78rem;
+  }
+
+  @media (min-width: 56rem) {
+    .nx__body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    }
+
+    .nx__feed-wrap {
+      min-height: 0;
+      border-right: 1px solid var(--edge);
+    }
+
+    /* as tall as the tallest step, so the panel keeps its size from the first step to the last */
+    .nx__case {
+      min-height: 23.5rem;
+    }
+  }
+
+  @media (max-width: 55.99rem) {
+    .nx__feed-wrap {
+      order: 1;
+      border-top: 1px solid var(--edge);
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .nx__facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .nx__row {
+      grid-template-columns: 2.4rem 3.4rem minmax(0, 1fr);
+    }
+
+    .nx__did {
+      display: none;
+    }
+  }
+  /* ── motion ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* while nothing is wrong a sweep runs down the accounts and every dot trembles inside its range */
+    .nx__accounts::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2.4rem;
+      background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--accent) 16%, transparent), transparent);
+      pointer-events: none;
+      animation: nx-sweep 2.4s linear infinite;
+    }
+
+    .nx[data-hot] .nx__accounts::after {
+      animation: none;
+      opacity: 0;
+    }
+
+    .nx__band-dot {
+      animation: nx-jitter 3.2s ease-in-out infinite;
+      animation-delay: calc(var(--i) * -0.65s);
+    }
+
+    .nx__acc[data-zone='bad'] .nx__band-dot {
+      animation: nx-alarm 1.2s ease-in-out infinite;
+    }
+
+    .nx__row[data-new] {
+      animation: nx-in 0.5s var(--ease) both;
+    }
+
+    .nx__decoy:not([hidden]),
+    .nx__usual:not([hidden]) {
+      animation: nx-in 0.45s var(--ease) both;
+    }
+
+    .nx__user:not([hidden]) {
+      animation: nx-open 0.55s var(--ease) both;
+    }
+
+    .nx__trail:not([hidden])::before {
+      animation: nx-draw 1.4s var(--ease) 0.3s both;
+    }
+
+    .nx__trail:not([hidden]) li {
+      animation: nx-in 0.4s var(--ease) both;
+      animation-delay: calc(0.35s + var(--i) * 0.5s);
+    }
+
+    /* the pause lands on the account itself: the lock springs on and a ring goes out from the avatar once */
+    .nx__lock:not([hidden]) {
+      animation: nx-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+    }
+
+    .nx[data-step='3'] .nx__avatar::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: nx-lockring 0.9s ease-out 0.2s both;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes nx-sweep {
+    from {
+      top: -2.4rem;
+    }
+    to {
+      top: 100%;
+    }
+  }
+
+  @keyframes nx-jitter {
+    25% {
+      translate: 4px 0;
+    }
+    75% {
+      translate: -4px 0;
+    }
+  }
+
+  @keyframes nx-alarm {
+    50% {
+      scale: 1.35;
+    }
+  }
+
+  @keyframes nx-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  @keyframes nx-open {
+    from {
+      opacity: 0;
+      scale: 0.97;
+      filter: blur(4px);
+    }
+  }
+
+  @keyframes nx-draw {
+    from {
+      scale: 0 1;
+    }
+  }
+
+  @keyframes nx-pop {
+    from {
+      opacity: 0;
+      scale: 0.3;
+    }
+  }
+
+  @keyframes nx-lockring {
+    from {
+      opacity: 0.9;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 1.7;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../../engine/client';
+  import { scene } from '../../lib/demoScene';
+  import {
+    accounts,
+    analysed,
+    anomaly,
+    areaPath,
+    blocked,
+    calm,
+    climb,
+    evening,
+    after,
+    edgeOf,
+    GRAPH,
+    linePath,
+    peakAt,
+    spike,
+    suspect,
+    zoneOf,
+    type FeedRow,
+  } from '../../lib/nightExport';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-nx]')) {
+    const stage = scene(root, {
+      stages: { '0': 0, '1': 1, '2': 2, '2b': 2, '3': 3, '4': 5 },
+      last: '4',
+      aside: ['notify'],
+    });
+    const { go, later, wait } = stage;
+
+    const feed = root.querySelector<HTMLElement>('[data-nx-feed]')!;
+    const clock = root.querySelector<HTMLElement>('[data-nx-clock]')!;
+    const line = root.querySelector<SVGPathElement>('[data-nx-line]')!;
+    const area = root.querySelector<SVGPathElement>('[data-nx-area]')!;
+    const peak = root.querySelector<HTMLElement>('[data-nx-peak]')!;
+    const notify = root.querySelector<HTMLButtonElement>('[data-act="notify"]')!;
+    const count = root.querySelector<HTMLElement>('[data-nx-count]')!;
+    const climber = root.querySelector<HTMLElement>(`[data-acc="${suspect}"]`)!;
+    const from = accounts.find((a) => a.id === suspect)!.at;
+
+    /** Moves the climbing account's dot along its track; its colour follows the zone it reaches. */
+    const place = (at: number) => {
+      climber.style.setProperty('--at', String(at));
+      climber.dataset.zone = zoneOf(at);
+    };
+    const pattern = feed.firstElementChild!.cloneNode(true) as HTMLElement;
+    const start = feed.innerHTML;
+
+    // the graph: the hours so far, and how many of them have slid off its left edge
+    let series = calm.slice();
+    let offset = 0;
+    let frame = 0;
+    let events = analysed;
+    let ticker = 0;
+
+    const say = (row: FeedRow, kind?: 'warn' | 'blocked') => {
+      // the feed follows the newest row, unless someone has scrolled back to read: they are left where they are
+      const following = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 24;
+      const li = pattern.cloneNode(true) as HTMLElement;
+      li.querySelectorAll('span').forEach((cell, i) => (cell.textContent = row[i] ?? ''));
+      if (kind) li.classList.add(`nx__row--${kind}`);
+      li.dataset.new = '';
+      feed.append(li);
+      clock.textContent = row[0];
+      if (following) feed.scrollTo({ top: feed.scrollHeight, behavior: reducedMotion() ? 'auto' : 'smooth' });
+    };
+
+    /** The count of events analysed, running while the accounts are being checked. */
+    const counting = (on: boolean) => {
+      window.clearInterval(ticker);
+      if (!on || reducedMotion()) return;
+      ticker = window.setInterval(() => {
+        events += 3 + Math.floor(Math.random() * 14);
+        count.textContent = events.toLocaleString('en-US');
+      }, 140);
+    };
+
+    const draw = () => {
+      line.setAttribute('d', linePath(series, offset));
+      area.setAttribute('d', areaPath(series, offset));
+      const [x, y, v] = edgeOf(series, offset);
+      peak.style.setProperty('--x', `${(x / GRAPH.width) * 100}%`);
+      peak.style.setProperty('--y', `${(y / GRAPH.height) * 100}%`);
+      peak.toggleAttribute('data-high', v > 60);
+    };
+
+    /** Runs `move` from 0 to 1 over `ms`, eased, redrawing the graph each frame. */
+    const animate = (ms: number, move: (k: number) => void) => {
+      cancelAnimationFrame(frame);
+      if (reducedMotion()) {
+        move(1);
+        draw();
+        return;
+      }
+      const begin = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - begin) / ms);
+        move(1 - (1 - k) ** 3);
+        draw();
+        if (k < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    /** The hours on show change their values in place: the export shooting up. */
+    const surge = (to: number[]) => {
+      const from = series.slice();
+      animate(800, (k) => (series = from.map((v, i) => v + (to[i]! - v) * k)));
+    };
+
+    /** Time moves on: new hours come in from the right, and the ones before slide left, spike and all. */
+    const roll = (more: number[]) => {
+      series = [...series, ...more];
+      const from = offset;
+      animate(2200, (k) => (offset = from + more.length * k));
+    };
+
+    /** Step 0 to the first decision: a quiet evening, then midnight and the export. */
+    const play = () => {
+      const quick = reducedMotion();
+      go('0');
+      counting(true);
+      evening.forEach((row, i) => later(quick ? 0 : 900 * (i + 1), () => say(row)));
+      // one account creeps out of the green while the rest stay where they always are
+      climb.forEach(([ms, at]) => later(quick ? 0 : ms, () => place(at)));
+      later(quick ? 0 : 3300, () => {
+        root.dataset.night = '';
+        clock.textContent = '23:58';
+      });
+      later(quick ? 0 : 4200, () => {
+        say(anomaly, 'warn');
+        place(peakAt);
+        root.dataset.hot = '';
+        surge(spike);
+        go('1');
+        wait('investigate');
+      });
+    };
+
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      counting(false);
+      events = analysed;
+      count.textContent = events.toLocaleString('en-US');
+      feed.innerHTML = start;
+      feed.scrollTop = feed.scrollHeight;
+      clock.textContent = '22:47';
+      delete root.dataset.night;
+      delete root.dataset.hot;
+      series = calm.slice();
+      offset = 0;
+      draw();
+      notify.setAttribute('aria-pressed', 'false');
+      place(from);
+    };
+
+    stage.start({
+      play,
+      reset,
+      acts: {
+        investigate: () => {
+          counting(false);
+          go('2');
+          later(reducedMotion() ? 0 : 2600, () => {
+            go('2b');
+            wait('pause');
+          });
+        },
+        notify: (button) => button.setAttribute('aria-pressed', 'true'),
+        pause: () => {
+          go('3');
+          const quick = reducedMotion();
+          blocked.forEach((row, i) => later(quick ? 0 : 900 + i * 800, () => say(row, 'blocked')));
+          // the export stays on the graph; the hours after the pause fall back to an ordinary level
+          later(quick ? 0 : 700, () => roll(after));
+          later(quick ? 1200 : 3200, () => go('4'));
+        },
+      },
+    });
+
+    // the feed opens at its foot, on the latest rows
+    feed.scrollTop = feed.scrollHeight;
+  }
+</script>
