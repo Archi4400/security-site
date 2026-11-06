@@ -6,9 +6,9 @@ import Icon from '../../components/Icon.astro';
 import PostCards from '../../components/sections/PostCards.astro';
 import Related from '../../components/sections/Related.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
-import { alt, countUp, t, text } from '../../engine';
+import { alt, countUp, html, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
-import { posts, type Post } from '../../lib/posts';
+import { posts, type Block, type Post } from '../../lib/posts';
 
 export function getStaticPaths() {
   return posts.map((p) => ({ params: { slug: p.slug }, props: { post: p } }));
@@ -20,7 +20,7 @@ interface Props {
 
 const { post } = Astro.props;
 const k = post.key;
-const body = en.blog.posts[k].body;
+const body: Block[] = en.blog.posts[k].body;
 const read = countUp(`read-${k}`, post.minutes, { key: 'blog.minutes' });
 const pictureWidths = [480, 768, 1152, 1536];
 // .ab is 52rem wide with the gutters inside it
@@ -44,17 +44,61 @@ const pictureSizes = '(min-width: 52rem) 48rem, 100vw';
     </header>
     <div class="shell ab">
       <Image src={post.cover} {...alt(`blog.posts.${k}.cover`)} widths={pictureWidths} sizes={pictureSizes} priority class="ab__picture" />
-      {body.map((_, i) => (
-        <>
-          <p {...text(`blog.posts.${k}.body.${i}`)}>{t(`blog.posts.${k}.body.${i}`)}</p>
-          {post.figures.map((f, j) => f.after === i && (
-            <figure class="ab__figure">
-              <Image src={f.image} {...alt(`blog.posts.${k}.figures.${j}.alt`)} widths={pictureWidths} sizes={pictureSizes} class="ab__picture" />
-              <figcaption class="note" {...text(`blog.posts.${k}.figures.${j}.caption`)}>{t(`blog.posts.${k}.figures.${j}.caption`)}</figcaption>
-            </figure>
-          ))}
-        </>
-      ))}
+      {body.map((block, i) => {
+        const at = `blog.posts.${k}.body.${i}`;
+        return (
+          <>
+            {typeof block === 'string' ? (
+              <p {...text(at)}>{t(at)}</p>
+            ) : 'rich' in block ? (
+              <p {...html(`${at}.rich`)} set:html={t(`${at}.rich`)} />
+            ) : 'h2' in block ? (
+              <h2 class="ab__h2" {...text(`${at}.h2`)}>{t(`${at}.h2`)}</h2>
+            ) : 'h3' in block ? (
+              <h3 class="ab__h3" {...text(`${at}.h3`)}>{t(`${at}.h3`)}</h3>
+            ) : 'list' in block ? (
+              <ul class="ab__list">
+                {block.list.map((_, j) => <li {...text(`${at}.list.${j}`)}>{t(`${at}.list.${j}`)}</li>)}
+              </ul>
+            ) : 'terms' in block ? (
+              <dl class="ab__terms">
+                {block.terms.map((_, j) => (
+                  <div>
+                    <dt {...text(`${at}.terms.${j}.title`)}>{t(`${at}.terms.${j}.title`)}</dt>
+                    <dd {...text(`${at}.terms.${j}.text`)}>{t(`${at}.terms.${j}.text`)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : 'steps' in block ? (
+              <ol class="ab__steps" role="list">
+                {block.steps.map((_, j) => (
+                  <li>
+                    <span class="ab__step-num mono" aria-hidden="true">{j + 1}</span>
+                    <strong {...text(`${at}.steps.${j}.title`)}>{t(`${at}.steps.${j}.title`)}</strong>
+                    <span {...text(`${at}.steps.${j}.text`)}>{t(`${at}.steps.${j}.text`)}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : 'sources' in block ? (
+              <aside class="ab__sources">
+                <p class="ab__sources-title" {...text(`${at}.sources.title`)}>{t(`${at}.sources.title`)}</p>
+                <ul role="list">
+                  {block.sources.items.map((_, j) => <li {...html(`${at}.sources.items.${j}`)} set:html={t(`${at}.sources.items.${j}`)} />)}
+                </ul>
+              </aside>
+            ) : (
+              <p class="ab__close" {...text(`${at}.close`)}>{t(`${at}.close`)}</p>
+            )}
+            {post.figures.map((f, j) => f.after === i && (
+              // a square or upright picture is kept narrower, so it does not tower over the text
+              <figure class:list={['ab__figure', f.image.height >= f.image.width && 'ab__figure--tall']}>
+                <Image src={f.image} {...alt(`blog.posts.${k}.figures.${j}.alt`)} widths={pictureWidths} sizes={pictureSizes} class="ab__picture" />
+                <figcaption class="note" {...text(`blog.posts.${k}.figures.${j}.caption`)}>{t(`blog.posts.${k}.figures.${j}.caption`)}</figcaption>
+              </figure>
+            ))}
+          </>
+        );
+      })}
     </div>
   </article>
 
@@ -138,5 +182,134 @@ const pictureSizes = '(min-width: 52rem) 48rem, 100vw';
     display: grid;
     gap: 0.75rem;
     margin-block: 0.6rem;
+  }
+
+  .ab__figure--tall {
+    max-width: 32rem;
+  }
+
+  /* ── a longer article's parts: sections, sub-sections, lists, terms, stages and a closing line ── */
+
+  .ab__h2,
+  .ab__h3 {
+    color: var(--ink);
+  }
+
+  .ab__h2 {
+    margin-top: 1.6rem;
+    font-size: var(--step-2);
+    letter-spacing: -0.02em;
+  }
+
+  .ab__h3 {
+    margin-top: 0.6rem;
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+
+  .ab__list {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 44rem;
+    padding-left: 1.3rem;
+  }
+
+  .ab__list li::marker {
+    color: var(--accent-ink);
+  }
+
+  .ab__terms {
+    display: grid;
+    gap: 1rem;
+    max-width: 44rem;
+  }
+
+  .ab__terms > div {
+    display: grid;
+    gap: 0.25rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent);
+  }
+
+  .ab__terms dt {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .ab__steps {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 44rem;
+  }
+
+  .ab__steps li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 1rem;
+    align-items: baseline;
+  }
+
+  .ab__step-num {
+    grid-row: span 2;
+    align-self: start;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.85rem;
+  }
+
+  .ab__steps strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* the sources a section rests on: a small, quiet box, not part of the reading */
+  .ab__sources {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 44rem;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .ab__sources-title {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .ab__sources ul {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .ab__sources :global(a) {
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .ab__sources :global(a:hover) {
+    text-decoration-thickness: 2px;
+  }
+
+  /* what a paragraph puts in bold stands out in the text's own colour */
+  .ab :global(strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .ab__close {
+    margin-top: 0.6rem;
+    color: var(--ink);
+    font-weight: 600;
   }
 </style>

@@ -1,4 +1,9 @@
 import type { ImageMetadata } from 'astro';
+import binanceCover from '../assets/blog/binance-cover.jpg';
+import binance1 from '../assets/blog/binance-1.jpg';
+import binance2 from '../assets/blog/binance-2.jpg';
+import aiCover from '../assets/blog/ai-cover.jpg';
+import ai1 from '../assets/blog/ai-1.jpg';
 import allowlistCover from '../assets/blog/allowlist-cover.jpg';
 import allowlist1 from '../assets/blog/allowlist-1.jpg';
 import offboardingCover from '../assets/blog/offboarding-cover.jpg';
@@ -11,6 +16,8 @@ import tenancyCover from '../assets/blog/tenancy-cover.jpg';
 import tenancy1 from '../assets/blog/tenancy-1.jpg';
 import thresholdsCover from '../assets/blog/thresholds-cover.jpg';
 import thresholds1 from '../assets/blog/thresholds-1.jpg';
+import trustedCover from '../assets/blog/trusted-cover.jpg';
+import trusted1 from '../assets/blog/trusted-1.jpg';
 
 export interface Figure {
   image: ImageMetadata;
@@ -18,9 +25,25 @@ export interface Figure {
   after: number;
 }
 
+/**
+ * One piece of an article's body as the dictionary writes it: a plain string is a paragraph, and `rich`
+ * one with markup in it (<strong>); the rest are headings, a bulleted list, terms each with a line of
+ * explanation, numbered stages, the sources a section rests on (links allowed), and a closing line.
+ */
+export type Block =
+  | string
+  | { rich: string }
+  | { h2: string }
+  | { h3: string }
+  | { list: string[] }
+  | { terms: { title: string; text: string }[] }
+  | { steps: { title: string; text: string }[] }
+  | { sources: { title: string; items: string[] } }
+  | { close: string };
+
 export interface Post {
   slug: string;
-  key: 'offboarding' | 'thresholds' | 'signins' | 'allowlist' | 'score' | 'tenancy';
+  key: 'binance' | 'ai' | 'trusted' | 'offboarding' | 'thresholds' | 'signins' | 'allowlist' | 'score' | 'tenancy';
   minutes: number;
   date: string;
   /** On the card and at the top of the article; its alt text is the dictionary's `cover`. */
@@ -29,9 +52,36 @@ export interface Post {
   figures: Figure[];
 }
 
-/** Newest first, by date: the blog and the latest posts under an article read them in this order. */
+/** Newest first, by date (posts from the same day keep the order they are listed in): the blog and the latest posts read them in this order. */
 export const posts: Post[] = (
   [
+    {
+      slug: 'binance-hack-2026-how-it-happened',
+      key: 'binance',
+      minutes: 8,
+      date: '2026-11-06',
+      cover: binanceCover,
+      figures: [
+        { image: binance1, after: 5 },
+        { image: binance2, after: 38 },
+      ],
+    },
+    {
+      slug: 'ai-vs-hackers-cybersecurity-2026',
+      key: 'ai',
+      minutes: 8,
+      date: '2026-11-06',
+      cover: aiCover,
+      figures: [{ image: ai1, after: 56 }],
+    },
+    {
+      slug: 'trusted-access-cybersecurity-threats',
+      key: 'trusted',
+      minutes: 6,
+      date: '2026-11-06',
+      cover: trustedCover,
+      figures: [{ image: trusted1, after: 11 }],
+    },
     {
       slug: 'the-token-that-outlived-the-employee',
       key: 'offboarding',
