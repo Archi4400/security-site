@@ -1,0 +1,1860 @@
+---
+import { label, reveal, t, text } from '../../engine';
+import Icon from '../Icon.astro';
+import DemoStage from '../demo/DemoStage.astro';
+import DemoDone from '../demo/DemoDone.astro';
+import { findings, hops, isFinding, nodes, sessions, sparks } from '../../lib/attackPath';
+
+/**
+ * Scenario B, "the attack path": a scan maps an online store and finds three weaknesses that each look
+ * minor; the visitor runs the attack they add up to, watching it in the attacker's console, then fixes
+ * the three one at a time and sees the attack run again. Parts that belong to some steps name them in
+ * data-show (f0, f1, f2: fixing, with that many done; v: checking the fixes); the map's own marks
+ * (up, seen, flag, hit, picked, fixed, cut) are set by the script as the scene gets to them.
+ */
+const steps = [0, 1, 2, 3].map((i) => `demo.path.steps.${i}`);
+---
+
+<section class="band" id="attack-path">
+  <div class="shell stack">
+    <div class="head" {...reveal()}>
+      <h2 {...text('demo.path.title')}>{t('demo.path.title')}</h2>
+      <p {...text('demo.path.lede')}>{t('demo.path.lede')}</p>
+    </div>
+
+    <DemoStage class="ap" data-ap steps={steps} labelKey="demo.path.label">
+      <p slot="alert" class="demo__alert" hidden data-show="1 2 2b f0 f1 f2 v 4">
+        <span class="demo__alert-dot" aria-hidden="true"></span>
+        <span hidden data-show="1" {...text('demo.path.alertFound')}>{t('demo.path.alertFound')}</span>
+        <span hidden data-show="2 2b f0" {...text('demo.path.alertPath')}>{t('demo.path.alertPath')}</span>
+        <span hidden data-show="f1" {...text('demo.path.alertLeft2')}>{t('demo.path.alertLeft2')}</span>
+        <span hidden data-show="f2" {...text('demo.path.alertLeft1')}>{t('demo.path.alertLeft1')}</span>
+        <span hidden data-show="v" {...text('demo.path.alertCheck')}>{t('demo.path.alertCheck')}</span>
+        <span hidden data-show="4" {...text('demo.path.alertDone')}>{t('demo.path.alertDone')}</span>
+        <span class="demo__sev" hidden data-show="1" {...text('demo.path.low')}>{t('demo.path.low')}</span>
+        <span class="demo__sev" hidden data-show="2 2b f0" {...text('demo.path.high')}>{t('demo.path.high')}</span>
+        <span class="demo__sev" hidden data-show="f1 f2" {...text('demo.path.mid')}>{t('demo.path.mid')}</span>
+        <span class="demo__sev" hidden data-show="4" {...text('demo.path.ok')}>{t('demo.path.ok')}</span>
+      </p>
+
+      <span slot="aside" class="ap__checks mono" aria-hidden="true">
+        <Icon name="scan" />
+        <span class="ap__count" data-ap-checks>0</span>
+        <span {...text('demo.path.checks')}>{t('demo.path.checks')}</span>
+      </span>
+
+      <div class="ap__panel panel">
+        <div class="demo__head">
+          <span class="demo__app">
+            <span class="demo__live" aria-hidden="true"></span>
+            <span {...text('demo.path.panel')}>{t('demo.path.panel')}</span>
+          </span>
+          <span class="demo__eye">
+            <Icon name="radar" />
+            <span {...text('demo.path.watching')}>{t('demo.path.watching')}</span>
+          </span>
+        </div>
+
+        <div class="ap__map" data-ap-map>
+          <span class="ap__beam" aria-hidden="true"></span>
+
+          <ol class="ap__nodes" role="list">
+            {nodes.map((node, i) => (
+              <li class="ap__node" data-ap-node={node.id} data-finding={isFinding(node.id) ? '' : undefined}>
+                <span class="ap__beside" aria-hidden="true">
+                  <span class="ap__pill">
+                    <Icon name="check" />
+                    <span {...text(`demo.path.nodes.${node.id}.beside`)}>{t(`demo.path.nodes.${node.id}.beside`)}</span>
+                  </span>
+                </span>
+
+                {isFinding(node.id) ? (
+                  <button type="button" class="ap__dot" data-act="spot" data-ap-pick={node.id} disabled {...label(`demo.path.find.${node.id}`)}>
+                    <Icon name={node.icon} />
+                  </button>
+                ) : (
+                  <span class="ap__dot">
+                    <Icon name={node.icon} />
+                  </span>
+                )}
+
+                <span class="ap__name" {...text(`demo.path.nodes.${node.id}.name`)}>{t(`demo.path.nodes.${node.id}.name`)}</span>
+                <span class="ap__note" {...text(`demo.path.nodes.${node.id}.note`)}>{t(`demo.path.nodes.${node.id}.note`)}</span>
+
+                <span class="ap__tags">
+                  {isFinding(node.id) && (
+                    <span class="ap__find">
+                      <Icon name="alert" class="ap__find-warn" />
+                      <Icon name="check" class="ap__find-ok" />
+                      <span {...text(`demo.path.find.${node.id}`)}>{t(`demo.path.find.${node.id}`)}</span>
+                    </span>
+                  )}
+                  {node.id === 'data' && (
+                    <>
+                      <span class="ap__mark ap__mark--bad">
+                        <span class="ap__mark-dot" aria-hidden="true"></span>
+                        <span {...text('demo.path.reachable')}>{t('demo.path.reachable')}</span>
+                      </span>
+                      <span class="ap__mark ap__mark--ok">
+                        <Icon name="shield" />
+                        <span {...text('demo.path.protected')}>{t('demo.path.protected')}</span>
+                      </span>
+                    </>
+                  )}
+                </span>
+
+                {i < nodes.length - 1 && (
+                  <span class="ap__link" data-ap-link={i} aria-hidden="true">
+                    <span class="ap__wire"></span>
+                    <span class="ap__wire"></span>
+                    <span class="ap__fill"></span>
+                    <span class="ap__seal"><Icon name="shield" /></span>
+                    <span class="ap__hop mono">{hops[i]}</span>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+
+          <span class="ap__comet" hidden aria-hidden="true" data-ap-comet></span>
+          <span class="ap__sparks" hidden aria-hidden="true" data-ap-sparks>
+            {sparks.map(([x, y]) => <i style={`--x: ${x}px; --y: ${y}px`}></i>)}
+          </span>
+        </div>
+
+        <div class="ap__desk">
+          <div class="ap__scan" data-show="0">
+            <p class="ap__scan-head">
+              <span class="demo__live" aria-hidden="true"></span>
+              <span {...text('demo.path.mapping')}>{t('demo.path.mapping')}</span>
+            </p>
+            <span class="ap__progress" aria-hidden="true"><span data-ap-progress></span></span>
+            <p class="ap__probe mono" aria-hidden="true" data-ap-probe>{nodes[0]!.probe}</p>
+          </div>
+
+          <div class="ap__step" hidden data-show="1">
+            <p class="ap__lead" {...text('demo.path.minor')}>{t('demo.path.minor')}</p>
+            <div class="demo__ask">
+              <button type="button" class="demo__go" data-act="simulate">
+                <Icon name="bolt" />
+                <span {...text('demo.path.simulate')}>{t('demo.path.simulate')}</span>
+              </button>
+              <span class="demo__hint mono" {...text('demo.path.hintSimulate')}>{t('demo.path.hintSimulate')}</span>
+            </div>
+          </div>
+
+          {/* the attack as the attacker runs it: one session per link, played while the attacker waits at each part */}
+          <div class="ap__console" hidden data-show="2">
+            <p class="ap__console-bar">
+              <span class="ap__console-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ap__console-who mono">attacker@outside:~</span>
+              <span class="ap__console-state mono" {...text('demo.path.attacking')}>{t('demo.path.attacking')}</span>
+            </p>
+            <ol class="ap__console-body mono" role="list" data-ap-console {...label('demo.path.consoleLabel')}>
+              {sessions.map((lines, s) => (
+                <>
+                  <li class="ap__line ap__line--note" data-ap-session={s}>
+                    <span {...text(`demo.path.console.${s}`)}>{t(`demo.path.console.${s}`)}</span>
+                  </li>
+                  {lines.map(([kind, line]) => (
+                    <li class={`ap__line ap__line--${kind}`} data-ap-session={s} data-kind={kind}>{line}</li>
+                  ))}
+                </>
+              ))}
+            </ol>
+          </div>
+
+          <p class="ap__intro" hidden data-show="2b">
+            <span class="ap__lead" {...text('demo.path.pick')}>{t('demo.path.pick')}</span>
+            <span class="demo__hint mono" {...text('demo.path.hintPick')}>{t('demo.path.hintPick')}</span>
+          </p>
+
+          {/* the three findings as steps to fix, in the order the attacker meets them; each one can be opened */}
+          <ol class="ap__queue" role="list" hidden data-show="1 2b f0 f1 f2 v 4" {...label('demo.path.queue')}>
+            {findings.map((finding, i) => (
+              <li>
+                <button type="button" class="ap__task" data-act="pick" data-ap-pick={finding.id} disabled>
+                  <span class="ap__task-num mono" aria-hidden="true">
+                    <span class="ap__task-digit">{i + 1}</span>
+                    <Icon name="check" class="ap__task-tick" />
+                  </span>
+                  <span class="ap__task-copy">
+                    <span class="ap__task-title" {...text(`demo.path.find.${finding.id}`)}>{t(`demo.path.find.${finding.id}`)}</span>
+                    <span class="ap__task-state">
+                      <span class="ap__task-open" {...text('demo.path.open')}>{t('demo.path.open')}</span>
+                      <span class="ap__task-done" {...text('demo.path.fixedState')}>{t('demo.path.fixedState')}</span>
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          <div class="ap__work" hidden data-show="f0 f1 f2">
+            {findings.map((finding) => (
+              <div class="ap__fix" hidden data-ap-fix={finding.id}>
+                <p class="ap__fix-tag" {...text('demo.path.fixReady')}>{t('demo.path.fixReady')}</p>
+                <p class="ap__fix-text" {...text(`demo.path.fix.${finding.id}`)}>{t(`demo.path.fix.${finding.id}`)}</p>
+                <code class="ap__diff mono">
+                  <span class="ap__diff-file">{finding.file}</span>
+                  {finding.diff.map((line) => (
+                    <span class:list={['ap__diff-line', line.startsWith('+') ? 'ap__diff-line--add' : 'ap__diff-line--del']}>{line}</span>
+                  ))}
+                </code>
+              </div>
+            ))}
+            <div class="demo__ask ap__ask">
+              <button type="button" class="demo__go ap__apply" data-act="apply" data-lead>
+                <Icon name="check" />
+                <span class="ap__apply-idle" {...text('demo.path.apply')}>{t('demo.path.apply')}</span>
+                <span class="ap__apply-busy" {...text('demo.path.applying')}>{t('demo.path.applying')}</span>
+              </button>
+              <span class="demo__hint mono" {...text('demo.path.hintApply')}>{t('demo.path.hintApply')}</span>
+            </div>
+          </div>
+
+          <p class="demo__busy mono" hidden data-show="v" {...text('demo.path.checking')}>{t('demo.path.checking')}</p>
+
+          <DemoDone items={[0, 1, 2].map((i) => `demo.path.summary.${i}`)} data-show="4" />
+        </div>
+      </div>
+    </DemoStage>
+  </div>
+</section>
+
+<style>
+  /*
+   * The map lays the site out as a column on a phone and a row on a wide stage. --dot is a part's mark,
+   * --hop how long the attacker takes from one part to the next (the script's HOP), --scan how long the
+   * sweep takes to cross the map (the script's SCAN).
+   */
+  .ap {
+    --dot: 2.75rem;
+    --row: 1.6rem;
+    --hop: 0.85s;
+    --scan: 2.4s;
+    --hot: rgb(var(--aurora-1));
+    --hop-ease: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  /*
+   * The alert, and every severity in the scene: red while the path is open, back to orange once the
+   * first fix closes it and findings are left (f1, f2: one or two fixed), blue while the fixes are
+   * checked, green at the end.
+   */
+  .ap[data-step='2'],
+  .ap[data-step='2b'],
+  .ap[data-step='f0'] {
+    --tone: var(--bad);
+  }
+
+  .ap[data-step='v'] {
+    --tone: var(--accent);
+  }
+
+  .ap[data-step='4'] {
+    --tone: var(--ok);
+  }
+
+  .ap__checks {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-2);
+    font-size: 0.85rem;
+  }
+
+  .ap__checks :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--accent-ink);
+  }
+
+  .ap__count {
+    min-width: 3ch;
+    text-align: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* a phone has no room beside the steps; the scan's progress bar says the same there */
+  @media (max-width: 40rem) {
+    .ap__checks {
+      display: none;
+    }
+  }
+
+  .ap__panel {
+    overflow: hidden;
+  }
+
+  /* ── the map: a faint dot grid, the parts on it, the links between them ── */
+
+  .ap__map {
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--edge);
+    background-image: radial-gradient(circle, color-mix(in oklab, var(--ink) 9%, transparent) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+  }
+
+  .ap__nodes {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--row) 0;
+    margin: 0;
+  }
+
+  .ap__node {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--dot) minmax(0, 1fr);
+    grid-template-areas:
+      'dot name'
+      'dot note'
+      'dot tags';
+    align-content: start;
+    column-gap: 0.9rem;
+  }
+
+  /* the clean neighbours only fit on a wide stage */
+  .ap__beside {
+    display: none;
+  }
+
+  .ap__dot {
+    grid-area: dot;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--dot);
+    height: var(--dot);
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--mute);
+    font: inherit;
+    transition:
+      opacity 0.5s var(--ease),
+      scale 0.5s var(--ease),
+      border-color 0.4s var(--ease),
+      background-color 0.4s var(--ease),
+      color 0.4s var(--ease),
+      box-shadow 0.4s var(--ease);
+  }
+
+  .ap__dot :global(svg) {
+    width: 42%;
+    height: 42%;
+  }
+
+  .ap__name {
+    grid-area: name;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .ap__note {
+    grid-area: note;
+    color: var(--mute);
+    font-size: 0.78rem;
+  }
+
+  .ap__name,
+  .ap__note,
+  .ap__tags,
+  .ap__beside {
+    transition: opacity 0.5s var(--ease);
+  }
+
+  /* a part's tags share one place: a finding, or what the data is exposed to */
+  .ap__tags {
+    grid-area: tags;
+    display: grid;
+    justify-items: start;
+    margin-top: 0.45rem;
+  }
+
+  .ap__tags > * {
+    grid-area: 1 / 1;
+  }
+
+  .ap__find,
+  .ap__mark {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+    max-width: 100%;
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    visibility: hidden;
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 0.4s var(--ease),
+      translate 0.4s var(--ease),
+      visibility 0s 0.4s,
+      background-color 0.4s var(--ease),
+      color 0.4s var(--ease);
+  }
+
+  .ap__find :global(svg),
+  .ap__mark :global(svg) {
+    flex: none;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-top: 0.05rem;
+  }
+
+  .ap__find {
+    background: color-mix(in oklab, var(--warn) 14%, transparent);
+    color: var(--warn);
+  }
+
+  .ap__find :global(.ap__find-ok) {
+    display: none;
+  }
+
+  .ap__mark {
+    font-weight: 600;
+  }
+
+  .ap__mark--bad {
+    background: color-mix(in oklab, var(--bad) 14%, transparent);
+    color: var(--bad);
+  }
+
+  .ap__mark-dot {
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-top: 0.25rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .ap__mark--ok {
+    background: color-mix(in oklab, var(--ok) 14%, transparent);
+    color: var(--ok);
+  }
+
+  .ap__node[data-flag] .ap__find,
+  .ap[data-step='2b'] .ap__mark--bad,
+  .ap[data-step='f0'] .ap__mark--bad,
+  .ap[data-step='4'] .ap__mark--ok {
+    visibility: visible;
+    opacity: 1;
+    translate: none;
+    transition-delay: 0s;
+  }
+
+  .ap__node[data-fixed] .ap__find {
+    background: color-mix(in oklab, var(--ok) 14%, transparent);
+    color: var(--ok);
+  }
+
+  .ap__node[data-fixed] .ap__find :global(.ap__find-warn) {
+    display: none;
+  }
+
+  .ap__node[data-fixed] .ap__find :global(.ap__find-ok) {
+    display: block;
+  }
+
+  /* ── a part, as the scene gets to it ── */
+
+  /* the parts come up one by one as the map is drawn */
+  :global(html.js) .ap__node:not([data-up]) > :not(.ap__link) {
+    opacity: 0;
+  }
+
+  :global(html.js) .ap__node:not([data-up]) .ap__dot {
+    scale: 0.6;
+  }
+
+  .ap__node[data-seen] .ap__dot {
+    border-color: color-mix(in oklab, var(--accent) 55%, var(--edge));
+    color: var(--ink);
+  }
+
+  .ap__node[data-flag] .ap__dot {
+    border-color: var(--warn);
+    background: color-mix(in oklab, var(--warn) 10%, var(--sheet));
+    color: var(--warn);
+  }
+
+  .ap__node[data-hit] .ap__dot {
+    border-color: var(--hot);
+    color: var(--hot);
+    box-shadow:
+      0 0 0 4px rgb(var(--aurora-1) / 0.16),
+      0 0 24px rgb(var(--aurora-1) / 0.35);
+  }
+
+  .ap__node[data-ap-node='data'][data-hit] .ap__dot {
+    border-color: var(--bad);
+    background: color-mix(in oklab, var(--bad) 12%, var(--sheet));
+    color: var(--bad);
+  }
+
+  /* a weak link can be opened from the map too; while the scene asks where to start, they all take the decision's blue */
+  .ap__node .ap__dot:enabled {
+    cursor: pointer;
+  }
+
+  .ap[data-step='2b'] .ap__node .ap__dot:enabled {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 12%, var(--sheet));
+    color: var(--accent-ink);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 20%, transparent);
+  }
+
+  .ap__node .ap__dot:enabled:hover,
+  .ap__node .ap__dot:enabled:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 0 24px color-mix(in oklab, var(--accent) 50%, transparent);
+  }
+
+  .ap__node[data-picked] .ap__dot {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 35%, transparent);
+  }
+
+  .ap__node[data-fixed] .ap__dot,
+  .ap[data-step='4'] .ap__node[data-ap-node='data'] .ap__dot {
+    border-color: var(--ok);
+    background: color-mix(in oklab, var(--ok) 14%, var(--sheet));
+    color: var(--ok);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--ok) 16%, transparent);
+  }
+
+  /* ── the links: two halves, so a cut can pull them apart, and the attacker's trail over them ── */
+
+  .ap__link {
+    position: absolute;
+    left: calc(var(--dot) / 2 - 1px);
+    top: calc(var(--dot) + 0.35rem);
+    bottom: calc(0.35rem - var(--row));
+    width: 2px;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    transform-origin: top;
+    transition: scale 0.5s var(--ease) 0.15s;
+  }
+
+  :global(html.js) .ap__node:not([data-up]) .ap__link {
+    scale: 1 0;
+  }
+
+  .ap__wire {
+    background: var(--edge-strong);
+    transition:
+      translate 0.6s var(--ease),
+      opacity 0.6s var(--ease),
+      background-color 0.6s var(--ease);
+  }
+
+  .ap__fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--hot), var(--bad));
+    scale: 1 0;
+    transform-origin: top;
+    transition: scale 0.4s var(--ease);
+  }
+
+  .ap__link[data-hit] .ap__fill {
+    scale: 1;
+    transition: scale var(--hop) var(--hop-ease);
+  }
+
+  .ap__link[data-cut] .ap__wire {
+    opacity: 0.25;
+  }
+
+  .ap__link[data-cut] .ap__wire:first-child {
+    translate: 0 -5px;
+  }
+
+  .ap__link[data-cut] .ap__wire + .ap__wire {
+    translate: 0 5px;
+  }
+
+  /* where the chain was broken: a green seal on the gap */
+  .ap__seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin: -0.675rem 0 0 -0.675rem;
+    border-radius: 50%;
+    border: 2px solid var(--sheet);
+    background: var(--ok);
+    color: #fff;
+    opacity: 0;
+    scale: 0.3;
+    transition:
+      opacity 0.3s var(--ease),
+      scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .ap__seal :global(svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .ap__link[data-cut] .ap__seal {
+    opacity: 1;
+    scale: 1;
+    transition-delay: 0.3s;
+  }
+
+  /* closed: the map settles into the product's blue */
+  .ap[data-step='4'] .ap__wire {
+    background: color-mix(in oklab, var(--accent) 55%, var(--edge-strong));
+  }
+
+  .ap__hop {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 0.55rem;
+    translate: -50% 4px;
+    color: var(--hot);
+    font-size: 0.66rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition:
+      opacity 0.4s var(--ease),
+      translate 0.4s var(--ease);
+  }
+
+  .ap__link[data-hit] .ap__hop {
+    opacity: 1;
+    translate: -50% 0;
+  }
+
+  /* ── the sweep, the attacker, and where it breaks up ── */
+
+  .ap__beam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5rem;
+    translate: 0 -100%;
+    border-bottom: 2px solid var(--accent);
+    background: linear-gradient(180deg, transparent, color-mix(in oklab, var(--accent) 20%, transparent));
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .ap__comet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 0.8rem;
+    height: 0.8rem;
+    margin: -0.4rem 0 0 -0.4rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 0 3px rgb(var(--aurora-1) / 0.55),
+      0 0 18px 4px rgb(var(--aurora-1) / 0.8);
+    pointer-events: none;
+  }
+
+  /* the tail trails behind: up the column on a phone, back along the row on a wide stage */
+  .ap__comet::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    width: 0.3rem;
+    height: 3rem;
+    margin-left: -0.15rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, transparent, rgb(var(--aurora-1) / 0.9));
+  }
+
+  .ap__sparks {
+    position: absolute;
+    top: var(--sy, 0);
+    left: var(--sx, 0);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .ap__sparks i {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    border-radius: 50%;
+    background: var(--hot);
+  }
+
+  /* ── the desk under the map: what the scene says and asks at each step ── */
+
+  .ap__desk {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    min-height: 15rem;
+    padding: 1.1rem 1.25rem 1.25rem;
+  }
+
+  .ap__scan,
+  .ap__step {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .ap__scan-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink-2);
+    font-size: 0.88rem;
+  }
+
+  .ap__progress {
+    overflow: hidden;
+    display: block;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--edge);
+  }
+
+  .ap__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-ink));
+    scale: var(--done, 0) 1;
+    transform-origin: left;
+  }
+
+  .ap__probe {
+    color: var(--accent-ink);
+    font-size: 0.76rem;
+  }
+
+  .ap__lead {
+    color: var(--ink-2);
+    font-size: 0.9rem;
+  }
+
+  .ap__intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 1rem;
+  }
+
+  /*
+   * The attacker's console: a terminal, dark on either theme, a fixed height that scrolls to the newest
+   * line like a real one. Its colours are its own for the same reason.
+   */
+  .ap__console {
+    --term: #0b0d12;
+    --term-ink: #e6e9f0;
+    --term-mute: #7d8595;
+    --term-prompt: #8ea6ff;
+    --term-hit: #ff8a3d;
+    --term-bad: #ff6b78;
+    overflow: hidden;
+    display: grid;
+    border-radius: var(--radius-s);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: var(--term);
+    color: var(--term-ink);
+    box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.6);
+  }
+
+  .ap__console-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    font-size: 0.72rem;
+  }
+
+  .ap__console-dots {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .ap__console-dots i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .ap__console-who {
+    color: var(--term-mute);
+  }
+
+  .ap__console-state {
+    margin-left: auto;
+    color: var(--term-hit);
+  }
+
+  .ap__console-body {
+    display: grid;
+    align-content: start;
+    gap: 0.2rem;
+    height: 12rem;
+    margin: 0;
+    padding: 0.7rem 0.9rem 0.9rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+    font-size: 0.76rem;
+    line-height: 1.45;
+  }
+
+  .ap__line {
+    padding-left: 1.15rem;
+    text-indent: -1.15rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* a note to the reader, as a shell comment, with a blank line before each session but the first */
+  .ap__line--note {
+    color: var(--term-mute);
+    white-space: normal;
+  }
+
+  .ap__line--note::before {
+    content: '# ';
+  }
+
+  .ap__line--note:not(:first-child) {
+    margin-top: 0.6rem;
+  }
+
+  .ap__line--cmd::before {
+    content: '$ ';
+    color: var(--term-prompt);
+  }
+
+  .ap__line--sql::before {
+    content: 'sql> ';
+    color: var(--term-prompt);
+  }
+
+  /* the line being typed carries the cursor */
+  .ap__line[data-typing]::after {
+    content: '';
+    display: inline-block;
+    width: 0.5em;
+    height: 1.05em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+    background: var(--term-ink);
+  }
+
+  .ap__line--out {
+    color: var(--term-mute);
+  }
+
+  .ap__line--try {
+    color: var(--term-bad);
+  }
+
+  .ap__line--hit {
+    color: var(--term-hit);
+  }
+
+  /* ── the fixes: one step per finding, open, in hand (data-current) or done ── */
+
+  .ap__queue {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .ap__task {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.55rem 0.8rem 0.55rem 0.55rem;
+    border-radius: 12px;
+    border: 1px solid var(--edge);
+    background: var(--sheet);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    transition:
+      border-color 0.3s var(--ease),
+      background-color 0.3s var(--ease),
+      box-shadow 0.3s var(--ease);
+  }
+
+  .ap__task:enabled {
+    cursor: pointer;
+  }
+
+  .ap__task:enabled:hover {
+    border-color: var(--accent);
+  }
+
+  .ap__task-num {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--warn) 60%, transparent);
+    color: var(--warn);
+    font-size: 0.75rem;
+    transition:
+      background-color 0.3s var(--ease),
+      border-color 0.3s var(--ease),
+      color 0.3s var(--ease);
+  }
+
+  .ap__task-digit,
+  .ap__task-num :global(.ap__task-tick) {
+    grid-area: 1 / 1;
+    transition:
+      opacity 0.3s var(--ease),
+      scale 0.4s var(--ease);
+  }
+
+  .ap__task-num :global(.ap__task-tick) {
+    width: 0.9rem;
+    height: 0.9rem;
+    opacity: 0;
+    scale: 0.4;
+  }
+
+  .ap__task-copy {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .ap__task-title {
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .ap__task-state {
+    color: var(--mute);
+    font-size: 0.72rem;
+  }
+
+  .ap__task-done {
+    display: none;
+  }
+
+  .ap__task[data-current] {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, var(--sheet));
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+  }
+
+  .ap__task[data-current] .ap__task-num {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .ap__task[data-done] {
+    border-color: color-mix(in oklab, var(--ok) 40%, var(--edge));
+    background: color-mix(in oklab, var(--ok) 7%, var(--sheet));
+  }
+
+  .ap__task[data-done] .ap__task-num {
+    border-color: color-mix(in oklab, var(--ok) 60%, transparent);
+    background: color-mix(in oklab, var(--ok) 16%, transparent);
+    color: var(--ok);
+  }
+
+  .ap__task[data-done] .ap__task-digit {
+    opacity: 0;
+  }
+
+  .ap__task[data-done] .ap__task-num :global(.ap__task-tick) {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .ap__task[data-done] .ap__task-title {
+    color: var(--ink-2);
+  }
+
+  .ap__task[data-done] .ap__task-open {
+    display: none;
+  }
+
+  .ap__task[data-done] .ap__task-done {
+    display: inline;
+    color: var(--ok);
+  }
+
+  /*
+   * The fix in hand: what to change and the change itself. Only one card is shown at a time, and it
+   * lends its parts to the grid (display: contents), so the apply button can sit under the text
+   * with the diff beside them on a wide stage.
+   */
+  .ap__work {
+    display: grid;
+    gap: 0.6rem 1.5rem;
+  }
+
+  .ap__fix {
+    display: contents;
+  }
+
+  .ap__fix-tag {
+    justify-self: start;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent-ink);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .ap__fix-text {
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .ap__ask {
+    margin-top: 0.15rem;
+  }
+
+  /* while a fix applies the button stays where it is, says so, and takes no more clicks */
+  .ap__apply-busy {
+    display: none;
+  }
+
+  .ap .ap__apply[aria-disabled='true'] {
+    cursor: progress;
+    animation: none;
+  }
+
+  .ap .ap__apply[aria-disabled='true']::after {
+    display: none;
+  }
+
+  .ap__apply[aria-disabled='true'] .ap__apply-idle {
+    display: none;
+  }
+
+  .ap__apply[aria-disabled='true'] .ap__apply-busy {
+    display: inline;
+  }
+
+  .ap__diff {
+    display: grid;
+    align-content: start;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 0.5rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--edge);
+    background: color-mix(in oklab, var(--sheet-2) 70%, transparent);
+    font-size: 0.74rem;
+    scrollbar-width: thin;
+  }
+
+  .ap__diff-file {
+    padding: 0 0.45rem 0.35rem;
+    color: var(--mute);
+    font-size: 0.7rem;
+  }
+
+  /* a long line wraps like it would in an editor, rather than hiding behind a scrollbar on a phone */
+  .ap__diff-line {
+    padding: 0.15rem 0.45rem 0.15rem 1.6rem;
+    border-radius: 4px;
+    text-indent: -1.15rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ap__diff-line--del {
+    background: color-mix(in oklab, var(--bad) 9%, transparent);
+    color: var(--bad);
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .ap__diff-line--add {
+    background: color-mix(in oklab, var(--ok) 9%, transparent);
+    color: var(--ok);
+  }
+
+  .ap[data-applying] .ap__diff-line--del {
+    opacity: 0.45;
+    text-decoration: line-through;
+  }
+
+  /* ── a wide stage: the parts in a row, each with a clean neighbour above it ── */
+
+  @media (min-width: 56rem) {
+    .ap {
+      --dot: 3.25rem;
+      --beside: 3.25rem;
+      --col: 1rem;
+    }
+
+    .ap__map {
+      padding: 1.5rem 1.5rem 1.75rem;
+    }
+
+    .ap__nodes {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap: var(--col);
+    }
+
+    .ap__node {
+      grid-template-columns: none;
+      grid-template-areas: 'beside' 'dot' 'name' 'note' 'tags';
+      justify-items: center;
+      text-align: center;
+    }
+
+    /* a pill for the neighbour, and a dashed line from it down to the part */
+    .ap__beside {
+      grid-area: beside;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: var(--beside);
+    }
+
+    .ap__beside::after {
+      content: '';
+      flex: 1;
+      border-left: 1px dashed var(--edge-strong);
+    }
+
+    .ap__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--edge);
+      background: var(--sheet);
+      color: var(--mute);
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .ap__pill :global(svg) {
+      width: 0.75rem;
+      height: 0.75rem;
+      transition: color 0.4s var(--ease);
+    }
+
+    .ap__node[data-seen] .ap__pill :global(svg) {
+      color: var(--ok);
+    }
+
+    .ap__dot {
+      margin-bottom: 0.6rem;
+    }
+
+    .ap__tags {
+      justify-items: center;
+      margin-top: 0.55rem;
+    }
+
+    .ap__find,
+    .ap__mark {
+      text-align: center;
+    }
+
+    .ap__link {
+      left: calc(50% + var(--dot) / 2 + 0.35rem);
+      top: calc(var(--beside) + var(--dot) / 2 - 1px);
+      bottom: auto;
+      width: calc(100% + var(--col) - var(--dot) - 0.7rem);
+      height: 2px;
+      grid-template-rows: none;
+      grid-template-columns: 1fr 1fr;
+      transform-origin: left;
+    }
+
+    :global(html.js) .ap__node:not([data-up]) .ap__link {
+      scale: 0 1;
+    }
+
+    .ap__fill {
+      background: linear-gradient(90deg, var(--hot), var(--bad));
+      scale: 0 1;
+      transform-origin: left;
+    }
+
+    .ap__link[data-cut] .ap__wire:first-child {
+      translate: -6px 0;
+    }
+
+    .ap__link[data-cut] .ap__wire + .ap__wire {
+      translate: 6px 0;
+    }
+
+    .ap__hop {
+      display: block;
+    }
+
+    .ap__beam {
+      top: 0;
+      bottom: 0;
+      right: auto;
+      width: 6rem;
+      height: auto;
+      translate: -100% 0;
+      border-bottom: 0;
+      border-right: 2px solid var(--accent);
+      background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 20%, transparent));
+    }
+
+    .ap__comet::before {
+      left: auto;
+      right: 50%;
+      bottom: auto;
+      top: 50%;
+      width: 3rem;
+      height: 0.3rem;
+      margin: -0.15rem 0 0;
+      background: linear-gradient(90deg, transparent, rgb(var(--aurora-1) / 0.9));
+    }
+
+    /* the three fixes side by side, and under them the fix in hand next to its change */
+    .ap__desk {
+      min-height: 15.25rem;
+    }
+
+    .ap__console-body {
+      height: 10.5rem;
+    }
+
+    .ap__queue {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ap__work {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'tag diff'
+        'text diff'
+        'ask diff';
+      align-content: start;
+    }
+
+    .ap__fix-tag {
+      grid-area: tag;
+    }
+
+    .ap__fix-text {
+      grid-area: text;
+    }
+
+    .ap__diff {
+      grid-area: diff;
+    }
+
+    .ap__ask {
+      grid-area: ask;
+    }
+  }
+
+  /* ── motion ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ap__map[data-scanning] .ap__beam {
+      opacity: 1;
+      animation: ap-sweep-y var(--scan) linear both;
+    }
+
+    /* a part flashes blue as the sweep crosses it */
+    .ap__node[data-seen] .ap__dot {
+      animation: ap-blink 0.7s ease-out;
+    }
+
+    /* the attacker is inside this part: it sends out orange rings until the attacker moves on */
+    .ap__node[data-here] .ap__dot {
+      animation: ap-here 1.1s ease-out infinite;
+    }
+
+    /* while the scene asks where to start, the weak links breathe like a decision, and so does step 1 */
+    .ap[data-step='2b'] .ap__dot:enabled,
+    .ap[data-step='2b'] .ap__queue li:first-child .ap__task {
+      animation: ap-ring 1.6s ease-out infinite;
+    }
+
+    .ap__task[data-done] .ap__task-num :global(.ap__task-tick) {
+      transition-delay: 0.1s;
+    }
+
+    .ap__line:not([hidden]) {
+      animation: ap-line 0.25s ease-out both;
+    }
+
+    .ap__line[data-typing]::after {
+      animation: ap-caret 0.9s steps(1) infinite;
+    }
+
+    .ap__dot[data-ripple]::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgb(255 255 255 / 0.35);
+      animation: ap-ripple 0.3s ease-out both;
+    }
+
+    /* the data the path ends at pulses red for as long as it can be reached */
+    .ap__node[data-ap-node='data'][data-hit] .ap__dot {
+      animation: ap-alarm 1.4s ease-out infinite;
+    }
+
+    .ap__node[data-fixed] .ap__dot {
+      animation: ap-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .ap__sparks:not([hidden]) i {
+      animation: ap-spark 0.7s ease-out both;
+    }
+
+    .ap__step:not([hidden]),
+    .ap__intro:not([hidden]),
+    .ap__console:not([hidden]),
+    .ap__queue:not([hidden]),
+    .ap__work:not([hidden]),
+    .ap__fix:not([hidden]) > * {
+      animation: ap-in 0.45s var(--ease) both;
+    }
+  }
+
+  @keyframes ap-line {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ap-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-width: 56rem) {
+    .ap__map[data-scanning] .ap__beam {
+      animation-name: ap-sweep-x;
+    }
+  }
+
+  @keyframes ap-sweep-y {
+    from {
+      top: 0;
+    }
+    to {
+      top: 100%;
+    }
+  }
+
+  @keyframes ap-sweep-x {
+    from {
+      left: 0;
+    }
+    to {
+      left: 100%;
+    }
+  }
+
+  @keyframes ap-blink {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+
+  @keyframes ap-ring {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+
+  @keyframes ap-here {
+    from {
+      box-shadow:
+        0 0 0 0 rgb(var(--aurora-1) / 0.6),
+        0 0 24px rgb(var(--aurora-1) / 0.35);
+    }
+    to {
+      box-shadow:
+        0 0 0 14px transparent,
+        0 0 24px rgb(var(--aurora-1) / 0.35);
+    }
+  }
+
+  @keyframes ap-alarm {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--bad) 60%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 16px transparent;
+    }
+  }
+
+  @keyframes ap-ripple {
+    from {
+      opacity: 1;
+      scale: 0.6;
+    }
+    to {
+      opacity: 0;
+      scale: 1.15;
+    }
+  }
+
+  @keyframes ap-pop {
+    from {
+      scale: 0.8;
+    }
+  }
+
+  @keyframes ap-spark {
+    from {
+      opacity: 1;
+      scale: 1.3;
+    }
+    to {
+      opacity: 0;
+      scale: 0.4;
+      translate: var(--x) var(--y);
+    }
+  }
+
+  @keyframes ap-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../../engine/client';
+  import { scene } from '../../lib/demoScene';
+  import { checks, findings, guessing, nodes, type ConsoleKind, type FindingId } from '../../lib/attackPath';
+
+  /** The attacker's way in from the edge, each hop from part to part (--hop in the CSS), and a short stop at each part. */
+  const ENTRY = 600;
+  const HOP = 850;
+  const DWELL = 250;
+  /** How long the sweep takes to cross the map (--scan in the CSS). */
+  const SCAN = 2400;
+  /** How long a fix takes to apply. */
+  const APPLY = 900;
+  /** The console: a typed character, and how long each kind of line holds before the next. */
+  const KEY = 11;
+  const HOLD: Record<ConsoleKind | 'note', number> = { note: 250, cmd: 200, sql: 200, out: 160, try: 1300, hit: 300 };
+  /** How long the attacker takes to slip into a part, or out of it. */
+  const FADE = 180;
+  /** A fixed part closes the link that leads into it. */
+  const cutFor: Record<FindingId, number> = { admin: 0, accounts: 1, db: 2 };
+  /** The fixes in the order the attacker meets them, which is the order the scene suggests. */
+  const order = findings.map((finding) => finding.id);
+  const fixing = ['f0', 'f1', 'f2'];
+  const MARKS = ['up', 'seen', 'flag', 'hit', 'here', 'picked', 'fixed', 'cut', 'current', 'done'];
+
+  type Point = { x: number; y: number };
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-ap]')) {
+    const map = root.querySelector<HTMLElement>('[data-ap-map]')!;
+    const parts = nodes.map((node) => root.querySelector<HTMLElement>(`[data-ap-node="${node.id}"]`)!);
+    const dots = parts.map((part) => part.querySelector<HTMLElement>('.ap__dot')!);
+    const flagged = parts.filter((part) => part.hasAttribute('data-finding'));
+    const links = [...root.querySelectorAll<HTMLElement>('[data-ap-link]')];
+    const picks = [...root.querySelectorAll<HTMLButtonElement>('[data-ap-pick]')];
+    const tasks = [...root.querySelectorAll<HTMLElement>('.ap__task')];
+    const fixes = [...root.querySelectorAll<HTMLElement>('[data-ap-fix]')];
+    const comet = root.querySelector<HTMLElement>('[data-ap-comet]')!;
+    const sparks = root.querySelector<HTMLElement>('[data-ap-sparks]')!;
+    const counter = root.querySelector<HTMLElement>('[data-ap-checks]')!;
+    const progress = root.querySelector<HTMLElement>('[data-ap-progress]')!;
+    const probe = root.querySelector<HTMLElement>('[data-ap-probe]')!;
+    const terminal = root.querySelector<HTMLElement>('[data-ap-console]')!;
+    const lines = [...terminal.querySelectorAll<HTMLElement>('.ap__line')];
+    // what each typed line says, kept before the script empties it to type it again
+    const said = new Map(lines.map((line) => [line, line.textContent ?? '']));
+    const fixed = new Set<FindingId>();
+    let current: FindingId | null = null;
+    let frame = 0;
+    let typer = 0;
+
+    const part = (id: FindingId) => parts.find((p) => p.dataset.apNode === id)!;
+    const task = (id: FindingId) => tasks.find((t) => t.dataset.apPick === id)!;
+
+    /** A finding can be opened, from its step or from the map, while the scene asks for fixes, until it is fixed. */
+    const pickable = (on: boolean) =>
+      picks.forEach((button) => (button.disabled = !on || fixed.has(button.dataset.apPick as FindingId)));
+
+    const stage = scene(root, {
+      stages: { '0': 1, '1': 2, '2': 3, '2b': 3, f0: 4, f1: 4, f2: 4, v: 4, '4': 5 },
+      last: '4',
+      aside: ['spot'],
+      enter: (step) => pickable(step === '2b' || fixing.includes(step)),
+    });
+    const { go, later, wait } = stage;
+
+    const mark = (el: Element, name: string, on = true) => el.toggleAttribute(`data-${name}`, on);
+    const wide = () => matchMedia('(min-width: 56rem)').matches;
+
+    /** The middle of a part, inside the map. */
+    const at = (el: Element): Point => {
+      const box = map.getBoundingClientRect();
+      const part = el.getBoundingClientRect();
+      return { x: part.left - box.left + part.width / 2, y: part.top - box.top + part.height / 2 };
+    };
+
+    /** The checks counter and the progress bar, climbing to the end of the scan over `ms`. */
+    const count = (ms: number) => {
+      cancelAnimationFrame(frame);
+      const show = (k: number) => {
+        counter.textContent = String(Math.round(checks * k));
+        progress.style.setProperty('--done', String(k));
+      };
+      if (reducedMotion()) return show(1);
+      const begin = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - begin) / ms);
+        show(k);
+        if (k < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+
+    /* ── the console ── */
+
+    const scroll = () => (terminal.scrollTop = terminal.scrollHeight);
+
+    /** Runs `step` every frame for `ms`, with how far along it is, from 0 to 1. */
+    const during = (ms: number, step: (k: number) => void) => {
+      const begin = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - begin) / ms);
+        step(k);
+        if (k < 1) typer = requestAnimationFrame(tick);
+      };
+      typer = requestAnimationFrame(tick);
+    };
+
+    /** How long a line takes: typing it, if it is typed, then its hold. */
+    const length = (line: HTMLElement) => {
+      const kind = (line.dataset.kind ?? 'note') as ConsoleKind | 'note';
+      return (kind === 'cmd' || kind === 'sql' ? said.get(line)!.length * KEY : 0) + HOLD[kind];
+    };
+
+    /** How long a session takes from its note to its last line. */
+    const sessionLength = (s: number) =>
+      lines.filter((line) => line.dataset.apSession === String(s)).reduce((sum, line) => sum + length(line), 0);
+
+    /** Brings a line up: typed out, a run of guesses, or all at once. */
+    const show = (line: HTMLElement) => {
+      line.hidden = false;
+      const kind = line.dataset.kind;
+      const text = said.get(line)!;
+      if (kind === 'cmd' || kind === 'sql') {
+        line.textContent = '';
+        line.dataset.typing = '';
+        during(text.length * KEY, (k) => {
+          line.textContent = text.slice(0, Math.ceil(text.length * k));
+          if (k === 1) delete line.dataset.typing;
+          scroll();
+        });
+      } else if (kind === 'try') {
+        // the guesses fly past, each one refused, and the count runs up to the one that works
+        const { user, words, tries } = guessing;
+        during(HOLD.try - 150, (k) => {
+          const n = Math.round(tries * k);
+          const word = words[Math.floor(k * 47) % words.length];
+          line.textContent = `[-] ${n.toLocaleString('en-US').padStart(5)}  ${user} : ${word}  ✗`;
+        });
+      }
+      scroll();
+    };
+
+    /** Plays one session of the console, line by line. */
+    const session = (s: number) => {
+      let time = 0;
+      for (const line of lines.filter((l) => l.dataset.apSession === String(s))) {
+        later(time, () => show(line));
+        time += length(line);
+      }
+    };
+
+    /** Shows the whole console at once, for someone who would rather not watch it type. */
+    const showAll = () => {
+      for (const line of lines) {
+        line.hidden = false;
+        if (line.dataset.kind === 'try') {
+          const { user, words, tries } = guessing;
+          line.textContent = `[-] ${tries.toLocaleString('en-US')}  ${user} : ${words.at(-1)}  ✗`;
+        }
+      }
+      scroll();
+    };
+
+    const clearConsole = () => {
+      cancelAnimationFrame(typer);
+      for (const line of lines) {
+        line.hidden = true;
+        // a note keeps its translated text; only the lines the script types or runs are put back
+        if (line.dataset.kind) line.textContent = said.get(line)!;
+        delete line.dataset.typing;
+      }
+    };
+
+    /* ── the attacker ── */
+
+    /** The attacker breaks up where it runs into a cut. */
+    const burst = (where: Point) => {
+      comet.hidden = true;
+      if (reducedMotion()) return;
+      sparks.style.setProperty('--sx', `${where.x}px`);
+      sparks.style.setProperty('--sy', `${where.y}px`);
+      sparks.hidden = false;
+      later(800, () => (sparks.hidden = true));
+    };
+
+    /**
+     * Sends the attacker in from the edge and from part to part up to part `to`, lighting each link it takes.
+     * It slips into each part it reaches, so it never sits on the icon; the part pulses (data-here) while it is
+     * inside. It waits `stay(i)` at each part before going on, and `arrive(i)` runs as it gets there; with
+     * `broken`, it goes on into the next link, which is cut, and breaks up halfway. Returns how long that takes.
+     */
+    const attack = (to: number, { broken = false, stay = (_: number) => DWELL, arrive = (_: number) => {} } = {}) => {
+      const quick = reducedMotion();
+      const centres = dots.slice(0, to + 1).map(at);
+      const first = centres[0]!;
+      const stops: [Point, number][] = [[wide() ? { x: -20, y: first.y } : { x: first.x, y: -20 }, 0]];
+      // when the attacker shows: [ms, opacity], fading out as it reaches a part and back in as it leaves
+      const fades: [number, number][] = [[0, 1]];
+      let time = 0;
+      const stop = (point: Point, ms: number) => {
+        time += ms;
+        stops.push([point, time]);
+      };
+      const leave = (i: number) => {
+        later(quick ? 0 : time, () => mark(parts[i]!, 'here', false));
+        fades.push([time, 0], [time + FADE, 1]);
+      };
+
+      centres.forEach((centre, i) => {
+        // a link lights up as the attacker sets off along it, a part as it arrives
+        if (i) {
+          leave(i - 1);
+          later(quick ? 0 : time, () => mark(links[i - 1]!, 'hit'));
+        }
+        stop(centre, i ? HOP : ENTRY);
+        fades.push([time - FADE, 1], [time, 0]);
+        later(quick ? 0 : time, () => {
+          mark(parts[i]!, 'hit');
+          mark(parts[i]!, 'here');
+          arrive(i);
+        });
+        stop(centre, i < to || broken ? stay(i) : DWELL);
+      });
+
+      if (broken) {
+        const last = centres[to]!;
+        const next = at(dots[to + 1]!);
+        const gap = { x: (last.x + next.x) / 2, y: (last.y + next.y) / 2 };
+        leave(to);
+        stop(gap, HOP / 2);
+        later(quick ? 0 : time, () => burst(gap));
+      }
+
+      if (quick) return 0;
+      fades.push([time, fades.at(-1)![1]]);
+      comet.hidden = false;
+      comet.animate(
+        fades.map(([ms, opacity]) => ({ opacity, offset: ms / time })),
+        { duration: time, fill: 'forwards' },
+      );
+      const flight = comet.animate(
+        stops.map(([point, ms]) => ({ translate: `${point.x}px ${point.y}px`, offset: ms / time, easing: 'cubic-bezier(0.45, 0, 0.55, 1)' })),
+        { duration: time, fill: 'forwards' },
+      );
+      flight.finished.then(
+        () => (comet.hidden = true),
+        () => {},
+      );
+      return time;
+    };
+
+    /** What the attacker can still reach after the fixes so far: up to the first cut stays lit, the rest goes dark. */
+    const trace = () => {
+      const cut = Math.min(...[...fixed].map((id) => cutFor[id]));
+      links.forEach((link, i) => i >= cut && mark(link, 'hit', false));
+      parts.forEach((p, i) => {
+        mark(p, 'here', false);
+        if (i > cut) mark(p, 'hit', false);
+      });
+    };
+
+    /* ── the fixes ── */
+
+    /** Opens a finding's fix: its card, its step and its part on the map marked as the one in hand. */
+    const open = (id: FindingId) => {
+      current = id;
+      parts.forEach((p) => mark(p, 'picked', p.dataset.apNode === id));
+      tasks.forEach((t) => mark(t, 'current', t.dataset.apPick === id));
+      fixes.forEach((fix) => (fix.hidden = fix.dataset.apFix !== id));
+      go(fixing[fixed.size]!);
+      wait('apply');
+    };
+
+    /** All three fixed: the attack runs once more and breaks up at the first cut. */
+    const check = () => {
+      const quick = reducedMotion();
+      current = null;
+      fixes.forEach((fix) => (fix.hidden = true));
+      go('v');
+      for (const el of [...parts, ...links]) mark(el, 'hit', false);
+      later(quick ? 0 : 600, () => {
+        const ms = attack(0, { broken: true });
+        later(quick ? 0 : ms + 700, () => {
+          for (const el of [...parts, ...links]) mark(el, 'hit', false);
+          go('4');
+        });
+      });
+    };
+
+    /** Step 0 to the first decision: the map comes up, the sweep checks every part, three are flagged. */
+    const begin = () => {
+      const quick = reducedMotion();
+      go('0');
+      parts.forEach((p, i) => later(quick ? 0 : 150 + i * 220, () => mark(p, 'up')));
+
+      const sweep = quick ? 0 : 1400;
+      later(sweep, () => {
+        if (!quick) map.dataset.scanning = '';
+        count(SCAN);
+        // each part is checked as the sweep crosses it
+        const box = map.getBoundingClientRect();
+        parts.forEach((p, i) => {
+          const centre = at(dots[i]!);
+          const along = wide() ? centre.x / box.width : centre.y / box.height;
+          later(quick ? 0 : SCAN * along, () => {
+            mark(p, 'seen');
+            probe.textContent = nodes[i]!.probe;
+          });
+        });
+      });
+
+      const found = quick ? 0 : sweep + SCAN + 200;
+      flagged.forEach((p, i) => later(quick ? 0 : found + i * 300, () => mark(p, 'flag')));
+      later(quick ? 0 : found + 1100, () => {
+        delete map.dataset.scanning;
+        go('1');
+        wait('simulate');
+      });
+    };
+
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      comet.getAnimations().forEach((flight) => flight.cancel());
+      comet.hidden = true;
+      sparks.hidden = true;
+      delete map.dataset.scanning;
+      delete root.dataset.applying;
+      for (const el of [...parts, ...links, ...tasks]) for (const name of MARKS) el.removeAttribute(`data-${name}`);
+      root.querySelector('[data-act="apply"]')!.removeAttribute('aria-disabled');
+      fixes.forEach((fix) => (fix.hidden = true));
+      fixed.clear();
+      current = null;
+      clearConsole();
+      counter.textContent = '0';
+      progress.style.setProperty('--done', '0');
+      probe.textContent = nodes[0]!.probe;
+    };
+
+    const pick = (button: HTMLElement) => open(button.dataset.apPick as FindingId);
+
+    stage.start({
+      play: begin,
+      reset,
+      acts: {
+        // the attack, with the console playing a session at each part before the attacker moves on
+        simulate: () => {
+          const quick = reducedMotion();
+          go('2');
+          if (quick) showAll();
+          const ms = attack(parts.length - 1, {
+            stay: (i) => sessionLength(i) + 200,
+            arrive: (i) => {
+              if (i < links.length && !quick) session(i);
+            },
+          });
+          later(ms + 600, () => {
+            go('2b');
+            wait('pick', `.ap__task[data-ap-pick="${order[0]}"]`);
+          });
+        },
+        pick,
+        spot: pick,
+        apply: (button) => {
+          const id = current!;
+          const quick = reducedMotion();
+          button.setAttribute('aria-disabled', 'true');
+          root.dataset.applying = '';
+          pickable(false);
+          later(quick ? 0 : APPLY, () => {
+            button.removeAttribute('aria-disabled');
+            delete root.dataset.applying;
+            fixed.add(id);
+            mark(part(id), 'picked', false);
+            mark(part(id), 'fixed');
+            mark(task(id), 'current', false);
+            mark(task(id), 'done');
+            mark(links[cutFor[id]]!, 'cut');
+            trace();
+            const next = order.find((f) => !fixed.has(f));
+            if (next) open(next);
+            else check();
+          });
+        },
+      },
+    });
+
+    clearConsole();
+  }
+</script>

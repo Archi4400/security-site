@@ -6,6 +6,7 @@ import Related from '../../components/sections/Related.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
 import SolutionVisual from '../../components/SolutionVisual.astro';
 import NightExport from '../../components/sections/NightExport.astro';
+import AttackPath from '../../components/sections/AttackPath.astro';
 import { reveal, t, text } from '../../engine';
 import { solutionCards, solutions, type Solution } from '../../lib/solutions';
 
@@ -47,6 +48,9 @@ const notes = [
 
   {/* behavior analytics shows itself at work: the night export, played through */}
   {k === 'behavior' && <NightExport />}
+
+  {/* vulnerability scanning shows how small findings add up: the attack path, and where to cut it */}
+  {k === 'scanning' && <AttackPath />}
 
   <Related titleKey="common.related">
     <LinkCards items={solutionCards(k)} />

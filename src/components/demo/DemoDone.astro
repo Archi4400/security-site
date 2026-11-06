@@ -1,0 +1,88 @@
+---
+import { t, text } from '../../engine';
+import { DEMO } from '../header/navRoutes';
+import Icon from '../Icon.astro';
+
+/**
+ * How a walk-through ends: what was done, ticked off one by one, then a replay and the way to a real demo.
+ * Anything the scene adds (what is still open, say) goes in the slot, between the two.
+ */
+interface Props {
+  /** What was done, as dictionary keys. */
+  items: string[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { items, class: cls, ...rest } = Astro.props;
+---
+
+<div class:list={['done', cls]} hidden {...rest}>
+  <ul class="done__summary" role="list">
+    {items.map((key, i) => (
+      <li style={`--i: ${i}`}>
+        <Icon name="check" />
+        <span {...text(key)}>{t(key)}</span>
+      </li>
+    ))}
+  </ul>
+  <slot />
+  <div class="done__end">
+    <button type="button" class="btn btn--line" data-act="replay">
+      <Icon name="restore" />
+      <span {...text('demo.replay')}>{t('demo.replay')}</span>
+    </button>
+    <a href={DEMO} class="btn btn--solid"><span {...text('common.cta')}>{t('common.cta')}</span></a>
+  </div>
+</div>
+
+<style>
+  .done {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .done__summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin: 0;
+    font-size: 0.86rem;
+  }
+
+  .done__summary li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .done__summary :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--ok);
+  }
+
+  .done__end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .done:not([hidden]) .done__summary li {
+      animation: done-in 0.4s var(--ease) both;
+      animation-delay: calc(var(--i) * 0.25s);
+    }
+
+    .done:not([hidden]) .done__end {
+      animation: done-in 0.4s var(--ease) 0.8s both;
+    }
+  }
+
+  @keyframes done-in {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+</style>

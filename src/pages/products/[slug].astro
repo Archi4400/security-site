@@ -7,6 +7,7 @@ import CloseCall from '../../components/sections/CloseCall.astro';
 import Icon from '../../components/Icon.astro';
 import ProductVisual from '../../components/ProductVisual.astro';
 import NightExport from '../../components/sections/NightExport.astro';
+import AttackPath from '../../components/sections/AttackPath.astro';
 import { reveal, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
 import { DEMO } from '../../components/header/navRoutes';
@@ -70,6 +71,9 @@ const points = en.products[k].points;
 
   {/* manga watches the same CRM activity: the night export, played through */}
   {k === 'manga' && <NightExport />}
+
+  {/* single is the scanning product: how small findings add up to an attack path, and fixing them */}
+  {k === 'single' && <AttackPath />}
 
   <Related titleKey="common.relatedProducts">
     <LinkCards items={productCards(k)} />
