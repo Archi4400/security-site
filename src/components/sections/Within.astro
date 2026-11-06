@@ -6,12 +6,12 @@ import type { IconName } from '../../lib/icons';
 const icons: IconName[] = ['radar', 'eye', 'database'];
 ---
 
-<section class="band within">
-  <div class="shell within__wrap">
+<section class="band">
+  <div class="shell stack">
     <div class="head" {...reveal()}>
       <h2 {...text('home.within.title')}>{t('home.within.title')}</h2>
     </div>
-    <ul class="within__grid" role="list">
+    <ul class="tiles" role="list">
       {icons.map((icon, i) => (
         <li class="within__item card" data-spot {...reveal()} style={`--d: ${i * 0.08}s`}>
           <span class="within__icon" aria-hidden="true"><Icon name={icon} /></span>
@@ -24,18 +24,6 @@ const icons: IconName[] = ['radar', 'eye', 'database'];
 </section>
 
 <style>
-  .within__wrap {
-    display: grid;
-    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
-  }
-
-  .within__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: 1rem;
-    margin: 0;
-  }
-
   .within__item {
     isolation: isolate;
     overflow: hidden;

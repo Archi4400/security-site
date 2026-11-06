@@ -5,8 +5,8 @@ import SolutionVisual from '../SolutionVisual.astro';
 import { solutions } from '../../lib/solutions';
 ---
 
-<section class="band st" id="solutions">
-  <div class="shell st__wrap">
+<section class="band band--alt" id="solutions">
+  <div class="shell stack">
     <div class="head" {...reveal()}>
       <h2 {...text('home.solutions.title')}>{t('home.solutions.title')}</h2>
       <p {...text('solutions.head.lede')}>{t('solutions.head.lede')}</p>
@@ -42,16 +42,6 @@ import { solutions } from '../../lib/solutions';
 </section>
 
 <style>
-  .st {
-    border-top: 1px solid var(--edge);
-    background: var(--ground-2);
-  }
-
-  .st__wrap {
-    display: grid;
-    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
-  }
-
   .st__stage {
     display: grid;
     gap: 1.5rem;

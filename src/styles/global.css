@@ -42,6 +42,7 @@
   --shell: 80rem;
   --gutter: clamp(1rem, 0.5rem + 2.4vw, 2rem);
   --band: clamp(4.5rem, 3rem + 6vw, 8.5rem);
+  --stack: clamp(2rem, 1.5rem + 2vw, 3rem);
   --header-h: 4.5rem;
   --pinned-offset: calc(var(--header-h) + 0.75rem);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -203,6 +204,54 @@ summary:active {
 
 .band {
   padding-block: var(--band);
+}
+
+/* a band on the second ground, set off by a line along its top */
+.band--alt {
+  border-top: 1px solid var(--edge);
+  background: var(--ground-2);
+}
+
+/* a section's column: its head, then what it shows, the same distance apart in every section */
+.stack {
+  display: grid;
+  gap: var(--stack);
+}
+
+/* two columns from 64rem, one above the other below that; --split shares the width out between them */
+.split {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.split > * {
+  min-width: 0;
+}
+
+.split--middle {
+  align-items: center;
+}
+
+/* cards in as many columns as fit, none narrower than --tile */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--tile, 18rem)), 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+@media (min-width: 64rem) {
+  .split {
+    grid-template-columns: var(--split, 1fr 1fr);
+    gap: clamp(2rem, 1rem + 3vw, 4rem);
+  }
+
+  /* the shorter column of a split stays in view while the other scrolls past */
+  .pin {
+    position: sticky;
+    top: calc(var(--pinned-offset) + 2rem);
+  }
 }
 
 .head {

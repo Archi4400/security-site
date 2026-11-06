@@ -4,9 +4,9 @@ import Aurora from '../Aurora.astro';
 import Icon from '../Icon.astro';
 ---
 
-<section class="news">
+<section class="band news">
   <Aurora intensity={0.7} scale={14} lean={0.04} fps={30} rise={1.1} />
-  <div class="shell news__wrap" {...reveal()}>
+  <div class="shell split split--middle" style="--split: 1.1fr 1fr" {...reveal()}>
     <div class="news__copy">
       <h2 class="news__title" {...text('home.news.title')}>{t('home.news.title')}</h2>
       <p class="news__text lede" {...text('home.news.text')}>{t('home.news.text')}</p>
@@ -44,7 +44,6 @@ import Icon from '../Icon.astro';
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    padding-block: clamp(4.5rem, 3rem + 6vw, 8rem);
   }
 
   .news::before {
@@ -54,12 +53,6 @@ import Icon from '../Icon.astro';
     z-index: -1;
     pointer-events: none;
     background: linear-gradient(180deg, var(--ground) 0%, transparent 55%);
-  }
-
-  .news__wrap {
-    display: grid;
-    gap: 2rem;
-    align-items: center;
   }
 
   .news__copy {
@@ -148,13 +141,6 @@ import Icon from '../Icon.astro';
 
     .news__err {
       grid-column: 1 / -1;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .news__wrap {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      gap: 4rem;
     }
   }
 </style>

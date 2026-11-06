@@ -29,13 +29,13 @@ const order = new Map(reach.slice(0, tiles[3].value).map((cell, k) => [cell.n, k
 ---
 
 <section class="band stats">
-  <div class="shell stats__wrap">
+  <div class="shell stack">
     <div class="head" {...reveal()}>
       <h2 {...text('home.stats.title')}>{t('home.stats.title')}</h2>
       <p class="stats__lede" {...html('home.stats.lede')} set:html={t('home.stats.lede')} />
     </div>
 
-    <ul class="stats__grid" role="list">
+    <ul class="tiles" role="list" style="--tile: 15rem">
       {tiles.map((f, n) => (
         <li class="stats__tile card" data-spot {...reveal()} style={`--d: ${n * 0.08}s`}>
           <div class={`stats__viz stats__viz--${f.viz}`} aria-hidden="true">
@@ -91,24 +91,12 @@ const order = new Map(reach.slice(0, tiles[3].value).map((cell, k) => [cell.n, k
       var(--ground-2);
   }
 
-  .stats__wrap {
-    display: grid;
-    gap: clamp(2rem, 1.5rem + 2vw, 3rem);
-  }
-
   .stats__lede :global(strong) {
     color: var(--ink);
     font-weight: 500;
   }
 
   /* ── the tiles ─────────────────────────────────────────────────────────── */
-
-  .stats__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    gap: 1rem;
-    margin: 0;
-  }
 
   .stats__tile {
     isolation: isolate;

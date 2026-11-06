@@ -1,0 +1,23 @@
+---
+import { t, text } from '../../engine';
+
+/** The band at the foot of a product, solution or post: a title, then the cards it is given. */
+interface Props {
+  titleKey: string;
+}
+
+const { titleKey } = Astro.props;
+---
+
+<section class="band band--alt">
+  <div class="shell stack">
+    <h2 class="related__title" {...text(titleKey)}>{t(titleKey)}</h2>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .related__title {
+    font-size: var(--step-3);
+  }
+</style>

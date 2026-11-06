@@ -12,9 +12,9 @@ const roles = en.careers.roles;
 <Layout metaKey="meta.careers" path="/careers">
   <PageHead titleKey="careers.head.title" ledeKey="careers.head.lede" kickerKey="nav.about" />
 
-  <section class="band cr">
-    <div class="shell cr__grid">
-      <div class="cr__how" {...reveal()}>
+  <section class="band">
+    <div class="shell split" style="--split: 0.9fr 1.1fr">
+      <div class="cr__how pin" {...reveal()}>
         <h2 {...text('careers.how.title')}>{t('careers.how.title')}</h2>
         <ul role="list">
           {how.map((_, i) => (
@@ -43,12 +43,6 @@ const roles = en.careers.roles;
 </Layout>
 
 <style>
-  .cr__grid {
-    display: grid;
-    gap: 3rem;
-    align-items: start;
-  }
-
   .cr__how,
   .cr__roles {
     display: grid;
@@ -111,16 +105,5 @@ const roles = en.careers.roles;
 
   .cr__none {
     color: var(--mute);
-  }
-
-  @media (min-width: 64rem) {
-    .cr__grid {
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    }
-
-    .cr__how {
-      position: sticky;
-      top: calc(var(--pinned-offset) + 2rem);
-    }
   }
 </style>

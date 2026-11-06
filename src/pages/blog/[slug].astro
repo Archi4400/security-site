@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Aurora from '../../components/Aurora.astro';
 import Icon from '../../components/Icon.astro';
 import PostCards from '../../components/sections/PostCards.astro';
+import Related from '../../components/sections/Related.astro';
 import CloseCall from '../../components/sections/CloseCall.astro';
 import { alt, countUp, t, text } from '../../engine';
 import { en } from '../../i18n/locales/en';
@@ -57,12 +58,9 @@ const pictureSizes = '(min-width: 52rem) 48rem, 100vw';
     </div>
   </article>
 
-  <section class="band more">
-    <div class="shell more__wrap">
-      <h2 class="more__title" {...text('blog.latest')}>{t('blog.latest')}</h2>
-      <PostCards except={k} limit={3} />
-    </div>
-  </section>
+  <Related titleKey="blog.latest">
+    <PostCards except={k} limit={3} />
+  </Related>
 
   <CloseCall />
 </Layout>
@@ -140,19 +138,5 @@ const pictureSizes = '(min-width: 52rem) 48rem, 100vw';
     display: grid;
     gap: 0.75rem;
     margin-block: 0.6rem;
-  }
-
-  .more {
-    background: var(--ground-2);
-    border-top: 1px solid var(--edge);
-  }
-
-  .more__wrap {
-    display: grid;
-    gap: 2rem;
-  }
-
-  .more__title {
-    font-size: var(--step-3);
   }
 </style>
