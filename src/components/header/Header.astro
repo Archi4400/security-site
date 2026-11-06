@@ -4,7 +4,6 @@ import { LOGIN } from '../../brand';
 import Brand from '../Brand.astro';
 import Icon from '../Icon.astro';
 import DesktopNav from './DesktopNav.astro';
-import LangSwitcher from './LangSwitcher.astro';
 import MobileMenu from './MobileMenu.astro';
 import { DEMO } from './navRoutes';
 import ThemeSwitch from './ThemeSwitch.astro';
@@ -23,8 +22,7 @@ const nav = menuDialog('nav', { closeAt: '(min-width: 80rem)' });
     <DesktopNav path={path} />
     <div class="bar__end">
       <div class="bar__prefs">
-        <LangSwitcher id="lang" />
-        <ThemeSwitch id="theme" />
+        <ThemeSwitch />
       </div>
       <a href={LOGIN} class="bar__login"><Icon name="user" /><span {...text('nav.login')}>{t('nav.login')}</span></a>
       <a href={DEMO} class="btn btn--line bar__cta"><span {...text('nav.cta')}>{t('nav.cta')}</span></a>

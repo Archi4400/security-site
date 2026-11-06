@@ -1,37 +1,22 @@
 ---
-import { t, text, themeGroup } from '../../engine';
+import { label } from '../../engine';
 import Icon from '../Icon.astro';
 
 interface Props {
-  id: string;
   class?: string;
 }
 
-const { id, class: cls } = Astro.props;
-const mode = themeGroup(id);
+/** One button, pressed while the theme is dark: it shows the moon then, and the sun in the light. */
+const { class: cls } = Astro.props;
 ---
 
-<div {...mode.group()} class:list={['mode', cls]}>
-  <span {...mode.label()} data-sr {...text('ui.theme')}>{t('ui.theme')}</span>
-  <button {...mode.option('light')} class="mode__btn">
-    <Icon name="sun" />
-    <span data-sr {...text('ui.themeLight')}>{t('ui.themeLight')}</span>
-  </button>
-  <button {...mode.option('dark')} class="mode__btn">
-    <Icon name="moon" />
-    <span data-sr {...text('ui.themeDark')}>{t('ui.themeDark')}</span>
-  </button>
-</div>
+<button type="button" class:list={['mode', cls]} aria-pressed="true" data-theme-toggle {...label('ui.darkTheme')}>
+  <Icon name="moon" class="mode__icon mode__icon--dark" />
+  <Icon name="sun" class="mode__icon mode__icon--light" />
+</button>
 
 <style>
   .mode {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.1rem;
-  }
-
-  .mode__btn {
     display: grid;
     place-items: center;
     width: 44px;
@@ -40,27 +25,55 @@ const mode = themeGroup(id);
     border: 0;
     border-radius: 50%;
     background: none;
-    color: var(--mute);
+    color: var(--ink-2);
     cursor: pointer;
-    transition: color 0.2s var(--ease);
+    transition:
+      color 0.2s var(--ease),
+      background-color 0.2s var(--ease);
   }
 
-  .mode__btn svg {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-
-  .mode__btn:hover {
-    color: var(--ink);
-  }
-
-  .mode__btn[aria-pressed='true'] {
+  .mode:hover {
     color: var(--ink);
     background: var(--sheet-2);
-    box-shadow: inset 0 0 0 1px var(--edge-strong);
   }
 
-  .mode__btn[aria-pressed='true'] svg {
-    stroke-width: 2.2;
+  /* the two icons share one cell; the theme the page is in decides which shows */
+  .mode__icon {
+    grid-area: 1 / 1;
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  :global(html[data-theme='light']) .mode__icon--dark,
+  :global(html:not([data-theme='light'])) .mode__icon--light {
+    opacity: 0;
+    rotate: -90deg;
+    scale: 0.5;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mode__icon {
+      transition:
+        opacity 0.3s var(--ease),
+        rotate 0.45s var(--ease),
+        scale 0.45s var(--ease);
+    }
+  }
+
+  /* without scripts the button could not switch anything */
+  :global(html:not(.js)) .mode {
+    display: none;
   }
 </style>
+
+<script>
+  import { onTheme, setTheme, theme } from '../../engine/client';
+
+  const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+  for (const toggle of toggles) {
+    toggle.addEventListener('click', () => setTheme(theme() === 'dark' ? 'light' : 'dark'));
+  }
+  onTheme((current) => {
+    for (const toggle of toggles) toggle.setAttribute('aria-pressed', String(current === 'dark'));
+  });
+</script>

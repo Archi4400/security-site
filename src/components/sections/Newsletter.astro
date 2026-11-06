@@ -6,10 +6,10 @@ import Icon from '../Icon.astro';
 
 <section class="band news">
   <Aurora intensity={0.7} scale={14} lean={0.04} fps={30} rise={1.1} />
-  <div class="shell split split--middle" style="--split: 1.1fr 1fr" {...reveal()}>
-    <div class="news__copy">
-      <h2 class="news__title" {...text('home.news.title')}>{t('home.news.title')}</h2>
-      <p class="news__text lede" {...text('home.news.text')}>{t('home.news.text')}</p>
+  <div class="shell stack" {...reveal()}>
+    <div class="head head--centre">
+      <h2 {...text('home.news.title')}>{t('home.news.title')}</h2>
+      <p {...text('home.news.text')}>{t('home.news.text')}</p>
     </div>
 
     <div class="news__side" data-news>
@@ -25,16 +25,27 @@ import Icon from '../Icon.astro';
           {...placeholder('home.news.email')}
         />
         <button type="submit" class="btn btn--solid news__send">
-          <span {...text('home.news.join')}>{t('home.news.join')}</span>
-          <Icon name="arrow" />
+          <span class="news__send-label" {...text('home.news.join')}>{t('home.news.join')}</span>
+          <Icon name="arrow" class="news__send-arrow" />
+          <span class="news__spin" aria-hidden="true"></span>
         </button>
         <p id="news-email-err" class="news__err" hidden {...text('home.news.error')}>{t('home.news.error')}</p>
       </form>
-      <p class="news__done" role="status" data-news-done></p>
-      <p class="news__community">
-        <span {...text('home.news.community')}>{t('home.news.community')}</span>
-        <span class="news__soon" {...text('nav.soon')}>{t('nav.soon')}</span>
-      </p>
+
+      <div class="news__status" role="status">
+        <div class="news__done" tabindex="-1" hidden data-news-done>
+          <span class="news__badge" aria-hidden="true">
+            <svg class="news__tick" viewBox="0 0 48 48">
+              <circle class="news__tick-ring" cx="24" cy="24" r="21" pathLength="1" />
+              <path class="news__tick-mark" d="m15.5 24.5 6 6 11-12" pathLength="1" />
+            </svg>
+          </span>
+          <div class="news__done-copy">
+            <p class="news__done-title" {...text('home.news.doneTitle')}>{t('home.news.doneTitle')}</p>
+            <p class="news__done-text" data-news-say></p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -55,25 +66,20 @@ import Icon from '../Icon.astro';
     background: linear-gradient(180deg, var(--ground) 0%, transparent 55%);
   }
 
-  .news__copy {
-    display: grid;
-    gap: 1rem;
-    max-width: 38rem;
-  }
-
-  .news__title {
-    font-size: var(--step-4);
-  }
-
   .news__side {
+    justify-self: center;
     display: grid;
+    justify-items: center;
     gap: 1rem;
+    width: 100%;
+    max-width: 34rem;
   }
 
   .news__form {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.6rem;
+    width: 100%;
   }
 
   .news__input {
@@ -82,7 +88,9 @@ import Icon from '../Icon.astro';
     border-radius: 999px;
     border: 1px solid var(--edge-strong);
     background: color-mix(in oklab, var(--sheet) 85%, transparent);
-    transition: border-color 0.2s var(--ease);
+    transition:
+      border-color 0.2s var(--ease),
+      opacity 0.3s var(--ease);
   }
 
   .news__input::placeholder {
@@ -101,37 +109,125 @@ import Icon from '../Icon.astro';
   .news__err {
     color: var(--bad);
     font-size: 0.88rem;
-    padding-left: 1.25rem;
+    text-align: center;
   }
 
-  .news__done:empty {
-    display: none;
+  /* ── sending: the arrow flies off, the words fade and a ring turns where they were ── */
+
+  .news__send {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .news__send-label,
+  .news__send-arrow {
+    transition:
+      opacity 0.25s var(--ease),
+      translate 0.4s var(--ease);
+  }
+
+  .news__spin {
+    position: absolute;
+    inset: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: auto;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .news__side[data-state='sending'] .news__input {
+    opacity: 0.6;
+  }
+
+  .news__side[data-state='sending'] .news__send {
+    cursor: progress;
+  }
+
+  .news__side[data-state='sending'] .news__send-label {
+    opacity: 0;
+  }
+
+  .news__side[data-state='sending'] .news__send-arrow {
+    opacity: 0;
+    translate: 2rem 0;
+  }
+
+  .news__side[data-state='sending'] .news__spin {
+    opacity: 1;
+    animation: news-spin 0.7s linear infinite;
+  }
+
+  /* ── sent: a card with a tick in place of the form ── */
+
+  .news__status {
+    display: grid;
+    width: 100%;
   }
 
   .news__done {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 3rem;
-    font-weight: 500;
-    color: var(--ok);
+    gap: 1rem;
+    padding: 1rem 1.5rem 1rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid color-mix(in oklab, var(--ok) 40%, var(--edge-strong));
+    background: color-mix(in oklab, var(--ok) 8%, var(--sheet));
+    box-shadow: 0 24px 60px -28px color-mix(in oklab, var(--ok) 55%, transparent);
+    text-align: left;
   }
 
-  .news__community {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--mute);
-    font-size: 0.9rem;
+  .news__done:focus {
+    outline: none;
   }
 
-  .news__soon {
-    padding: 0.05rem 0.45rem;
-    border-radius: 999px;
-    border: 1px solid var(--edge-strong);
-    font-size: 0.7rem;
+  .news__badge {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--ok) 14%, transparent);
+  }
+
+  .news__tick {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--ok);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .news__tick-ring {
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+    rotate: -90deg;
+  }
+
+  .news__done-copy {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .news__done-title {
+    font-size: var(--step-1);
     font-weight: 500;
+    color: var(--ink);
+  }
+
+  .news__done-text {
     color: var(--ink-2);
+    font-size: 0.94rem;
+    overflow-wrap: anywhere;
   }
 
   @media (min-width: 40rem) {
@@ -143,17 +239,114 @@ import Icon from '../Icon.astro';
       grid-column: 1 / -1;
     }
   }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .news__side[data-state='sent'] .news__form {
+      animation: news-out 0.35s var(--ease) both;
+    }
+
+    .news__done:not([hidden]) {
+      animation: news-in 0.55s var(--ease) both;
+    }
+
+    /* the ring draws round from the top, then the tick, then a ripple goes out once */
+    .news__done:not([hidden]) .news__tick-ring {
+      stroke-dasharray: 1;
+      animation: news-draw 0.6s var(--ease) 0.15s both;
+    }
+
+    .news__done:not([hidden]) .news__tick-mark {
+      stroke-dasharray: 1;
+      animation: news-draw 0.35s var(--ease) 0.65s both;
+    }
+
+    .news__done:not([hidden]) .news__badge::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--ok);
+      animation: news-ping 0.9s ease-out 0.9s both;
+    }
+
+    .news__done:not([hidden]) .news__done-copy > * {
+      animation: news-rise 0.5s var(--ease) 0.3s both;
+    }
+
+    .news__done:not([hidden]) .news__done-text {
+      animation-delay: 0.4s;
+    }
+  }
+
+  @keyframes news-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  @keyframes news-out {
+    to {
+      opacity: 0;
+      translate: 0 -8px;
+      scale: 0.97;
+      filter: blur(4px);
+    }
+  }
+
+  @keyframes news-in {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+      scale: 0.96;
+      filter: blur(6px);
+    }
+  }
+
+  @keyframes news-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes news-ping {
+    from {
+      opacity: 0.8;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 1.6;
+    }
+  }
+
+  @keyframes news-rise {
+    from {
+      opacity: 0;
+      translate: 0 6px;
+    }
+  }
 </style>
 
 <script>
-  import { onLang, t } from '../../engine/client';
+  import { onLang, reducedMotion, t } from '../../engine/client';
+
+  /** How long the form takes to leave before the card comes in; matches news-out. */
+  const LEAVE = 350;
+
+  // there is no list behind the form yet: a short wait stands in for the request
+  const send = (_email: string) => new Promise<void>((resolve) => window.setTimeout(resolve, 1200));
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-news]')) {
     const form = root.querySelector<HTMLFormElement>('[data-news-form]');
     const done = root.querySelector<HTMLElement>('[data-news-done]');
+    const say = root.querySelector<HTMLElement>('[data-news-say]');
     const input = form?.querySelector<HTMLInputElement>('input[type="email"]');
+    const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
     const err = form?.querySelector<HTMLElement>('#news-email-err');
-    if (!form || !done || !input || !err) continue;
+    if (!form || !done || !say || !input || !button || !err) continue;
 
     const valid = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
     const mark = (bad: boolean) => {
@@ -171,24 +364,43 @@ import Icon from '../Icon.astro';
       if (input.getAttribute('aria-invalid') === 'true') mark(!valid());
     });
 
-    let sent = false;
-    const say = () => {
-      if (sent) done.textContent = t('home.news.done');
+    let sentTo: string | null = null;
+    const tell = () => {
+      if (sentTo !== null) say.textContent = t('home.news.done').replace('{email}', sentTo);
     };
-    onLang(say);
+    onLang(tell);
 
-    form.addEventListener('submit', (event) => {
+    let busy = false;
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (busy) return;
       if (!valid()) {
         mark(true);
         input.focus();
         return;
       }
       mark(false);
-      form.reset();
-      form.hidden = true;
-      sent = true;
-      say();
+      busy = true;
+      const email = input.value.trim();
+      root.dataset.state = 'sending';
+      input.readOnly = true;
+      button.setAttribute('aria-disabled', 'true');
+
+      await send(email);
+
+      root.dataset.state = 'sent';
+      sentTo = email;
+      const show = () => {
+        const hadFocus = form.contains(document.activeElement);
+        form.reset();
+        form.hidden = true;
+        done.hidden = false;
+        tell();
+        // the button that had focus is gone, so focus goes to what took its place
+        if (hadFocus) done.focus({ preventScroll: true });
+      };
+      if (reducedMotion()) show();
+      else window.setTimeout(show, LEAVE);
     });
   }
 </script>

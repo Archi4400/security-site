@@ -226,6 +226,33 @@ export const es = {
     relatedProducts: 'Otros productos',
   },
 
+  consent: {
+    label: 'Consentimiento de cookies',
+    text: `Al hacer clic en «Aceptar todas las cookies», usted acepta que se almacenen cookies en su dispositivo para mejorar la navegación del sitio, analizar su uso y apoyar nuestras acciones de marketing. Para saber más sobre cómo ${BRAND} trata sus datos personales y utiliza las cookies, consulte nuestra <a href="/privacy-policy">Política de privacidad</a> y nuestra <a href="/cookie-policy">Política de cookies</a>.`,
+    prefs: 'Preferencias de cookies',
+    reject: 'Rechazar las no esenciales',
+    accept: 'Aceptar todas las cookies',
+    close: 'Cerrar y conservar solo las cookies necesarias',
+    title: 'Preferencias de cookies',
+    lede: 'Elija qué cookies podemos usar. Las necesarias mantienen el sitio en funcionamiento, por lo que no se pueden desactivar.',
+    always: 'Siempre activas',
+    necessary: {
+      title: 'Estrictamente necesarias',
+      text: 'Recuerdan su tema e idioma y hacen que los formularios funcionen.',
+    },
+    analytics: {
+      title: 'Analítica',
+      text: 'Cuentan las visitas y muestran qué páginas se leen, para que podamos mejorar el sitio.',
+    },
+    marketing: {
+      title: 'Marketing',
+      text: 'Miden nuestras campañas y le muestran contenido relevante en otros sitios.',
+    },
+    save: 'Guardar mis preferencias',
+    settings: 'Configuración de cookies',
+    dismiss: 'Cerrar',
+  },
+
   close: {
     title: 'Vea lo que pasa dentro de su producto',
     lede: `Cuéntenos qué tiene — un sitio web, una tienda online, un CRM o varios proyectos de clientes — y le mostraremos qué revisaría ${BRAND} primero.`,
@@ -298,7 +325,8 @@ export const es = {
       email: 'Correo de trabajo',
       join: 'Suscribirse al boletín',
       error: 'Escriba una dirección como nombre@empresa.com.',
-      done: 'Gracias, ya está en la lista.',
+      doneTitle: 'Ya está en la lista.',
+      done: 'Gracias por suscribirse. Las próximas ediciones llegarán a {email}.',
       community: 'Comunidad de desarrolladores',
     },
   },
@@ -528,6 +556,7 @@ export const es = {
     },
     minutes: '{n} min de lectura',
     latest: 'Últimas publicaciones',
+    all: 'Todas las publicaciones',
     posts: {
       offboarding: {
         tag: 'Detección',
@@ -834,6 +863,7 @@ export const es = {
     theme: 'Tema',
     themeLight: 'Claro',
     themeDark: 'Oscuro',
+    darkTheme: 'Tema oscuro',
     menu: 'Menú',
     menuOpen: 'Abrir menú',
     menuClose: 'Cerrar menú',

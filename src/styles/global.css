@@ -324,6 +324,7 @@ summary:active {
 
 .btn--line {
   border-color: var(--edge-strong);
+  background: none;
   color: var(--ink);
 }
 
@@ -402,6 +403,48 @@ summary:active {
   border-radius: 50%;
   flex: none;
   background: currentColor;
+}
+
+/* a live alarm, kept quiet: the halo breathes, and now and then one faint ring goes out */
+.dot--alarm {
+  position: relative;
+  color: var(--bad);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dot--alarm {
+    animation: dot-breathe 3.6s ease-in-out infinite;
+  }
+
+  .dot--alarm::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    animation: dot-ping 3.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@keyframes dot-breathe {
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 32%, transparent);
+  }
+}
+
+/* the ring takes the first half of the beat; the rest is still */
+@keyframes dot-ping {
+  0% {
+    opacity: 0.35;
+    scale: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+    scale: 2.4;
+  }
 }
 
 .sev--high {

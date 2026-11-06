@@ -226,6 +226,33 @@ export const en = {
     relatedProducts: 'Other products',
   },
 
+  consent: {
+    label: 'Cookie consent',
+    text: `By clicking “Accept all cookies”, you agree to the storing of cookies on your device to enhance site navigation, analyze site usage and assist in our marketing efforts. For more on how ${BRAND} handles your personal information and uses cookies, see our <a href="/privacy-policy">Privacy Policy</a> and <a href="/cookie-policy">Cookie Policy</a>.`,
+    prefs: 'Cookie preferences',
+    reject: 'Reject non-essential',
+    accept: 'Accept all cookies',
+    close: 'Close and keep only necessary cookies',
+    title: 'Cookie preferences',
+    lede: 'Choose which cookies we may use. Necessary cookies keep the site working, so they cannot be turned off.',
+    always: 'Always on',
+    necessary: {
+      title: 'Strictly necessary',
+      text: 'Remember your theme and language and keep the forms working.',
+    },
+    analytics: {
+      title: 'Analytics',
+      text: 'Count visits and show which pages are read, so we can improve the site.',
+    },
+    marketing: {
+      title: 'Marketing',
+      text: 'Measure our campaigns and show you relevant content on other sites.',
+    },
+    save: 'Save my choices',
+    settings: 'Cookie settings',
+    dismiss: 'Close',
+  },
+
   close: {
     title: 'See what is happening inside your product',
     lede: `Tell us what you run — a website, an online store, a CRM or a set of client projects — and we will show you what ${BRAND} would look at first.`,
@@ -298,7 +325,8 @@ export const en = {
       email: 'Work e-mail',
       join: 'Join the newsletter',
       error: 'Enter an e-mail address like name@company.com.',
-      done: 'Thank you — you are on the list.',
+      doneTitle: 'You are on the list.',
+      done: 'Thank you for subscribing. New issues will come to {email}.',
       community: 'Developer community',
     },
   },
@@ -528,6 +556,7 @@ export const en = {
     },
     minutes: '{n} min read',
     latest: 'Latest posts',
+    all: 'All posts',
     posts: {
       offboarding: {
         tag: 'Detection',
@@ -834,6 +863,7 @@ export const en = {
     theme: 'Theme',
     themeLight: 'Light',
     themeDark: 'Dark',
+    darkTheme: 'Dark theme',
     menu: 'Menu',
     menuOpen: 'Open menu',
     menuClose: 'Close menu',

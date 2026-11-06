@@ -1,0 +1,428 @@
+---
+import { html, label, t, text } from '../engine';
+import Icon from './Icon.astro';
+
+/** The kinds of cookies a visitor may turn on; the necessary ones are always on. */
+const optional = ['analytics', 'marketing'] as const;
+---
+
+<section class="cookie" aria-labelledby="cookie-title" hidden data-cookie>
+  <h2 id="cookie-title" data-sr {...text('consent.label')}>{t('consent.label')}</h2>
+  <button type="button" class="cookie__close" data-cookie-reject {...label('consent.close')}>
+    <Icon name="close" />
+  </button>
+  <p class="cookie__text" {...html('consent.text')} set:html={t('consent.text')} />
+  <div class="cookie__actions">
+    <button type="button" class="btn btn--line" data-cookie-open>
+      <span {...text('consent.prefs')}>{t('consent.prefs')}</span>
+    </button>
+    <div class="cookie__answer">
+      <button type="button" class="btn btn--solid" data-cookie-reject>
+        <span {...text('consent.reject')}>{t('consent.reject')}</span>
+      </button>
+      <button type="button" class="btn btn--solid" data-cookie-accept>
+        <span {...text('consent.accept')}>{t('consent.accept')}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<dialog class="prefs" aria-labelledby="prefs-title" data-cookie-dialog>
+  <form class="prefs__body" data-cookie-form>
+    <div class="prefs__head">
+      <h2 id="prefs-title" class="prefs__title" {...text('consent.title')}>{t('consent.title')}</h2>
+      <button type="button" class="cookie__close" data-cookie-dismiss {...label('consent.dismiss')}>
+        <Icon name="close" />
+      </button>
+    </div>
+    <p class="prefs__lede" {...text('consent.lede')}>{t('consent.lede')}</p>
+
+    <ul class="prefs__groups" role="list">
+      <li class="prefs__group">
+        <div class="prefs__row">
+          <h3 class="prefs__name" {...text('consent.necessary.title')}>{t('consent.necessary.title')}</h3>
+          <span class="prefs__always" {...text('consent.always')}>{t('consent.always')}</span>
+        </div>
+        <p class="prefs__text" {...text('consent.necessary.text')}>{t('consent.necessary.text')}</p>
+      </li>
+      {optional.map((kind) => (
+        <li class="prefs__group">
+          <div class="prefs__row">
+            <label for={`prefs-${kind}`} class="prefs__name" {...text(`consent.${kind}.title`)}>{t(`consent.${kind}.title`)}</label>
+            <input
+              type="checkbox"
+              role="switch"
+              id={`prefs-${kind}`}
+              name={kind}
+              class="prefs__switch"
+              aria-describedby={`prefs-${kind}-text`}
+            />
+          </div>
+          <p id={`prefs-${kind}-text`} class="prefs__text" {...text(`consent.${kind}.text`)}>{t(`consent.${kind}.text`)}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="prefs__actions">
+      <button type="button" class="btn btn--line" data-cookie-reject>
+        <span {...text('consent.reject')}>{t('consent.reject')}</span>
+      </button>
+      <button type="submit" class="btn btn--solid">
+        <span {...text('consent.save')}>{t('consent.save')}</span>
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<style>
+  /* ── the banner ── */
+
+  .cookie {
+    position: fixed;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: var(--gutter);
+    z-index: 60;
+    display: grid;
+    gap: 1.25rem;
+    max-width: 46rem;
+    padding: 1.5rem 3.5rem 1.5rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    box-shadow: 0 28px 70px -20px rgb(0 0 0 / 0.45);
+  }
+
+  .cookie__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      color 0.2s var(--ease),
+      background-color 0.2s var(--ease);
+  }
+
+  .cookie__close:hover {
+    color: var(--ink);
+    background: var(--sheet-2);
+  }
+
+  .cookie__close :global(svg) {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .cookie__text {
+    color: var(--ink-2);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .cookie__text :global(a) {
+    color: var(--accent-ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .cookie__actions,
+  .cookie__answer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .cookie__actions {
+    justify-content: space-between;
+  }
+
+  /* on a phone every answer gets a whole row, so none is easier to reach than another */
+  @media (max-width: 36rem) {
+    .cookie {
+      padding: 1.25rem;
+    }
+
+    .cookie__text {
+      padding-right: 2rem;
+    }
+
+    .cookie__actions,
+    .cookie__answer {
+      display: grid;
+      justify-content: stretch;
+    }
+  }
+
+  /* ── the preferences ── */
+
+  .prefs {
+    width: min(34rem, calc(100% - 2 * var(--gutter)));
+    max-height: calc(100dvh - 2 * var(--gutter));
+    padding: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet);
+    color: var(--ink);
+    box-shadow: 0 28px 70px -20px rgb(0 0 0 / 0.5);
+  }
+
+  .prefs::backdrop {
+    background: rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .prefs__body {
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .prefs__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: -0.5rem -0.75rem 0 0;
+  }
+
+  .prefs__head .cookie__close {
+    position: static;
+  }
+
+  .prefs__title {
+    font-size: var(--step-2);
+  }
+
+  .prefs__lede {
+    color: var(--ink-2);
+    font-size: 0.94rem;
+  }
+
+  .prefs__groups {
+    display: grid;
+    margin: 0.25rem 0 0;
+  }
+
+  .prefs__group {
+    display: grid;
+    gap: 0.35rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--edge);
+  }
+
+  .prefs__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2rem;
+  }
+
+  .prefs__name {
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: default;
+  }
+
+  label.prefs__name {
+    cursor: pointer;
+  }
+
+  .prefs__always {
+    color: var(--ok);
+    font-size: 0.86rem;
+    font-weight: 500;
+  }
+
+  .prefs__text {
+    color: var(--ink-2);
+    font-size: 0.9rem;
+  }
+
+  /* a switch: the track fills and the knob slides over once it is on */
+  .prefs__switch {
+    appearance: none;
+    position: relative;
+    flex: none;
+    width: 2.75rem;
+    height: 1.6rem;
+    margin: 0;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--sheet-2);
+    cursor: pointer;
+    transition:
+      background-color 0.25s var(--ease),
+      border-color 0.25s var(--ease);
+  }
+
+  .prefs__switch::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0.2rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: -0.55rem;
+    border-radius: 50%;
+    background: var(--mute);
+    transition:
+      translate 0.25s var(--ease),
+      background-color 0.25s var(--ease);
+  }
+
+  .prefs__switch:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .prefs__switch:checked::before {
+    translate: 1.15rem 0;
+    background: #fff;
+  }
+
+  .prefs__switch:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+  }
+
+  .prefs__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  @media (max-width: 36rem) {
+    .prefs__actions {
+      display: grid;
+    }
+  }
+
+  :global(html:has([data-cookie-dialog][open])) {
+    overflow: hidden;
+  }
+
+  /* ── motion: the banner rises in and drops away, the preferences open from slightly smaller ── */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cookie:not([hidden]) {
+      animation: cookie-in 0.6s var(--ease) 0.4s both;
+    }
+
+    .cookie[data-leaving] {
+      animation: cookie-out 0.3s var(--ease) both;
+    }
+
+    .prefs[open] {
+      animation: prefs-in 0.35s var(--ease);
+    }
+
+    .prefs[open]::backdrop {
+      animation: prefs-fade 0.35s var(--ease);
+    }
+  }
+
+  @keyframes cookie-in {
+    from {
+      opacity: 0;
+      translate: 0 1.5rem;
+    }
+  }
+
+  @keyframes cookie-out {
+    to {
+      opacity: 0;
+      translate: 0 1rem;
+    }
+  }
+
+  @keyframes prefs-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+      translate: 0 0.75rem;
+    }
+  }
+
+  @keyframes prefs-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../engine/client';
+  import { readConsent, saveConsent } from '../lib/consent';
+
+  /** How long the banner takes to leave; matches cookie-out. */
+  const LEAVE = 300;
+
+  const banner = document.querySelector<HTMLElement>('[data-cookie]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-cookie-dialog]');
+  const form = dialog?.querySelector<HTMLFormElement>('[data-cookie-form]');
+  const analytics = form?.querySelector<HTMLInputElement>('input[name="analytics"]');
+  const marketing = form?.querySelector<HTMLInputElement>('input[name="marketing"]');
+
+  if (banner && dialog && form && analytics && marketing) {
+    const hide = () => {
+      if (banner.hidden || banner.hasAttribute('data-leaving')) return;
+      if (reducedMotion()) {
+        banner.hidden = true;
+        return;
+      }
+      banner.setAttribute('data-leaving', '');
+      window.setTimeout(() => {
+        banner.hidden = true;
+        banner.removeAttribute('data-leaving');
+      }, LEAVE);
+    };
+
+    const choose = (choice: { analytics: boolean; marketing: boolean }) => {
+      saveConsent(choice);
+      if (dialog.open) dialog.close();
+      hide();
+    };
+
+    const open = () => {
+      const now = readConsent();
+      analytics.checked = now?.analytics ?? false;
+      marketing.checked = now?.marketing ?? false;
+      dialog.showModal();
+    };
+
+    // the banner, the preferences and the footer's "Cookie settings" all answer through these hooks
+    document.addEventListener('click', (event) => {
+      const hit = (event.target as Element).closest('[data-cookie-accept], [data-cookie-reject], [data-cookie-open], [data-cookie-dismiss]');
+      if (!hit) return;
+      if (hit.hasAttribute('data-cookie-accept')) choose({ analytics: true, marketing: true });
+      else if (hit.hasAttribute('data-cookie-reject')) choose({ analytics: false, marketing: false });
+      else if (hit.hasAttribute('data-cookie-open')) open();
+      else dialog.close();
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      choose({ analytics: analytics.checked, marketing: marketing.checked });
+    });
+
+    // a click on the dimmed backdrop lands on the dialog itself, outside its body
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+
+    if (!readConsent()) banner.hidden = false;
+  }
+</script>
